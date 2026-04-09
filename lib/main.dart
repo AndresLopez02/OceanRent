@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   //Estos 3 print son para verificar que Firebase se ha inicializado correctamente
   //Se puede eliminar después de ver que no hay errores en la inicialización
   print('Firebase inicializado correctamente');
   print('App Firebase: ${Firebase.app().name}');
-  print('Instancia Auth creada: ${FirebaseAuth.instance}');
   runApp(const MyApp());
 }
 
