@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "145195283796",
+    "project_id": "rentboat2-7e150",
+    "storage_bucket": "rentboat2-7e150.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:145195283796:android:8d7e49d60c0ed82712c4c1",
+        "android_client_info": {
+          "package_name": "es.zaitec.ocean_rent"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "145195283796-9lsjc6jau0clpd7rd6t3ddfsoikae5ir.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBykzJe84XzBLnigObKSC47MPdQUGKjDLQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "145195283796-9lsjc6jau0clpd7rd6t3ddfsoikae5ir.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
