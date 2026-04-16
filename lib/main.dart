@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
+import 'package:ocean_rent/pages/login/login_page.dart';
 import 'services/firebase_options.dart';
 
 Future<void> main() async {
@@ -24,15 +25,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'OceanRent',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: Scaffold(
-        body: Center(
-          child: 
-          Text('OceanRent 🚢', style: TextStyle(color: AppTheme.deepNavy))
-        ),
-      ),
+      home: LoginScreen()
     );
   }
 }
