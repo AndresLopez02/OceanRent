@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
+import 'package:ocean_rent/providers/image_picker_providers.dart';
 
 
 //ESTA TENDRA QUE HACERLA EL QUE LE TOQUE LA TAREA
@@ -51,6 +52,28 @@ class HomePage extends ConsumerWidget {
                 user?.email ?? 'Usuario sin email',
                 textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 24),
+
+              // Botón temporal para probar la selección múltiple de imágenes
+              ElevatedButton(
+                onPressed: () async {
+                  final images = await ref
+                      .read(imagePickerServiceProvider)
+                      .pickMultipleImages();
+
+                  if (!context.mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Imágenes seleccionadas: ${images.length}',
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Probar selector de imágenes'),
+              ),
+              
               const SizedBox(height: 24),
               if (authState.isLoading) const CircularProgressIndicator(),
             ],
