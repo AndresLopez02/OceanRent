@@ -39,6 +39,8 @@ dependencies:
   flutter_riverpod: ^2.5.1
   cloud_firestore: ^6.2.0
   google_fonts: ^6.2.1
+  firebase_storage: ^13.2.0
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
