@@ -1,8 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ocean_rent/models/user_model.dart';
 import 'package:ocean_rent/repository/auth_repository.dart';
 import 'package:ocean_rent/services/firebase_auth_service.dart';
+
+// ── Providers de infraestructura (igual que tenéis) ─────────────────────────
 
 final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
   return FirebaseAuthService();
@@ -13,31 +16,50 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(authService);
 });
 
+// Stream para AuthGatePage (igual que tenéis)
 final authStateChangesProvider = StreamProvider<User?>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   return repository.authStateChanges;
 });
 
-final authNotifierProvider = ChangeNotifierProvider<AuthProvider>((ref) {
+// Provider principal — ahora con UserModel y rol
+final authNotifierProvider = ChangeNotifierProvider<AuthNotifier>((ref) {
   final repository = ref.watch(authRepositoryProvider);
-  return AuthProvider(repository);
+  return AuthNotifier(repository);
 });
 
-class AuthProvider extends ChangeNotifier {
-  AuthProvider(this._authRepository);
+// ── AuthNotifier (reemplaza tu AuthProvider) ─────────────────────────────────
+
+class AuthNotifier extends ChangeNotifier {
+  AuthNotifier(this._authRepository);
 
   final AuthRepository _authRepository;
 
   bool _isLoading = false;
   String? _errorMessage;
+  UserModel? _currentUser;         // ← NUEVO: usuario con rol
 
   bool get isLoading => _isLoading;
-
   String? get errorMessage => _errorMessage;
+  UserModel? get currentUser => _currentUser;
+  bool get isAdmin => _currentUser?.role == UserRole.admin;
+  bool get isCustomer => _currentUser?.role == UserRole.customer;
 
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  // Llamado al arrancar para restaurar sesión
+  Future<void> checkCurrentSession() async {
+    _setLoading(true);
+    try {
+      _currentUser = await _authRepository.getCurrentUser();
+    } catch (_) {
+      _currentUser = null;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   Future<bool> signInWithEmailAndPassword({
@@ -48,13 +70,13 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
 
     try {
-      await _authRepository.signInWithEmailAndPassword(
+      _currentUser = await _authRepository.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
       return true;
     } on FirebaseAuthException catch (e) {
-      _errorMessage = _mapFirebaseAuthException(e);
+      _errorMessage = _mapFirebaseError(e);
       return false;
     } catch (_) {
       _errorMessage = 'Ha ocurrido un error inesperado al iniciar sesión.';
@@ -64,21 +86,28 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  // Ahora recibe name, surname y birthDate para guardarlos en Firestore
   Future<bool> registerWithEmailAndPassword({
     required String email,
     required String password,
+    required String name,
+    required String surname,
+    required DateTime birthDate,
   }) async {
     _setLoading(true);
     _errorMessage = null;
 
     try {
-      await _authRepository.registerWithEmailAndPassword(
+      _currentUser = await _authRepository.registerWithEmailAndPassword(
         email: email,
         password: password,
+        name: name,
+        surname: surname,
+        birthDate: birthDate,
       );
       return true;
     } on FirebaseAuthException catch (e) {
-      _errorMessage = _mapFirebaseAuthException(e);
+      _errorMessage = _mapFirebaseError(e);
       return false;
     } catch (_) {
       _errorMessage = 'Ha ocurrido un error inesperado al registrarte.';
@@ -88,35 +117,31 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> signOut() async {
-    _setLoading(true);
-    _errorMessage = null;
-
-    try {
-      await _authRepository.signOut();
-    } on FirebaseAuthException catch (e) {
-      _errorMessage = _mapFirebaseAuthException(e);
-    } catch (_) {
-      _errorMessage = 'No se pudo cerrar la sesión.';
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  //Iniciar sesion con Google
   Future<bool> signInWithGoogle() async {
     _setLoading(true);
     _errorMessage = null;
 
     try {
-      await _authRepository.signInWithGoogle();
+      _currentUser = await _authRepository.signInWithGoogle();
       return true;
     } on FirebaseAuthException catch (e) {
-      _errorMessage = _mapFirebaseAuthException(e);
+      _errorMessage = _mapFirebaseError(e);
       return false;
     } catch (_) {
       _errorMessage = 'No se pudo iniciar sesión con Google.';
       return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> signOut() async {
+    _setLoading(true);
+    try {
+      await _authRepository.signOut();
+      _currentUser = null;
+    } catch (_) {
+      _errorMessage = 'No se pudo cerrar la sesión.';
     } finally {
       _setLoading(false);
     }
@@ -127,24 +152,18 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  String _mapFirebaseAuthException(FirebaseAuthException e) {
-    switch (e.code) {
-      case 'invalid-email':
-        return 'El correo electrónico no es válido.';
-      case 'user-not-found':
-      case 'invalid-credential':
-      case 'wrong-password':
-        return 'Correo o contraseña incorrectos.';
-      case 'email-already-in-use':
-        return 'Ese correo ya está registrado.';
-      case 'weak-password':
-        return 'La contraseña debe tener al menos 6 caracteres.';
-      case 'too-many-requests':
-        return 'Demasiados intentos. Inténtalo más tarde.';
-      case 'account-exists-with-different-credential':
-        return 'Ya existe una cuenta con ese correo usando otro método de acceso.';
-      default:
-        return e.message ?? 'Ha ocurrido un error con Firebase Auth.';
-    }
+  String _mapFirebaseError(FirebaseAuthException e) {
+    return switch (e.code) {
+      'invalid-email'                          => 'El correo electrónico no es válido.',
+      'user-not-found' ||
+      'invalid-credential' ||
+      'wrong-password'                         => 'Correo o contraseña incorrectos.',
+      'email-already-in-use'                   => 'Ese correo ya está registrado.',
+      'weak-password'                          => 'La contraseña debe tener al menos 6 caracteres.',
+      'too-many-requests'                      => 'Demasiados intentos. Inténtalo más tarde.',
+      'account-exists-with-different-credential'
+                                               => 'Ya existe una cuenta con ese correo usando otro método.',
+      _                                        => e.message ?? 'Error de Firebase Auth.',
+    };
   }
 }

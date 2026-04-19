@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
-import 'package:ocean_rent/pages/register/register_page.dart';
+import 'package:ocean_rent/models/user_model.dart';
+import 'package:ocean_rent/pages/home/pages/admin_home_page.dart';
+import 'package:ocean_rent/pages/home/pages/customer_home_page.dart';
+import 'package:ocean_rent/pages/login/pages/register_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/widgets/build_label_text_fields.dart';
 import 'package:ocean_rent/widgets/custom_text_field.dart';
@@ -26,13 +29,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
+  // ── Navegación según rol ─────────────────────────────────────────────────
+  void _navigateByRole() {
+    final user = ref.read(authNotifierProvider).currentUser;
+    if (user == null) return;
+
+    final destination = switch (user.role) {
+      UserRole.admin    => const AdminHomePage(),
+      UserRole.customer => const CustomerHomePage(),
+    };
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => destination),
+      (_) => false,
+    );
+  }
+
+  // ── Login con email ──────────────────────────────────────────────────────
   Future<void> _login() async {
     FocusScope.of(context).unfocus();
     ref.read(authNotifierProvider).clearError();
 
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-    final email = _emailController.text.trim();
+    final email    = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
@@ -55,7 +74,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     if (!mounted) return;
 
-    if (!success) {
+    if (success) {
+      _navigateByRole(); // ← LA LÍNEA QUE FALTABA
+    } else {
       final error = ref.read(authNotifierProvider).errorMessage;
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text(error ?? 'No se pudo iniciar sesión.')),
@@ -63,6 +84,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
+  // ── Login con Google ─────────────────────────────────────────────────────
   Future<void> _loginWithGoogle() async {
     FocusScope.of(context).unfocus();
     ref.read(authNotifierProvider).clearError();
@@ -73,7 +95,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     if (!mounted) return;
 
-    if (!success) {
+    if (success) {
+      _navigateByRole(); // ← igual aquí
+    } else {
       final error = ref.read(authNotifierProvider).errorMessage;
       scaffoldMessenger.showSnackBar(
         SnackBar(
@@ -148,7 +172,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'RentBoat',
+                                'OceanRent',
                                 style: textTheme.titleLarge?.copyWith(
                                   color: Colors.white,
                                   fontSize: 20,
@@ -168,7 +192,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ],
                     ),
                   ),
+
                   const SizedBox(height: 18),
+
                   Container(
                     padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
                     decoration: BoxDecoration(
@@ -193,6 +219,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             color: Colors.black,
                           ),
                         ),
+
                         const SizedBox(height: 28),
 
                         buildLabelTextFields(context, 'Correo Electrónico'),
@@ -215,9 +242,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           onSubmitted: (_) => _login(),
                           suffixIcon: IconButton(
                             onPressed: () {
-                              setState(() {
-                                _showPassword = !_showPassword;
-                              });
+                              setState(() => _showPassword = !_showPassword);
                             },
                             icon: Icon(
                               _showPassword
@@ -293,15 +318,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         Row(
                           children: [
                             Expanded(
-                              child: Divider(
-                                color: Colors.grey[400],
-                                thickness: 1,
-                              ),
+                              child: Divider(color: Colors.grey[400], thickness: 1),
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
                               child: Text(
                                 'o',
                                 style: textTheme.bodySmall?.copyWith(
@@ -311,10 +331,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               ),
                             ),
                             Expanded(
-                              child: Divider(
-                                color: Colors.grey[400],
-                                thickness: 1,
-                              ),
+                              child: Divider(color: Colors.grey[400], thickness: 1),
                             ),
                           ],
                         ),
@@ -324,9 +341,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         SizedBox(
                           height: 48,
                           child: OutlinedButton(
-                            onPressed: authState.isLoading
-                                ? null
-                                : _loginWithGoogle,
+                            onPressed: authState.isLoading ? null : _loginWithGoogle,
                             style: OutlinedButton.styleFrom(
                               backgroundColor: Colors.white,
                               foregroundColor: AppTheme.deepNavy,
@@ -334,9 +349,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 14),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
