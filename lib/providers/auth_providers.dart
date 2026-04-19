@@ -5,7 +5,6 @@ import 'package:ocean_rent/models/user_model.dart';
 import 'package:ocean_rent/repository/auth_repository.dart';
 import 'package:ocean_rent/services/firebase_auth_service.dart';
 
-// ── Providers de infraestructura (igual que tenéis) ─────────────────────────
 
 final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
   return FirebaseAuthService();
@@ -16,19 +15,17 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(authService);
 });
 
-// Stream para AuthGatePage (igual que tenéis)
 final authStateChangesProvider = StreamProvider<User?>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   return repository.authStateChanges;
 });
 
-// Provider principal — ahora con UserModel y rol
 final authNotifierProvider = ChangeNotifierProvider<AuthNotifier>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   return AuthNotifier(repository);
 });
 
-// ── AuthNotifier (reemplaza tu AuthProvider) ─────────────────────────────────
+
 
 class AuthNotifier extends ChangeNotifier {
   AuthNotifier(this._authRepository);
@@ -37,7 +34,7 @@ class AuthNotifier extends ChangeNotifier {
 
   bool _isLoading = false;
   String? _errorMessage;
-  UserModel? _currentUser;         // ← NUEVO: usuario con rol
+  UserModel? _currentUser;        
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -50,7 +47,6 @@ class AuthNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Llamado al arrancar para restaurar sesión
   Future<void> checkCurrentSession() async {
     _setLoading(true);
     try {
@@ -86,7 +82,6 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
-  // Ahora recibe name, surname y birthDate para guardarlos en Firestore
   Future<bool> registerWithEmailAndPassword({
     required String email,
     required String password,
