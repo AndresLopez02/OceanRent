@@ -84,16 +84,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Widget _buildGoogleLogo() {
-    return RichText(
-      text: const TextSpan(
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-        children: [
-          TextSpan(
-            text: 'G',
-            style: TextStyle(color: Color(0xFF4285F4)),
-          ),
-        ],
-      ),
+    return Image.asset(
+      'assets/icons/google_logo.png',
+      width: 20,
+      height: 20,
+      fit: BoxFit.contain,
     );
   }
 
