@@ -41,12 +41,15 @@ class CustomTextField extends StatelessWidget {
       ),
       child: TextField(
         controller: controller,
-        maxLines: maxLines,
+        maxLines: obscureText ? 1 : maxLines,
         keyboardType: keyboardType,
         inputFormatters: inputFormatters,
+        obscureText: obscureText,
+        onSubmitted: onSubmitted,
         textAlign: TextAlign.left,
         style: const TextStyle(color: Colors.black),
         decoration: InputDecoration(
+          hintText: hintText,
           filled: true,
           fillColor: AppTheme.pearlWhite,
           suffixIcon: suffixIcon,
