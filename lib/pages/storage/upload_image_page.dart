@@ -13,49 +13,53 @@ class UploadImagePage extends StatefulWidget {
 class _UploadImagePageState extends State<UploadImagePage> {
   final ImagePicker _picker = ImagePicker();
 
-  File? _selectedImage;
-  String? _imageUrl;
+  List<File> _selectedImages = [];
+  List<String> _imageUrls = [];
   bool _isUploading = false;
 
-  Future<void> _pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.gallery,
+  // Permite seleccionar varias imágenes desde la galería.
+  Future<void> _pickImages() async {
+    final List<XFile> pickedFiles = await _picker.pickMultiImage(
       imageQuality: 85,
     );
 
-    if (pickedFile == null) return;
+    if (pickedFiles.isEmpty) return;
 
     setState(() {
-      _selectedImage = File(pickedFile.path);
-      _imageUrl = null;
+      _selectedImages = pickedFiles.map((file) => File(file.path)).toList();
+      _imageUrls = [];
     });
   }
 
-  Future<void> _uploadImage() async {
-    if (_selectedImage == null) return;
+  // Sube todas las imágenes seleccionadas a Firebase Storage.
+  Future<void> _uploadImages() async {
+    if (_selectedImages.isEmpty) return;
 
     setState(() {
       _isUploading = true;
     });
 
     try {
-      final String url = await StorageService.instance.uploadImage(
-        _selectedImage!,
-      );
+      final List<String> urls = [];
+
+      for (final image in _selectedImages) {
+        final String url = await StorageService.instance.uploadImage(image);
+        urls.add(url);
+      }
 
       setState(() {
-        _imageUrl = url;
+        _imageUrls = urls;
       });
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Imagen subida correctamente')),
+        const SnackBar(content: Text('Imágenes subidas correctamente')),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Error al subir la imagen')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error al subir las imágenes')),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -73,40 +77,49 @@ class _UploadImagePageState extends State<UploadImagePage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            if (_selectedImage != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(
-                  _selectedImage!,
-                  height: 220,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              )
-            else
-              Container(
-                height: 220,
-                width: double.infinity,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Text('No has seleccionado ninguna imagen'),
-              ),
+            Expanded(
+              child: _selectedImages.isNotEmpty
+                  ? GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                      ),
+                      itemCount: _selectedImages.length,
+                      itemBuilder: (context, index) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.file(
+                            _selectedImages[index],
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      },
+                    )
+                  : Container(
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text('No has seleccionado ninguna imagen'),
+                    ),
+            ),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _pickImage,
-                child: const Text('Seleccionar imagen'),
+                onPressed: _pickImages,
+                child: const Text('Seleccionar imágenes'),
               ),
             ),
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isUploading ? null : _uploadImage,
+                onPressed: _isUploading ? null : _uploadImages,
                 child: _isUploading
                     ? const SizedBox(
                         width: 18,
@@ -117,16 +130,27 @@ class _UploadImagePageState extends State<UploadImagePage> {
               ),
             ),
             const SizedBox(height: 20),
-            if (_imageUrl != null) ...[
+            if (_imageUrls.isNotEmpty) ...[
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'URL generada:',
+                  'URLs generadas:',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 8),
-              SelectableText(_imageUrl!),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _imageUrls.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: SelectableText(_imageUrls[index]),
+                    );
+                  },
+                ),
+              ),
             ],
           ],
         ),
