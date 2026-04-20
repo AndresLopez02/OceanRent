@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
+import 'package:ocean_rent/pages/home/pages/customer_home_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/widgets/build_label_text_fields.dart';
 import 'package:ocean_rent/widgets/custom_text_field.dart';
@@ -18,8 +19,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final TextEditingController _birthDateController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   bool _showPassword = false;
   bool _showConfirmPassword = false;
@@ -39,8 +39,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   String _formatDate(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');
     final month = date.month.toString().padLeft(2, '0');
-    final year = date.year.toString();
-    return '$day/$month/$year';
+    return '$day/${month}/${date.year}';
   }
 
   Future<void> _selectBirthDate() async {
@@ -74,28 +73,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-    final name = _nameController.text.trim();
-    final surname = _surnameController.text.trim();
-    final birthDate = _birthDateController.text.trim();
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
+    final name            = _nameController.text.trim();
+    final surname         = _surnameController.text.trim();
+    final email           = _emailController.text.trim();
+    final password        = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
-    if (name.isEmpty ||
-        surname.isEmpty ||
-        birthDate.isEmpty ||
-        email.isEmpty ||
-        password.isEmpty ||
-        confirmPassword.isEmpty) {
+    // Validaciones
+    if (name.isEmpty || surname.isEmpty || email.isEmpty ||
+        password.isEmpty || confirmPassword.isEmpty) {
       scaffoldMessenger.showSnackBar(
         const SnackBar(content: Text('Rellena todos los campos.')),
-      );
-      return;
-    }
-
-    if (!email.contains('@')) {
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Introduce un correo válido.')),
       );
       return;
     }
@@ -103,6 +91,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (_selectedBirthDate == null) {
       scaffoldMessenger.showSnackBar(
         const SnackBar(content: Text('Selecciona una fecha de nacimiento.')),
+      );
+      return;
+    }
+
+    if (!email.contains('@')) {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Introduce un correo válido.')),
       );
       return;
     }
@@ -125,13 +120,20 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     final success = await ref
         .read(authNotifierProvider)
-        .registerWithEmailAndPassword(email: email, password: password);
+        .registerWithEmailAndPassword(
+          email: email,
+          password: password,
+          name: name,
+          surname: surname,
+          birthDate: _selectedBirthDate!,
+        );
 
     if (!mounted) return;
 
     if (success) {
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Cuenta creada correctamente.')),
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const CustomerHomePage()),
+        (_) => false,
       );
     } else {
       final error = ref.read(authNotifierProvider).errorMessage;
@@ -197,7 +199,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'RentBoat',
+                                'OceanRent',
                                 style: textTheme.titleLarge?.copyWith(
                                   color: Colors.white,
                                   fontSize: 20,
@@ -217,6 +219,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       ],
                     ),
                   ),
+
                   const SizedBox(height: 18),
                   Container(
                     padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
@@ -243,7 +246,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ),
                         ),
                         const SizedBox(height: 28),
-
                         buildLabelTextFields(context, 'Nombre'),
                         const SizedBox(height: 8),
                         CustomTextField(
@@ -251,9 +253,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           hintText: '',
                           obscureText: false,
                         ),
-
                         const SizedBox(height: 22),
-
                         buildLabelTextFields(context, 'Apellidos'),
                         const SizedBox(height: 8),
                         CustomTextField(
@@ -261,9 +261,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           hintText: '',
                           obscureText: false,
                         ),
-
                         const SizedBox(height: 22),
-
                         buildLabelTextFields(context, 'Fecha de nacimiento'),
                         const SizedBox(height: 8),
                         GestureDetector(
@@ -294,9 +292,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           hintText: '',
                           obscureText: false,
                         ),
-
                         const SizedBox(height: 22),
-
                         buildLabelTextFields(context, 'Contraseña'),
                         const SizedBox(height: 8),
                         CustomTextField(
@@ -304,11 +300,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           obscureText: !_showPassword,
                           hintText: '',
                           suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _showPassword = !_showPassword;
-                              });
-                            },
+                            onPressed: () =>
+                                setState(() => _showPassword = !_showPassword),
                             icon: Icon(
                               _showPassword
                                   ? Icons.visibility_off_outlined
@@ -317,9 +310,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 22),
-
                         buildLabelTextFields(context, 'Confirmar contraseña'),
                         const SizedBox(height: 8),
                         CustomTextField(
@@ -328,11 +319,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           hintText: '',
                           onSubmitted: (_) => _register(),
                           suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _showConfirmPassword = !_showConfirmPassword;
-                              });
-                            },
+                            onPressed: () => setState(
+                              () => _showConfirmPassword = !_showConfirmPassword,
+                            ),
                             icon: Icon(
                               _showConfirmPassword
                                   ? Icons.visibility_off_outlined
@@ -341,9 +330,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 30),
-
                         SizedBox(
                           height: 46,
                           child: ElevatedButton(
@@ -372,13 +359,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
-
                         TextButton(
-                          onPressed: authState.isLoading
-                              ? null
-                              : () {
-                                  Navigator.of(context).pop();
-                                },
+                          onPressed: authState.isLoading ? null : () => Navigator.of(context).pop(),
                           child: Text(
                             '¿Ya tienes cuenta? Inicia sesión',
                             style: textTheme.bodyMedium?.copyWith(
