@@ -9,9 +9,16 @@ class UserService {
   Future<bool> isAdmin(String uid) async {
     final doc = await _firestore.collection('users').doc(uid).get();
 
-    if (!doc.exists) return false;
+    if (!doc.exists) {
+      return false;
+    }
 
     final data = doc.data();
-    return data?['isAdmin'] == true;
+    if (data == null) {
+      return false;
+    }
+
+    final role = data['role']?.toString().trim().toLowerCase();
+    return role == 'admin';
   }
 }
