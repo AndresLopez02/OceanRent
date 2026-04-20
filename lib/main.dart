@@ -2,7 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
-import 'package:ocean_rent/pages/admin/boats/boat_list_page.dart';
+import 'package:ocean_rent/pages/auth/auth_gate.dart';
+import 'package:ocean_rent/pages/login/login_page.dart';
 import 'package:ocean_rent/services/firebase_options.dart';
 
 Future<void> main() async {
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const BoatListPage(),
+      home: const AuthGate(),
     );
   }
 }
