@@ -1,62 +1,96 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
-import 'package:ocean_rent/models/user_model.dart';
-import 'package:ocean_rent/pages/home/pages/admin_home_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer_home_page.dart';
-import 'package:ocean_rent/pages/login/pages/register_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/widgets/build_label_text_fields.dart';
 import 'package:ocean_rent/widgets/custom_text_field.dart';
 
-class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends ConsumerStatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  ConsumerState<LoginPage> createState() => _LoginPageState();
+  ConsumerState<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends ConsumerState<LoginPage> {
+class _RegisterPageState extends ConsumerState<RegisterPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _surnameController = TextEditingController();
+  final TextEditingController _birthDateController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   bool _showPassword = false;
+  bool _showConfirmPassword = false;
+  DateTime? _selectedBirthDate;
 
   @override
   void dispose() {
+    _nameController.dispose();
+    _surnameController.dispose();
+    _birthDateController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  // ── Navegación según rol ─────────────────────────────────────────────────
-  void _navigateByRole() {
-    final user = ref.read(authNotifierProvider).currentUser;
-    if (user == null) return;
-
-    final destination = switch (user.role) {
-      UserRole.admin    => const AdminHomePage(),
-      UserRole.customer => const CustomerHomePage(),
-    };
-
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => destination),
-      (_) => false,
-    );
+  String _formatDate(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    return '$day/${month}/${date.year}';
   }
 
-  // ── Login con email ──────────────────────────────────────────────────────
-  Future<void> _login() async {
+  Future<void> _selectBirthDate() async {
+    FocusScope.of(context).unfocus();
+
+    final now = DateTime.now();
+    final initialDate =
+        _selectedBirthDate ?? DateTime(now.year - 18, now.month, now.day);
+
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1900),
+      lastDate: now,
+      helpText: 'Selecciona tu fecha de nacimiento',
+      cancelText: 'Cancelar',
+      confirmText: 'Aceptar',
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _selectedBirthDate = pickedDate;
+        _birthDateController.text = _formatDate(pickedDate);
+      });
+    }
+  }
+
+  Future<void> _register() async {
     FocusScope.of(context).unfocus();
     ref.read(authNotifierProvider).clearError();
 
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final email    = _emailController.text.trim();
-    final password = _passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    final name            = _nameController.text.trim();
+    final surname         = _surnameController.text.trim();
+    final email           = _emailController.text.trim();
+    final password        = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    // Validaciones
+    if (name.isEmpty || surname.isEmpty || email.isEmpty ||
+        password.isEmpty || confirmPassword.isEmpty) {
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Rellena correo y contraseña.')),
+        const SnackBar(content: Text('Rellena todos los campos.')),
+      );
+      return;
+    }
+
+    if (_selectedBirthDate == null) {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Selecciona una fecha de nacimiento.')),
       );
       return;
     }
@@ -68,52 +102,45 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       return;
     }
 
-    final success = await ref
-        .read(authNotifierProvider)
-        .signInWithEmailAndPassword(email: email, password: password);
-
-    if (!mounted) return;
-
-    if (success) {
-      _navigateByRole(); // ← LA LÍNEA QUE FALTABA
-    } else {
-      final error = ref.read(authNotifierProvider).errorMessage;
+    if (password.length < 6) {
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text(error ?? 'No se pudo iniciar sesión.')),
-      );
-    }
-  }
-
-  // ── Login con Google ─────────────────────────────────────────────────────
-  Future<void> _loginWithGoogle() async {
-    FocusScope.of(context).unfocus();
-    ref.read(authNotifierProvider).clearError();
-
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-    final success = await ref.read(authNotifierProvider).signInWithGoogle();
-
-    if (!mounted) return;
-
-    if (success) {
-      _navigateByRole(); // ← igual aquí
-    } else {
-      final error = ref.read(authNotifierProvider).errorMessage;
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text(error ?? 'No se pudo iniciar sesión con Google.'),
+        const SnackBar(
+          content: Text('La contraseña debe tener al menos 6 caracteres.'),
         ),
       );
+      return;
     }
-  }
 
-  Widget _buildGoogleLogo() {
-    return Image.asset(
-      'assets/icons/google_logo.png',
-      width: 20,
-      height: 20,
-      fit: BoxFit.contain,
-    );
+    if (password != confirmPassword) {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Las contraseñas no coinciden.')),
+      );
+      return;
+    }
+
+    final success = await ref
+        .read(authNotifierProvider)
+        .registerWithEmailAndPassword(
+          email: email,
+          password: password,
+          name: name,
+          surname: surname,
+          birthDate: _selectedBirthDate!,
+        );
+
+    if (!mounted) return;
+
+    if (success) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const CustomerHomePage()),
+        (_) => false,
+      );
+    } else {
+      final error = ref.read(authNotifierProvider).errorMessage;
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(error ?? 'No se pudo completar el registro.')),
+      );
+    }
   }
 
   @override
@@ -180,7 +207,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Alquiler de barcos y reservas',
+                                'Crea tu cuenta para comenzar',
                                 style: textTheme.bodySmall?.copyWith(
                                   color: Colors.white70,
                                   fontSize: 12,
@@ -194,7 +221,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
 
                   const SizedBox(height: 18),
-
                   Container(
                     padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
                     decoration: BoxDecoration(
@@ -212,17 +238,53 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Iniciar sesión',
+                          'Registro',
                           textAlign: TextAlign.center,
                           style: textTheme.headlineMedium?.copyWith(
                             fontSize: 20,
                             color: Colors.black,
                           ),
                         ),
-
                         const SizedBox(height: 28),
+                        buildLabelTextFields(context, 'Nombre'),
+                        const SizedBox(height: 8),
+                        CustomTextField(
+                          controller: _nameController,
+                          hintText: '',
+                          obscureText: false,
+                        ),
+                        const SizedBox(height: 22),
+                        buildLabelTextFields(context, 'Apellidos'),
+                        const SizedBox(height: 8),
+                        CustomTextField(
+                          controller: _surnameController,
+                          hintText: '',
+                          obscureText: false,
+                        ),
+                        const SizedBox(height: 22),
+                        buildLabelTextFields(context, 'Fecha de nacimiento'),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: _selectBirthDate,
+                          child: AbsorbPointer(
+                            child: CustomTextField(
+                              controller: _birthDateController,
+                              hintText: 'dd/mm/aaaa',
+                              obscureText: false,
+                              suffixIcon: IconButton(
+                                onPressed: _selectBirthDate,
+                                icon: const Icon(
+                                  Icons.calendar_month_outlined,
+                                  color: AppTheme.deepNavy,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
 
-                        buildLabelTextFields(context, 'Correo Electrónico'),
+                        const SizedBox(height: 22),
+
+                        buildLabelTextFields(context, 'Correo electrónico'),
                         const SizedBox(height: 8),
                         CustomTextField(
                           controller: _emailController,
@@ -230,20 +292,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           hintText: '',
                           obscureText: false,
                         ),
-
                         const SizedBox(height: 22),
-
                         buildLabelTextFields(context, 'Contraseña'),
                         const SizedBox(height: 8),
                         CustomTextField(
                           controller: _passwordController,
                           obscureText: !_showPassword,
                           hintText: '',
-                          onSubmitted: (_) => _login(),
                           suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() => _showPassword = !_showPassword);
-                            },
+                            onPressed: () =>
+                                setState(() => _showPassword = !_showPassword),
                             icon: Icon(
                               _showPassword
                                   ? Icons.visibility_off_outlined
@@ -252,13 +310,31 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ),
                         ),
-
-                        const SizedBox(height: 18),
-
+                        const SizedBox(height: 22),
+                        buildLabelTextFields(context, 'Confirmar contraseña'),
+                        const SizedBox(height: 8),
+                        CustomTextField(
+                          controller: _confirmPasswordController,
+                          obscureText: !_showConfirmPassword,
+                          hintText: '',
+                          onSubmitted: (_) => _register(),
+                          suffixIcon: IconButton(
+                            onPressed: () => setState(
+                              () => _showConfirmPassword = !_showConfirmPassword,
+                            ),
+                            icon: Icon(
+                              _showConfirmPassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: AppTheme.deepNavy,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 30),
                         SizedBox(
                           height: 46,
                           child: ElevatedButton(
-                            onPressed: authState.isLoading ? null : _login,
+                            onPressed: authState.isLoading ? null : _register,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.oceanBlue,
                               foregroundColor: Colors.white,
@@ -273,7 +349,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                     ),
                                   )
                                 : Text(
-                                    'Entrar',
+                                    'Registrarse',
                                     style: textTheme.bodyLarge?.copyWith(
                                       color: Colors.white,
                                       fontSize: 15,
@@ -282,107 +358,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   ),
                           ),
                         ),
-
-                        const SizedBox(height: 10),
-
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton(
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'La recuperación de contraseña aún no está implementada.',
-                                  ),
-                                ),
-                              );
-                            },
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: const Size(0, 0),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: Text(
-                              '¿Has olvidado tu contraseña?',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: AppTheme.oceanBlue,
-                                fontSize: 12,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Divider(color: Colors.grey[400], thickness: 1),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
-                              child: Text(
-                                'o',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: Colors.grey[600],
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Divider(color: Colors.grey[400], thickness: 1),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        SizedBox(
-                          height: 48,
-                          child: OutlinedButton(
-                            onPressed: authState.isLoading ? null : _loginWithGoogle,
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: AppTheme.deepNavy,
-                              side: BorderSide(color: Colors.grey.shade300),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              padding: const EdgeInsets.symmetric(horizontal: 14),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _buildGoogleLogo(),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Continuar con Google',
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 18),
-
+                        const SizedBox(height: 16),
                         TextButton(
-                          onPressed: authState.isLoading
-                              ? null
-                              : () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => const RegisterPage(),
-                                    ),
-                                  );
-                                },
+                          onPressed: authState.isLoading ? null : () => Navigator.of(context).pop(),
                           child: Text(
-                            '¿No tienes cuenta? Regístrate',
+                            '¿Ya tienes cuenta? Inicia sesión',
                             style: textTheme.bodyMedium?.copyWith(
                               color: AppTheme.oceanBlue,
                               fontWeight: FontWeight.w600,
@@ -391,9 +371,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ),
                         ),
-
                         if (authState.errorMessage != null) ...[
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 16),
                           Text(
                             authState.errorMessage!,
                             textAlign: TextAlign.center,
