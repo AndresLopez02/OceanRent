@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 
+// Widget personalizado para construir TextFields
+
 class CustomTextField extends StatelessWidget {
   final String? hintText;
   final int maxLines;
@@ -9,11 +11,6 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final Widget? suffixIcon;
   final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-  final bool readOnly;
-  final VoidCallback? onTap;
-  final ValueChanged<String>? onChanged;
-  final TextInputAction? textInputAction;
 
   const CustomTextField({
     super.key,
@@ -23,11 +20,6 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType,
     this.suffixIcon,
     this.inputFormatters,
-    this.validator,
-    this.readOnly = false,
-    this.onTap,
-    this.onChanged,
-    this.textInputAction,
   });
 
   @override
@@ -40,46 +32,36 @@ class CustomTextField extends StatelessWidget {
             color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 4,
             offset: const Offset(0, 4),
-          ),
-        ],
+          )
+        ]
       ),
-      child: TextFormField(
+      child: TextField(
         controller: controller,
         maxLines: maxLines,
         keyboardType: keyboardType,
         inputFormatters: inputFormatters,
-        validator: validator,
-        readOnly: readOnly,
-        onTap: onTap,
-        onChanged: onChanged,
-        textInputAction: textInputAction,
         textAlign: TextAlign.left,
         style: const TextStyle(color: Colors.black),
         decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: TextStyle(color: Colors.black.withValues(alpha: 0.45)),
           filled: true,
           fillColor: AppTheme.pearlWhite,
           suffixIcon: suffixIcon,
-          errorStyle: const TextStyle(color: AppTheme.alertRed, fontSize: 12),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: AppTheme.deepNavy, width: 1.9),
+            borderSide: const BorderSide(
+              color: AppTheme.deepNavy,
+              width: 1.9,
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: AppTheme.oceanBlue, width: 1.9),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: AppTheme.alertRed, width: 1.9),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: AppTheme.alertRed, width: 1.9),
+            borderSide: BorderSide(
+              color: AppTheme.oceanBlue,
+              width: 1.9,
+            ),
           ),
         ),
-      ),
+      )
     );
   }
 }
