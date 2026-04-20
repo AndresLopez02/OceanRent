@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/user_model.dart';
-import 'package:ocean_rent/pages/home/pages/admin_home_page.dart';
+import 'package:ocean_rent/pages/home/pages/admin/admin_home_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer_home_page.dart';
 import 'package:ocean_rent/pages/login/pages/register_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
@@ -35,8 +35,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (user == null) return;
 
     final destination = switch (user.role) {
-      UserRole.admin    => const AdminHomePage(),
-      UserRole.customer => const CustomerHomePage(),
+      UserRole.admin => AdminHomePage(),
+      UserRole.customer => CustomerHomePage(),
     };
 
     Navigator.of(context).pushAndRemoveUntil(
@@ -51,7 +51,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     ref.read(authNotifierProvider).clearError();
 
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final email    = _emailController.text.trim();
+    final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
@@ -318,10 +318,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         Row(
                           children: [
                             Expanded(
-                              child: Divider(color: Colors.grey[400], thickness: 1),
+                              child: Divider(
+                                color: Colors.grey[400],
+                                thickness: 1,
+                              ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
                               child: Text(
                                 'o',
                                 style: textTheme.bodySmall?.copyWith(
@@ -331,7 +336,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               ),
                             ),
                             Expanded(
-                              child: Divider(color: Colors.grey[400], thickness: 1),
+                              child: Divider(
+                                color: Colors.grey[400],
+                                thickness: 1,
+                              ),
                             ),
                           ],
                         ),
@@ -341,7 +349,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         SizedBox(
                           height: 48,
                           child: OutlinedButton(
-                            onPressed: authState.isLoading ? null : _loginWithGoogle,
+                            onPressed: authState.isLoading
+                                ? null
+                                : _loginWithGoogle,
                             style: OutlinedButton.styleFrom(
                               backgroundColor: Colors.white,
                               foregroundColor: AppTheme.deepNavy,
@@ -349,7 +359,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 14),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
