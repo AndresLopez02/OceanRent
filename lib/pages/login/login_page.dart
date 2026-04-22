@@ -29,7 +29,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-  // ── Navegación según rol ─────────────────────────────────────────────────
   void _navigateByRole() {
     final user = ref.read(authNotifierProvider).currentUser;
     if (user == null) return;
@@ -45,7 +44,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
-  // ── Login con email ──────────────────────────────────────────────────────
   Future<void> _login() async {
     FocusScope.of(context).unfocus();
     ref.read(authNotifierProvider).clearError();
@@ -84,7 +82,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
-  // ── Login con Google ─────────────────────────────────────────────────────
   Future<void> _loginWithGoogle() async {
     FocusScope.of(context).unfocus();
     ref.read(authNotifierProvider).clearError();
@@ -123,90 +120,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     return Scaffold(
       backgroundColor: AppTheme.pearlWhite,
+      appBar: AppBar(
+        backgroundColor: AppTheme.deepNavy,
+        title: const Text('OceanRent'),
+        actions: [
+          const Icon(Icons.directions_boat_outlined),
+          const SizedBox(width: 20)
+        ],
+        ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 380),
-              child: Column(
+            child: 
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 18,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.deepNavy,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.14),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.18),
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.directions_boat_outlined,
-                            color: Colors.white,
-                            size: 26,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'OceanRent',
-                                style: textTheme.titleLarge?.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Alquiler de barcos y reservas',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
                   Container(
                     padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
                     decoration: BoxDecoration(
                       color: AppTheme.pearlWhite,
                       borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.06),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -412,14 +346,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             style: textTheme.bodySmall?.copyWith(
                               color: AppTheme.alertRed,
                               fontSize: 13,
-                            ),
                           ),
-                        ],
+                        ),
                       ],
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
