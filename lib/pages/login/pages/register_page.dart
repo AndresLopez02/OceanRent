@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/pages/home/pages/customer_home_page.dart';
+import 'package:ocean_rent/pages/login/login_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/widgets/build_label_text_fields.dart';
 import 'package:ocean_rent/widgets/custom_text_field.dart';
@@ -150,89 +151,27 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     return Scaffold(
       backgroundColor: AppTheme.pearlWhite,
+      appBar: AppBar(
+        backgroundColor: AppTheme.deepNavy,
+        title: const Text('OceanRent'),
+        actions: [
+          const Icon(Icons.directions_boat_outlined),
+          const SizedBox(width: 20)
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 380),
-              child: Column(
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 18,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.deepNavy,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.14),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.18),
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.directions_boat_outlined,
-                            color: Colors.white,
-                            size: 26,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'OceanRent',
-                                style: textTheme.titleLarge?.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Crea tu cuenta para comenzar',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
                   const SizedBox(height: 18),
                   Container(
                     padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
                     decoration: BoxDecoration(
                       color: AppTheme.pearlWhite,
                       borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.06),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -360,7 +299,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ),
                         const SizedBox(height: 16),
                         TextButton(
-                          onPressed: authState.isLoading ? null : () => Navigator.of(context).pop(),
+                          onPressed: authState.isLoading ? null : () {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(builder: (_) => const LoginPage()),
+                              (_) => false,
+                            );
+                          },
                           child: Text(
                             '¿Ya tienes cuenta? Inicia sesión',
                             style: textTheme.bodyMedium?.copyWith(
@@ -379,14 +323,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             style: textTheme.bodySmall?.copyWith(
                               color: AppTheme.alertRed,
                               fontSize: 13,
-                            ),
                           ),
-                        ],
+                        ),
                       ],
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

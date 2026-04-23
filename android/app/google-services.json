@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "145195283796-l77d14rovtecqqp6hstm9tr84dq7kf7o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "es.zaitec.ocean_rent",
+            "certificate_hash": "0e8e79c0fb7e9d518caf38bab72047f3c01f6638"
+          }
+        },
+        {
           "client_id": "145195283796-9lsjc6jau0clpd7rd6t3ddfsoikae5ir.apps.googleusercontent.com",
           "client_type": 3
         }
