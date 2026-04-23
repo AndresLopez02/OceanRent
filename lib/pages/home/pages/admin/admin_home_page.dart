@@ -148,7 +148,7 @@ class AdminHomePage extends ConsumerWidget {
                               height: 180,
                               width: double.infinity,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) {
+                              errorBuilder: (_, _, _) {
                                 return _BoatImagePlaceholder(name: boat.name);
                               },
                             )

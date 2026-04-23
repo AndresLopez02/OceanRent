@@ -5,7 +5,6 @@ import 'package:ocean_rent/models/user_model.dart';
 import 'package:ocean_rent/repository/auth_repository.dart';
 import 'package:ocean_rent/services/firebase_auth_service.dart';
 
-
 final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
   return FirebaseAuthService();
 });
@@ -25,8 +24,6 @@ final authNotifierProvider = ChangeNotifierProvider<AuthNotifier>((ref) {
   return AuthNotifier(repository);
 });
 
-
-
 class AuthNotifier extends ChangeNotifier {
   AuthNotifier(this._authRepository);
 
@@ -34,12 +31,16 @@ class AuthNotifier extends ChangeNotifier {
 
   bool _isLoading = false;
   String? _errorMessage;
-  UserModel? _currentUser;        
+  UserModel? _currentUser;
 
   bool get isLoading => _isLoading;
+
   String? get errorMessage => _errorMessage;
+
   UserModel? get currentUser => _currentUser;
+
   bool get isAdmin => _currentUser?.role == UserRole.admin;
+
   bool get isCustomer => _currentUser?.role == UserRole.customer;
 
   void clearError() {
@@ -58,6 +59,7 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
+  // Implementación de inicio de sesión con correo electrónico y contraseña
   Future<bool> signInWithEmailAndPassword({
     required String email,
     required String password,
@@ -82,6 +84,7 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
+  // Implementación de registro de usuario con correo electrónico y contraseña
   Future<bool> registerWithEmailAndPassword({
     required String email,
     required String password,
@@ -112,6 +115,26 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
+  // Implementación de restablecimiento de contraseña
+  Future<bool> sendPasswordResetEmail({required String email}) async {
+    _setLoading(true);
+    _errorMessage = null;
+
+    try {
+      await _authRepository.sendPasswordResetEmail(email: email);
+      return true;
+    } on FirebaseAuthException catch (e) {
+      _errorMessage = _mapFirebaseError(e);
+      return false;
+    } catch (_) {
+      _errorMessage = 'No se pudo enviar el correo de recuperación.';
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Implementación de inicio de sesión con Google, creando un perfil si es la primera vez
   Future<bool> signInWithGoogle() async {
     _setLoading(true);
     _errorMessage = null;
@@ -149,16 +172,17 @@ class AuthNotifier extends ChangeNotifier {
 
   String _mapFirebaseError(FirebaseAuthException e) {
     return switch (e.code) {
-      'invalid-email'                          => 'El correo electrónico no es válido.',
+      'invalid-email' => 'El correo electrónico no es válido.',
+      'missing-email' => 'Introduce un correo electrónico.',
       'user-not-found' ||
       'invalid-credential' ||
-      'wrong-password'                         => 'Correo o contraseña incorrectos.',
-      'email-already-in-use'                   => 'Ese correo ya está registrado.',
-      'weak-password'                          => 'La contraseña debe tener al menos 6 caracteres.',
-      'too-many-requests'                      => 'Demasiados intentos. Inténtalo más tarde.',
-      'account-exists-with-different-credential'
-                                               => 'Ya existe una cuenta con ese correo usando otro método.',
-      _                                        => e.message ?? 'Error de Firebase Auth.',
+      'wrong-password' => 'Correo o contraseña incorrectos.',
+      'email-already-in-use' => 'Ese correo ya está registrado.',
+      'weak-password' => 'La contraseña debe tener al menos 6 caracteres.',
+      'too-many-requests' => 'Demasiados intentos. Inténtalo más tarde.',
+      'account-exists-with-different-credential' =>
+        'Ya existe una cuenta con ese correo usando otro método.',
+      _ => e.message ?? 'Error de Firebase Auth.',
     };
   }
 }
