@@ -20,7 +20,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final TextEditingController _birthDateController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _showPassword = false;
   bool _showConfirmPassword = false;
@@ -40,7 +41,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   String _formatDate(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');
     final month = date.month.toString().padLeft(2, '0');
-    return '$day/${month}/${date.year}';
+    return '$day/$month/$date.year';
   }
 
   Future<void> _selectBirthDate() async {
@@ -74,15 +75,18 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-    final name            = _nameController.text.trim();
-    final surname         = _surnameController.text.trim();
-    final email           = _emailController.text.trim();
-    final password        = _passwordController.text.trim();
+    final name = _nameController.text.trim();
+    final surname = _surnameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
     // Validaciones
-    if (name.isEmpty || surname.isEmpty || email.isEmpty ||
-        password.isEmpty || confirmPassword.isEmpty) {
+    if (name.isEmpty ||
+        surname.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
       scaffoldMessenger.showSnackBar(
         const SnackBar(content: Text('Rellena todos los campos.')),
       );
@@ -156,7 +160,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         title: const Text('OceanRent'),
         actions: [
           const Icon(Icons.directions_boat_outlined),
-          const SizedBox(width: 20)
+          const SizedBox(width: 20),
         ],
       ),
       body: SafeArea(
@@ -164,165 +168,169 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 18),
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-                    decoration: BoxDecoration(
-                      color: AppTheme.pearlWhite,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'Registro',
-                          textAlign: TextAlign.center,
-                          style: textTheme.headlineMedium?.copyWith(
-                            fontSize: 20,
-                            color: Colors.black,
-                          ),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+                  decoration: BoxDecoration(
+                    color: AppTheme.pearlWhite,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Registro',
+                        textAlign: TextAlign.center,
+                        style: textTheme.headlineMedium?.copyWith(
+                          fontSize: 20,
+                          color: Colors.black,
                         ),
-                        const SizedBox(height: 28),
-                        buildLabelTextFields(context, 'Nombre'),
-                        const SizedBox(height: 8),
-                        CustomTextField(
-                          controller: _nameController,
-                          hintText: '',
-                          obscureText: false,
-                        ),
-                        const SizedBox(height: 22),
-                        buildLabelTextFields(context, 'Apellidos'),
-                        const SizedBox(height: 8),
-                        CustomTextField(
-                          controller: _surnameController,
-                          hintText: '',
-                          obscureText: false,
-                        ),
-                        const SizedBox(height: 22),
-                        buildLabelTextFields(context, 'Fecha de nacimiento'),
-                        const SizedBox(height: 8),
-                        GestureDetector(
-                          onTap: _selectBirthDate,
-                          child: AbsorbPointer(
-                            child: CustomTextField(
-                              controller: _birthDateController,
-                              hintText: 'dd/mm/aaaa',
-                              obscureText: false,
-                              suffixIcon: IconButton(
-                                onPressed: _selectBirthDate,
-                                icon: const Icon(
-                                  Icons.calendar_month_outlined,
-                                  color: AppTheme.deepNavy,
-                                ),
+                      ),
+                      const SizedBox(height: 28),
+                      buildLabelTextFields(context, 'Nombre'),
+                      const SizedBox(height: 8),
+                      CustomTextField(
+                        controller: _nameController,
+                        hintText: '',
+                        obscureText: false,
+                      ),
+                      const SizedBox(height: 22),
+                      buildLabelTextFields(context, 'Apellidos'),
+                      const SizedBox(height: 8),
+                      CustomTextField(
+                        controller: _surnameController,
+                        hintText: '',
+                        obscureText: false,
+                      ),
+                      const SizedBox(height: 22),
+                      buildLabelTextFields(context, 'Fecha de nacimiento'),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: _selectBirthDate,
+                        child: AbsorbPointer(
+                          child: CustomTextField(
+                            controller: _birthDateController,
+                            hintText: 'dd/mm/aaaa',
+                            obscureText: false,
+                            suffixIcon: IconButton(
+                              onPressed: _selectBirthDate,
+                              icon: const Icon(
+                                Icons.calendar_month_outlined,
+                                color: AppTheme.deepNavy,
                               ),
                             ),
                           ),
                         ),
+                      ),
 
-                        const SizedBox(height: 22),
+                      const SizedBox(height: 22),
 
-                        buildLabelTextFields(context, 'Correo electrónico'),
-                        const SizedBox(height: 8),
-                        CustomTextField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          hintText: '',
-                          obscureText: false,
-                        ),
-                        const SizedBox(height: 22),
-                        buildLabelTextFields(context, 'Contraseña'),
-                        const SizedBox(height: 8),
-                        CustomTextField(
-                          controller: _passwordController,
-                          obscureText: !_showPassword,
-                          hintText: '',
-                          suffixIcon: IconButton(
-                            onPressed: () =>
-                                setState(() => _showPassword = !_showPassword),
-                            icon: Icon(
-                              _showPassword
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: AppTheme.deepNavy,
-                            ),
+                      buildLabelTextFields(context, 'Correo electrónico'),
+                      const SizedBox(height: 8),
+                      CustomTextField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        hintText: '',
+                        obscureText: false,
+                      ),
+                      const SizedBox(height: 22),
+                      buildLabelTextFields(context, 'Contraseña'),
+                      const SizedBox(height: 8),
+                      CustomTextField(
+                        controller: _passwordController,
+                        obscureText: !_showPassword,
+                        hintText: '',
+                        suffixIcon: IconButton(
+                          onPressed: () =>
+                              setState(() => _showPassword = !_showPassword),
+                          icon: Icon(
+                            _showPassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: AppTheme.deepNavy,
                           ),
                         ),
-                        const SizedBox(height: 22),
-                        buildLabelTextFields(context, 'Confirmar contraseña'),
-                        const SizedBox(height: 8),
-                        CustomTextField(
-                          controller: _confirmPasswordController,
-                          obscureText: !_showConfirmPassword,
-                          hintText: '',
-                          onSubmitted: (_) => _register(),
-                          suffixIcon: IconButton(
-                            onPressed: () => setState(
-                              () => _showConfirmPassword = !_showConfirmPassword,
-                            ),
-                            icon: Icon(
-                              _showConfirmPassword
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: AppTheme.deepNavy,
-                            ),
+                      ),
+                      const SizedBox(height: 22),
+                      buildLabelTextFields(context, 'Confirmar contraseña'),
+                      const SizedBox(height: 8),
+                      CustomTextField(
+                        controller: _confirmPasswordController,
+                        obscureText: !_showConfirmPassword,
+                        hintText: '',
+                        onSubmitted: (_) => _register(),
+                        suffixIcon: IconButton(
+                          onPressed: () => setState(
+                            () => _showConfirmPassword = !_showConfirmPassword,
+                          ),
+                          icon: Icon(
+                            _showConfirmPassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: AppTheme.deepNavy,
                           ),
                         ),
-                        const SizedBox(height: 30),
-                        SizedBox(
-                          height: 46,
-                          child: ElevatedButton(
-                            onPressed: authState.isLoading ? null : _register,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.oceanBlue,
-                              foregroundColor: Colors.white,
-                            ),
-                            child: authState.isLoading
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : Text(
-                                    'Registrarse',
-                                    style: textTheme.bodyLarge?.copyWith(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                      ),
+                      const SizedBox(height: 30),
+                      SizedBox(
+                        height: 46,
+                        child: ElevatedButton(
+                          onPressed: authState.isLoading ? null : _register,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.oceanBlue,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: authState.isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
                                   ),
+                                )
+                              : Text(
+                                  'Registrarse',
+                                  style: textTheme.bodyLarge?.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: authState.isLoading
+                            ? null
+                            : () {
+                                Navigator.of(context).pushAndRemoveUntil(
+                                  MaterialPageRoute(
+                                    builder: (_) => const LoginPage(),
+                                  ),
+                                  (_) => false,
+                                );
+                              },
+                        child: Text(
+                          '¿Ya tienes cuenta? Inicia sesión',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: AppTheme.oceanBlue,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            decoration: TextDecoration.underline,
                           ),
                         ),
+                      ),
+                      if (authState.errorMessage != null) ...[
                         const SizedBox(height: 16),
-                        TextButton(
-                          onPressed: authState.isLoading ? null : () {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(builder: (_) => const LoginPage()),
-                              (_) => false,
-                            );
-                          },
-                          child: Text(
-                            '¿Ya tienes cuenta? Inicia sesión',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: AppTheme.oceanBlue,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ),
-                        if (authState.errorMessage != null) ...[
-                          const SizedBox(height: 16),
-                          Text(
-                            authState.errorMessage!,
-                            textAlign: TextAlign.center,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: AppTheme.alertRed,
-                              fontSize: 13,
+                        Text(
+                          authState.errorMessage!,
+                          textAlign: TextAlign.center,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: AppTheme.alertRed,
+                            fontSize: 13,
                           ),
                         ),
                       ],

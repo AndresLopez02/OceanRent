@@ -3,13 +3,14 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class FirebaseAuthService {
   FirebaseAuthService({FirebaseAuth? firebaseAuth})
-      : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
+    : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   bool _googleInitialized = false;
 
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
+
   User? get currentUser => _firebaseAuth.currentUser;
 
   Future<void> _ensureGoogleInitialized() async {
@@ -18,6 +19,7 @@ class FirebaseAuthService {
     _googleInitialized = true;
   }
 
+  // Implementación de inicio de sesión con correo electrónico y contraseña
   Future<UserCredential> signInWithEmailAndPassword({
     required String email,
     required String password,
@@ -28,6 +30,7 @@ class FirebaseAuthService {
     );
   }
 
+  // Implementación de registro de usuario
   Future<UserCredential> createUserWithEmailAndPassword({
     required String email,
     required String password,
@@ -38,6 +41,12 @@ class FirebaseAuthService {
     );
   }
 
+  // Implementación de restablecimiento de contraseña
+  Future<void> sendPasswordResetEmail({required String email}) {
+    return _firebaseAuth.sendPasswordResetEmail(email: email);
+  }
+
+  // Implementación de inicio de sesión con Google
   Future<UserCredential> signInWithGoogle() async {
     await _ensureGoogleInitialized();
 
@@ -51,6 +60,7 @@ class FirebaseAuthService {
     return _firebaseAuth.signInWithCredential(credential);
   }
 
+  // Implementación de cierre de sesión
   Future<void> signOut() async {
     await _googleSignIn.signOut();
     await _firebaseAuth.signOut();

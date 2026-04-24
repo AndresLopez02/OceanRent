@@ -17,15 +17,75 @@ class _BoatFormPageState extends State<BoatFormPage> {
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
-  final _typeController = TextEditingController();
   final _capacityController = TextEditingController();
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _imageUrlController = TextEditingController();
+  final List<String> _boatTypes = const [
+    'lancha',
+    'semirigida',
+    'velero',
+    'yate',
+    'catamaran',
+    'jetski',
+  ];
 
+  String? _selectedBoatType;
   bool _isSaving = false;
 
   bool get isEditing => widget.boat != null;
+
+  String? _normalizeBoatType(String? type) {
+    if (type == null) return null;
+
+    final normalized = type
+        .trim()
+        .toLowerCase()
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u')
+        .replaceAll(' ', '');
+
+    switch (normalized) {
+      case 'lancha':
+        return 'lancha';
+      case 'semirigida':
+      case 'semirrigida':
+        return 'semirigida';
+      case 'velero':
+        return 'velero';
+      case 'yate':
+        return 'yate';
+      case 'catamaran':
+        return 'catamaran';
+      case 'jetski':
+      case 'jetsky':
+        return 'jetski';
+      default:
+        return null;
+    }
+  }
+
+  String _boatTypeLabel(String type) {
+    switch (type) {
+      case 'lancha':
+        return 'Lancha';
+      case 'semirigida':
+        return 'Semirrígida';
+      case 'velero':
+        return 'Velero';
+      case 'yate':
+        return 'Yate';
+      case 'catamaran':
+        return 'Catamarán';
+      case 'jetski':
+        return 'Jet Ski';
+      default:
+        return type;
+    }
+  }
 
   @override
   void initState() {
@@ -34,7 +94,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
     final boat = widget.boat;
     if (boat != null) {
       _nameController.text = boat.name;
-      _typeController.text = boat.type;
+      _selectedBoatType = _normalizeBoatType(boat.type);
       _capacityController.text = boat.capacity.toString();
       _priceController.text = boat.pricePerDay.toString();
       _descriptionController.text = boat.description;
@@ -49,7 +109,6 @@ class _BoatFormPageState extends State<BoatFormPage> {
   @override
   void dispose() {
     _nameController.dispose();
-    _typeController.dispose();
     _capacityController.dispose();
     _priceController.dispose();
     _descriptionController.dispose();
@@ -66,14 +125,13 @@ class _BoatFormPageState extends State<BoatFormPage> {
 
     try {
       final name = _nameController.text.trim();
-      final type = _typeController.text.trim();
+      final type = _selectedBoatType?.trim() ?? '';
       final capacity = int.parse(_capacityController.text.trim());
       final price = double.parse(
         _priceController.text.trim().replaceAll(',', '.'),
       );
       final description = _descriptionController.text.trim();
       final imageUrl = _imageUrlController.text.trim();
-
       if (isEditing) {
         await BoatService.instance.updateBoat(
           id: widget.boat!.id,
@@ -195,7 +253,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
                 ? Image.network(
                     url,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _buildImagePlaceholder(),
+                    errorBuilder: (_, _, _) => _buildImagePlaceholder(),
                   )
                 : _buildImagePlaceholder(),
           ),
@@ -256,10 +314,28 @@ class _BoatFormPageState extends State<BoatFormPage> {
                 validator: _validateRequired,
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: _typeController,
+              DropdownButtonFormField<String>(
+                initialValue: _selectedBoatType,
                 decoration: _inputDecoration('Tipo de barco'),
-                validator: _validateRequired,
+                items: _boatTypes
+                    .map(
+                      (type) => DropdownMenuItem<String>(
+                        value: type,
+                        child: Text(_boatTypeLabel(type)),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedBoatType = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Campo obligatorio';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 12),
               TextFormField(
