@@ -125,7 +125,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
 
     try {
       final name = _nameController.text.trim();
-      final type = _selectedBoatType?.trim() ?? '';
+      final category = _selectedBoatType?.trim() ?? '';
       final capacity = int.parse(_capacityController.text.trim());
       final price = double.parse(
         _priceController.text.trim().replaceAll(',', '.'),
@@ -136,7 +136,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
         await BoatService.instance.updateBoat(
           id: widget.boat!.id,
           name: name,
-          type: type,
+          category: category,
           capacity: capacity,
           pricePerDay: price,
           description: description,
@@ -145,7 +145,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
       } else {
         await BoatService.instance.createBoat(
           name: name,
-          type: type,
+          category: category,
           capacity: capacity,
           pricePerDay: price,
           description: description,

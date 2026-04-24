@@ -7,6 +7,7 @@ class UserModel {
   final String email;
   final String name;
   final String surname;
+  final DateTime? birthDate;
   final UserRole role;
   final NauticalLicense? nauticalLicense;
 
@@ -15,16 +16,19 @@ class UserModel {
     required this.email,
     required this.name,
     required this.surname,
+    required this.birthDate,
     required this.role,
     this.nauticalLicense,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map, String uid) {
+    final rawBirthDate = map['birth_date'];
     return UserModel(
       uid: uid,
       email: map['email'] ?? '',
       name: map['name'] ?? '',
       surname: map['surname'] ?? '',
+      birthDate: rawBirthDate is Timestamp ? rawBirthDate.toDate() : null,
       role: map['role'] == 'admin' ? UserRole.admin : UserRole.customer,
       nauticalLicense: map['nautical_license'] != null
           ? NauticalLicense.fromMap(map['nautical_license'])
@@ -36,17 +40,17 @@ class UserModel {
     'email': email,
     'name': name,
     'surname': surname,
+    if (birthDate != null) 'birth_date': Timestamp.fromDate(birthDate!),
     'role': role == UserRole.admin ? 'admin' : 'customer',
-    if (nauticalLicense != null)
-      'nautical_license': nauticalLicense!.toMap(),
+    if (nauticalLicense != null) 'nautical_license': nauticalLicense!.toMap(),
     'created_at': FieldValue.serverTimestamp(),
   };
 }
 
 class NauticalLicense {
-  final String type;            
+  final String type;
   final String documentUrl;
-  final String status;          
+  final String status;
   final String? rejectionReason;
 
   const NauticalLicense({
