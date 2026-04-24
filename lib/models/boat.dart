@@ -21,9 +21,9 @@ class Boat {
     return Boat(
       id: documentId,
       name: (map['name'] ?? '') as String,
-      type: (map['type'] ?? '') as String,
+      type: (map['category'] ?? '') as String,
       capacity: (map['capacity'] ?? 0) as int,
-      pricePerDay: (map['pricePerDay'] ?? 0).toDouble(),
+      pricePerDay: (map['price_per_ay'] ?? 0).toDouble(),
       description: (map['description'] ?? '') as String,
       imageUrl: (map['imageUrl'] ?? '') as String,
     );
@@ -34,7 +34,7 @@ class Boat {
       'name': name,
       'type': type,
       'capacity': capacity,
-      'pricePerDay': pricePerDay,
+      'price_per_day': pricePerDay,
       'description': description,
       'imageUrl': imageUrl,
     };

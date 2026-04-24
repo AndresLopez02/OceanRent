@@ -21,7 +21,7 @@ class BoatService {
 
   Future<void> createBoat({
     required String name,
-    required String type,
+    required String category,
     required int capacity,
     required double pricePerDay,
     required String description,
@@ -29,9 +29,9 @@ class BoatService {
   }) async {
     await _boatsCollection.add({
       'name': name.trim(),
-      'type': type.trim(),
+      'category': category.trim(),
       'capacity': capacity,
-      'pricePerDay': pricePerDay,
+      'price_per_day': pricePerDay,
       'description': description.trim(),
       'imageUrl': imageUrl.trim(),
     });
@@ -40,7 +40,7 @@ class BoatService {
   Future<void> updateBoat({
     required String id,
     required String name,
-    required String type,
+    required String category,
     required int capacity,
     required double pricePerDay,
     required String description,
@@ -48,9 +48,9 @@ class BoatService {
   }) async {
     await _boatsCollection.doc(id).update({
       'name': name.trim(),
-      'type': type.trim(),
+      'category': category.trim(),
       'capacity': capacity,
-      'pricePerDay': pricePerDay,
+      'price_per_day': pricePerDay,
       'description': description.trim(),
       'imageUrl': imageUrl.trim(),
     });

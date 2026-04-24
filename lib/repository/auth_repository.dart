@@ -40,6 +40,7 @@ class AuthRepository {
       email: email,
       name: name,
       surname: surname,
+      birthDate: birthDate,
       role: UserRole.customer,
       nauticalLicense: const NauticalLicense(
         type: 'none',
@@ -66,6 +67,7 @@ class AuthRepository {
         email: credential.user!.email ?? '',
         name: credential.user!.displayName ?? '',
         surname: '',
+        birthDate: null,
         role: UserRole.customer,
         nauticalLicense: const NauticalLicense(
           type: 'none',
