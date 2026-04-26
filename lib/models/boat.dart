@@ -23,7 +23,7 @@ class Boat {
       name: (map['name'] ?? '') as String,
       type: (map['category'] ?? '') as String,
       capacity: (map['capacity'] ?? 0) as int,
-      pricePerDay: (map['price_per_ay'] ?? 0).toDouble(),
+      pricePerDay: (map['price_per_day'] ?? 0).toDouble(),
       description: (map['description'] ?? '') as String,
       imageUrl: (map['imageUrl'] ?? '') as String,
     );
