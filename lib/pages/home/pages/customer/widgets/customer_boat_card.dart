@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat.dart';
+import 'package:ocean_rent/pages/home/pages/customer/customer_boat_detail_page.dart';
 
 class CustomerBoatCard extends StatelessWidget {
   final Boat boat;
@@ -14,83 +15,97 @@ class CustomerBoatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+
+      // Al pulsar la tarjeta se abre la pantalla de detalle del barco.
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CustomerBoatDetailPage(boat: boat),
           ),
-        ],
-        border: Border.all(
-          color: AppTheme.deepNavy.withValues(alpha: 0.08),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(18),
+        );
+      },
+
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            child: boat.imageUrl.isNotEmpty
-                ? Image.network(
-                    boat.imageUrl,
-                    height: 170,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => _BoatImagePlaceholder(
-                      name: boat.name,
-                    ),
-                  )
-                : _BoatImagePlaceholder(name: boat.name),
+          ],
+          border: Border.all(
+            color: AppTheme.deepNavy.withValues(alpha: 0.08),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  boat.name,
-                  style: textTheme.titleLarge?.copyWith(
-                    color: AppTheme.deepNavy,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.directions_boat_outlined,
-                      size: 18,
-                      color: AppTheme.oceanBlue,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
+              child: boat.imageUrl.isNotEmpty
+                  ? Image.network(
+                      boat.imageUrl,
+                      height: 170,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _BoatImagePlaceholder(
+                        name: boat.name,
+                      ),
+                    )
+                  : _BoatImagePlaceholder(name: boat.name),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    boat.name,
+                    style: textTheme.titleLarge?.copyWith(
+                      color: AppTheme.deepNavy,
+                      fontWeight: FontWeight.w700,
                     ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        boat.type.isEmpty ? 'Sin categoría' : boat.type,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey.shade700,
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.directions_boat_outlined,
+                        size: 18,
+                        color: AppTheme.oceanBlue,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          boat.type.isEmpty ? 'Sin categoría' : boat.type,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: Colors.grey.shade700,
+                          ),
                         ),
                       ),
-                    ),
-                    Text(
-                      '${boat.pricePerDay.toStringAsFixed(0)} €/día',
-                      style: textTheme.titleMedium?.copyWith(
-                        color: AppTheme.deepNavy,
-                        fontWeight: FontWeight.w700,
+                      Text(
+                        '${boat.pricePerDay.toStringAsFixed(0)} €/día',
+                        style: textTheme.titleMedium?.copyWith(
+                          color: AppTheme.deepNavy,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
