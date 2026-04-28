@@ -1,24 +1,33 @@
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
-//esta funcion guarda las imagenes en local y te devuelve el path para dejarlo en la base de datos y que se vea la imagen
-Future<List<String>> saveImages(List<File> images) async {
-  final directory = await getApplicationDocumentsDirectory();
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-final boatsDir = Directory('${directory.path}/boats_images');
-  if (!await boatsDir.exists()) {
-    await boatsDir.create(recursive: true);
+Future<String?> uploadToCloudinary(File image) async {
+
+  final url = Uri.parse(
+    "https://api.cloudinary.com/v1_1/ddkl78gti/image/upload",
+  );
+
+  final request = http.MultipartRequest("POST", url)
+    ..fields['upload_preset'] = "basico"
+    ..files.add(await http.MultipartFile.fromPath('file', image.path));
+
+  final response = await request.send();
+
+  final responseData = await response.stream.bytesToString();
+
+ 
+  if (response.statusCode == 200) {
+    final json = jsonDecode(responseData);
+    return json['secure_url'];
+  } else {
+    return null;
   }
-
-  List<String> imagepaths = [];
-
-  for (final image in images) {
-    final fileName = path.basename(image.path);
-    final newPath = path.join(boatsDir.path, fileName);
-
-    final newImage = await image.copy(newPath);
-    imagepaths.add(newImage.path);
-  }
-
-  return imagepaths;
 }
+Future<List<String>> uploadImages(List<File> images) async {
+  final results = await Future.wait(
+    images.map((img) => uploadToCloudinary(img)),
+  );
+
+  return results.whereType<String>().toList();
+  }
