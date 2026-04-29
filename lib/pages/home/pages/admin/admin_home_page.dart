@@ -7,6 +7,8 @@ import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/services/boat/boat_service.dart';
 
+import '../../../../services/providers.dart';
+
 class AdminHomePage extends ConsumerWidget {
   const AdminHomePage({super.key});
 
@@ -42,7 +44,8 @@ class AdminHomePage extends ConsumerWidget {
   }
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
-    await ref.read(authNotifierProvider).signOut();
+     final authService = ref.read(authServiceProvider);
+     await authService.signOut();
 
     if (context.mounted) {
       Navigator.of(context).pushAndRemoveUntil(
