@@ -19,7 +19,7 @@ class RentalRequest {
     required this.createdAt,
   });
 
-  // IMPORTANTE: convierte el objeto RentalRequest en un Map para guardarlo en Firestore.
+  // Convierte el objeto RentalRequest en Map para guardarlo en Firestore
   Map<String, dynamic> toMap() {
     return {
       'boatId': boatId,
@@ -31,7 +31,7 @@ class RentalRequest {
     };
   }
 
-  // IMPORTANTE: crea un objeto RentalRequest a partir de un documento leído desde Firestore.
+  // Crea un objeto RentalRequest a partir de un documento leído desde Firestore
   factory RentalRequest.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
