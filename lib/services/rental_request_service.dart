@@ -6,9 +6,18 @@ class RentalRequestService {
 
   // guarda una solicitud de alquiler en la colección rental_requests.
   Future<void> createRentalRequest(RentalRequest request) async {
-    await _firestore
+    await _firestore.collection('rental_requests').add(request.toMap());
+  }
+
+  // obtiene todas las solicitudes de alquiler en tiempo real
+  Stream<List<RentalRequest>> getRentalRequests() {
+    return _firestore
         .collection('rental_requests')
-        .add(request.toMap());
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => RentalRequest.fromFirestore(doc))
+              .toList(),
+        );
   }
 }
-  
