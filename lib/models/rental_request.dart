@@ -19,7 +19,7 @@ class RentalRequest {
     required this.createdAt,
   });
 
-  // Convierte el objeto RentalRequest en Map para guardarlo en Firestore
+  // Convierte el objeto RentalRequest en un Map para guardarlo en Firestore
   Map<String, dynamic> toMap() {
     return {
       'boatId': boatId,
