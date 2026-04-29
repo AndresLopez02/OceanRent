@@ -2,18 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
-import 'package:ocean_rent/pages/auth_gate/auth_gate_page.dart';
+import 'package:ocean_rent/pages/home/pages/customer/customer_home_page.dart';
+import 'package:ocean_rent/pages/login/login_page.dart';
 
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
 
-  void _goToAuthGate(BuildContext context) {
+  void _goToExploreBoats(BuildContext context) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const AuthGatePage()),
+      MaterialPageRoute(builder: (_) => const CustomerHomePage(isGuest: true)),
     );
   }
 
+  void _goToLogin(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+    );
+  }
+
+  // Para esta demo, ambos botones llevan a la misma página de login, pero en una app real podrían llevar a flujos diferentes
+  // El botón "Explorar Barcos" podría llevar a una versión limitada de la app sin necesidad de iniciar sesión, mientras que "Ya tengo una cuenta" llevaría al login tradicional
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -71,7 +81,7 @@ class OnboardingPage extends StatelessWidget {
                   width: double.infinity,
                   height: 72,
                   child: ElevatedButton(
-                    onPressed: () => _goToAuthGate(context),
+                    onPressed: () => _goToExploreBoats(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.oceanBlue,
                       foregroundColor: AppTheme.pearlWhite,
@@ -97,7 +107,7 @@ class OnboardingPage extends StatelessWidget {
                   width: double.infinity,
                   height: 72,
                   child: ElevatedButton(
-                    onPressed: () => _goToAuthGate(context),
+                    onPressed: () => _goToLogin(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.pearlWhite,
                       foregroundColor: AppTheme.deepNavy,
@@ -120,7 +130,7 @@ class OnboardingPage extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 TextButton(
-                  onPressed: () => _goToAuthGate(context),
+                  onPressed: () => _goToLogin(context),
                   child: Text(
                     'Saltar introducción',
                     style: GoogleFonts.montserrat(
