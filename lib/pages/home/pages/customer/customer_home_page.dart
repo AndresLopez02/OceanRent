@@ -7,10 +7,10 @@ import 'package:ocean_rent/pages/home/pages/customer/widgets/customer_boat_card.
 import 'package:ocean_rent/pages/login/login_page.dart';
 import 'package:ocean_rent/widgets/dialog_confirmacion.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_profile_screen.dart';
+import '../../../../services/providers.dart';
 
 class CustomerHomePage extends ConsumerWidget {
   const CustomerHomePage({super.key});
-
   // Esta página se ha creado para los usuarios regulares que tengan solo el rol de cliente en la base de datos
 
   @override
@@ -35,7 +35,10 @@ class CustomerHomePage extends ConsumerWidget {
               context,
               titulo: 'Cerrar Sesión',
               mensaje: '¿Quieres cerrar sesión?',
-              onAceptar: () {
+              onAceptar: () async {
+                 final authService = ref.read(authServiceProvider);
+                 await authService.signOut();
+                 if (!context.mounted) return;
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => LoginPage()),
