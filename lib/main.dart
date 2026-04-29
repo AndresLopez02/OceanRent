@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
-import 'package:ocean_rent/pages/auth_gate/auth_gate_page.dart';
+import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
 import 'package:ocean_rent/services/boat/boat_cache_service.dart';
 import 'package:ocean_rent/services/firebase_options.dart';
 
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const AuthGatePage(),
+      home: const OnboardingPage(),
     );
   }
 }

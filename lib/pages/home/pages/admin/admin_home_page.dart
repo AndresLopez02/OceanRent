@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/boat_form_page.dart';
-import 'package:ocean_rent/pages/login/login_page.dart';
+import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/services/boat/boat_service.dart';
 
@@ -46,7 +46,7 @@ class AdminHomePage extends ConsumerWidget {
 
     if (context.mounted) {
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginPage()),
+        MaterialPageRoute(builder: (_) => const OnboardingPage()),
         (_) => false,
       );
     }
