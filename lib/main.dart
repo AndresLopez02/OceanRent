@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
-import 'package:ocean_rent/pages/auth_gate/auth_gate_page.dart';
+import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
 import 'package:ocean_rent/services/firebase_options.dart';
 
 Future<void> main() async {
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const AuthGatePage(),
+      home: const OnboardingPage(),
     );
   }
 }
