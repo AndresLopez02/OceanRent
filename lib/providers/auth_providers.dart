@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/models/user_model.dart';
 import 'package:ocean_rent/repository/auth_repository.dart';
-import 'package:ocean_rent/services/firebase_auth_service.dart';
+import 'package:ocean_rent/services/auth/firebase_auth_service.dart';
 
 final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
   return FirebaseAuthService();

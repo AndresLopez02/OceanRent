@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ocean_rent/models/user_model.dart';
-import 'package:ocean_rent/services/firebase_auth_service.dart';
+import 'package:ocean_rent/services/auth/firebase_auth_service.dart';
 
 // Repositorio de autenticación que interactúa con FirebaseAuthService y Firestore para gestionar usuarios
 class AuthRepository {

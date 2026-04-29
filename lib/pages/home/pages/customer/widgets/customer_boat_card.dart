@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
-import 'package:ocean_rent/models/boat.dart';
-import 'package:ocean_rent/pages/home/pages/customer/customer_boat_detail_page.dart';
+import 'package:ocean_rent/models/boat_model.dart';
+import 'package:ocean_rent/pages/home/pages/customer/pages/customer_boat_detail_page.dart';
 
 class CustomerBoatCard extends StatelessWidget {
-  final Boat boat;
+  final BoatModel boat;
 
   const CustomerBoatCard({
     super.key,
@@ -86,7 +86,7 @@ class CustomerBoatCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          boat.type.isEmpty ? 'Sin categoría' : boat.type,
+                          boat.category.isEmpty ? 'Sin categoría' : boat.category,
                           style: textTheme.bodyMedium?.copyWith(
                             color: Colors.grey.shade700,
                           ),
