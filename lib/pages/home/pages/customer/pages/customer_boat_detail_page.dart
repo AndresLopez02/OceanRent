@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
-import 'package:ocean_rent/models/boat.dart';
+import 'package:ocean_rent/models/boat_model.dart';
+import 'package:ocean_rent/pages/home/pages/customer/pages/disponibility_page.dart';
+
 
 // Pantalla de detalle para el cliente.
 // Recibe el barco seleccionado desde el listado y muestra su información completa.
 class CustomerBoatDetailPage extends StatelessWidget {
-  final Boat boat;
+  final BoatModel boat;
 
   const CustomerBoatDetailPage({
     super.key,
@@ -19,6 +21,19 @@ class CustomerBoatDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(boat.name),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: 
+          ElevatedButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => DisponibilityPage(boat: boat)),
+                ), 
+            child:Text('Mirar Disponibilidad', style: TextStyle(color: AppTheme.pearlWhite),),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -50,7 +65,7 @@ class CustomerBoatDetailPage extends StatelessWidget {
                   const SizedBox(height: 12),
 
                   Text(
-                    boat.type.isEmpty ? 'Sin categoría' : boat.type,
+                    boat.category.isEmpty ? 'Sin categoría' : boat.category,
                     style: textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 16),
@@ -88,7 +103,7 @@ class CustomerBoatDetailPage extends StatelessWidget {
                         : boat.description,
                     style: textTheme.bodyMedium,
                   ),
-                ],
+                ]
               ),
             ),
           ],

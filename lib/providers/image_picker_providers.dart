@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ocean_rent/services/image_picker_service.dart';
+import 'package:ocean_rent/services/image/image_picker_service.dart';
 
 final imagePickerServiceProvider = Provider<ImagePickerService>((ref) {
   return ImagePickerService();

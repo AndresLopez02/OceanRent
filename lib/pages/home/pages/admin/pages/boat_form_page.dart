@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
-import 'package:ocean_rent/models/boat.dart';
+import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/pages/home/pages/admin/admin_home_page.dart';
-import 'package:ocean_rent/services/boat_service.dart';
+import 'package:ocean_rent/services/boat/boat_service.dart';
 import 'dart:io';
 
-import '../../../../../services/image_compress.dart';
-import '../../../../../services/image_picker_service.dart';
-import '../../../../../services/image_saver_service.dart';
+import '../../../../../services/image/image_compress.dart';
+import '../../../../../services/image/image_picker_service.dart';
+import '../../../../../services/image/image_saver_service.dart';
 
 class BoatFormPage extends StatefulWidget {
-  final Boat? boat;
+  final BoatModel? boat;
 
   const BoatFormPage({super.key, this.boat});
 
@@ -102,7 +102,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
     final boat = widget.boat;
     if (boat != null) {
       _nameController.text = boat.name;
-      _selectedBoatType = _normalizeBoatType(boat.type);
+      _selectedBoatType = _normalizeBoatType(boat.category);
       _capacityController.text = boat.capacity.toString();
       _priceController.text = boat.pricePerDay.toString();
       _descriptionController.text = boat.description;

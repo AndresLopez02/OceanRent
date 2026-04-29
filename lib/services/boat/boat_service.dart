@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ocean_rent/models/boat.dart';
+import 'package:ocean_rent/models/boat_model.dart';
 
 class BoatService {
   BoatService._();
@@ -11,10 +11,10 @@ class BoatService {
   CollectionReference<Map<String, dynamic>> get _boatsCollection =>
       _firestore.collection('boats');
 
-  Stream<List<Boat>> getBoats() {
+  Stream<List<BoatModel>> getBoats() {
     return _boatsCollection.snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => Boat.fromMap(doc.data(), doc.id))
+          .map((doc) => BoatModel.fromMap(doc.data(), doc.id))
           .toList();
     });
   }
