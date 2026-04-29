@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
-import 'package:ocean_rent/models/boat.dart';
+import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/boat_form_page.dart';
 import 'package:ocean_rent/pages/login/login_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
-import 'package:ocean_rent/services/boat_service.dart';
+import 'package:ocean_rent/services/boat/boat_service.dart';
 
 class AdminHomePage extends ConsumerWidget {
   const AdminHomePage({super.key});
 
-  Future<void> _deleteBoat(BuildContext context, Boat boat) async {
+  Future<void> _deleteBoat(BuildContext context, BoatModel boat) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -77,7 +77,7 @@ class AdminHomePage extends ConsumerWidget {
         },
         child: const Icon(Icons.add),
       ),
-      body: StreamBuilder<List<Boat>>(
+      body: StreamBuilder<List<BoatModel>>(
         stream: BoatService.instance.getBoats(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -174,7 +174,7 @@ class AdminHomePage extends ConsumerWidget {
                             children: [
                               _InfoChip(
                                 icon: Icons.directions_boat_outlined,
-                                label: boat.type,
+                                label: boat.category,
                               ),
                               _InfoChip(
                                 icon: Icons.people_alt_outlined,

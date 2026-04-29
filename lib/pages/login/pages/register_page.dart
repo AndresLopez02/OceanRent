@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
-import 'package:ocean_rent/pages/home/pages/customer_home_page.dart';
+import 'package:ocean_rent/pages/home/pages/customer/customer_home_page.dart';
 import 'package:ocean_rent/pages/login/login_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/widgets/build_label_text_fields.dart';
