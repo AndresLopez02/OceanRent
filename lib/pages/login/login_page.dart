@@ -420,31 +420,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                       ),
 
-                      // ── BOTÓN DE PRUEBA (eliminar en producción) ─────────
-                      const SizedBox(height: 8),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const CustomerHomePage(),
-                            ),
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.orange,
-                          side: const BorderSide(color: Colors.orange),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        icon: const Icon(Icons.bug_report_outlined, size: 18),
-                        label: const Text(
-                          '[TEST] Ver pantalla de barcos',
-                          style: TextStyle(fontSize: 13),
-                        ),
-                      ),
-                      // ────────────────────────────────────────────────────
-
                       if (authState.errorMessage != null) ...[
                         const SizedBox(height: 12),
                         Text(
