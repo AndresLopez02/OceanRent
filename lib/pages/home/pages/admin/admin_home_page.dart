@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
+import 'package:ocean_rent/pages/home/pages/admin/pages/admin_profile_screen.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/boat_form_page.dart';
 import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
@@ -44,8 +45,8 @@ class AdminHomePage extends ConsumerWidget {
   }
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
-     final authService = ref.read(authServiceProvider);
-     await authService.signOut();
+    final authService = ref.read(authServiceProvider);
+    await authService.signOut();
 
     if (context.mounted) {
       Navigator.of(context).pushAndRemoveUntil(
@@ -63,6 +64,17 @@ class AdminHomePage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Panel Admin - Barcos'),
         actions: [
+          IconButton(
+            tooltip: 'Perfil',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const AdminProfileScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.person_outline),
+          ),
           IconButton(
             tooltip: 'Cerrar sesión',
             onPressed: () => _logout(context, ref),
