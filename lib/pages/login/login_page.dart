@@ -46,7 +46,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
-  // Implementación de inicio de sesión con correo electrónico y contraseña
   Future<void> _login() async {
     FocusScope.of(context).unfocus();
     ref.read(authNotifierProvider).clearError();
@@ -76,7 +75,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!mounted) return;
 
     if (success) {
-      _navigateByRole(); // ← LA LÍNEA QUE FALTABA
+      _navigateByRole();
     } else {
       final error = ref.read(authNotifierProvider).errorMessage;
       scaffoldMessenger.showSnackBar(
@@ -85,7 +84,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
-  // Implementación de inicio de sesión con Google
   Future<void> _loginWithGoogle() async {
     FocusScope.of(context).unfocus();
     ref.read(authNotifierProvider).clearError();
@@ -97,7 +95,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!mounted) return;
 
     if (success) {
-      _navigateByRole(); // ← igual aquí
+      _navigateByRole();
     } else {
       final error = ref.read(authNotifierProvider).errorMessage;
       scaffoldMessenger.showSnackBar(
@@ -108,7 +106,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
-  // Implementación de diálogo para recuperación de contraseña
   Future<void> _showResetPasswordDialog() async {
     FocusScope.of(context).unfocus();
     ref.read(authNotifierProvider).clearError();
@@ -146,9 +143,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(
-                  dialogContext,
-                ).pop(_resetEmailController.text.trim());
+                Navigator.of(dialogContext).pop(_resetEmailController.text.trim());
               },
               child: const Text('Enviar'),
             ),
@@ -202,9 +197,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       scaffoldMessenger.hideCurrentSnackBar();
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text(
-            error ?? 'No se pudo enviar el correo de recuperación.',
-          ),
+          content: Text(error ?? 'No se pudo enviar el correo de recuperación.'),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
         ),
@@ -212,7 +205,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
-  // Widget para mostrar el logo de Google en el botón de inicio de sesión
   Widget _buildGoogleLogo() {
     return Image.asset(
       'assets/icons/google_logo.png',
@@ -222,7 +214,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
-  // El resto del código de construcción de la interfaz permanece igual
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
@@ -355,10 +346,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       Row(
                         children: [
                           Expanded(
-                            child: Divider(
-                              color: Colors.grey[400],
-                              thickness: 1,
-                            ),
+                            child: Divider(color: Colors.grey[400], thickness: 1),
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -371,10 +359,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ),
                           Expanded(
-                            child: Divider(
-                              color: Colors.grey[400],
-                              thickness: 1,
-                            ),
+                            child: Divider(color: Colors.grey[400], thickness: 1),
                           ),
                         ],
                       ),
@@ -384,9 +369,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       SizedBox(
                         height: 48,
                         child: OutlinedButton(
-                          onPressed: authState.isLoading
-                              ? null
-                              : _loginWithGoogle,
+                          onPressed: authState.isLoading ? null : _loginWithGoogle,
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: AppTheme.deepNavy,
@@ -459,3 +442,4 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 }
+
