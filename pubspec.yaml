@@ -63,6 +63,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   hive_generator: ^2.0.1
   build_runner: ^2.4.13
+  flutter_launcher_icons: ^0.14.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -82,11 +83,19 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/icons/google_logo.png
+    - assets/icons/icon_ocean_rent.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icons/icon_ocean_rent.png"
+  adaptive_icon_background: "#0A2342"
+  adaptive_icon_foreground: "assets/icons/icon_ocean_rent.png"
+
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
