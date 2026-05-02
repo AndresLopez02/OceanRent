@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
+import 'package:ocean_rent/models/user_model.dart';
+import 'package:ocean_rent/pages/home/pages/admin/admin_home_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer/customer_home_page.dart';
 import 'package:ocean_rent/pages/login/login_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
@@ -38,10 +40,25 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     super.dispose();
   }
 
+  void _navigateByRole() {
+    final user = ref.read(authNotifierProvider).currentUser;
+    if (user == null) return;
+
+    final destination = switch (user.role) {
+      UserRole.admin => const AdminHomePage(),
+      UserRole.customer => const CustomerHomePage(),
+    };
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => destination),
+      (_) => false,
+    );
+  }
+
   String _formatDate(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');
     final month = date.month.toString().padLeft(2, '0');
-    return '$day/$month/$date.year';
+    return '$day/$month/${date.year}';
   }
 
   Future<void> _selectBirthDate() async {
@@ -137,16 +154,45 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (!mounted) return;
 
     if (success) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const CustomerHomePage()),
-        (_) => false,
-      );
+      _navigateByRole();
     } else {
       final error = ref.read(authNotifierProvider).errorMessage;
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text(error ?? 'No se pudo completar el registro.')),
       );
     }
+  }
+
+  Future<void> _registerWithGoogle() async {
+    FocusScope.of(context).unfocus();
+    ref.read(authNotifierProvider).clearError();
+
+    final success = await ref.read(authNotifierProvider).signInWithGoogle();
+
+    if (!mounted) return;
+
+    if (success) {
+      _navigateByRole();
+    } else {
+      final error = ref.read(authNotifierProvider).errorMessage;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error ?? 'No se pudo completar el registro con Google.',
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildGoogleLogo() {
+    return Image.asset(
+      'assets/icons/google_logo.png',
+      width: 20,
+      height: 20,
+      fit: BoxFit.contain,
+    );
   }
 
   @override
@@ -158,7 +204,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       backgroundColor: AppTheme.pearlWhite,
       appBar: AppBar(
         backgroundColor: AppTheme.deepNavy,
-        title: const Text('OceanRent'),
+        title: const Text('Ocean Rent'),
         actions: [
           const Icon(Icons.directions_boat_outlined),
           const SizedBox(width: 20),
@@ -302,6 +348,71 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                 ),
                         ),
                       ),
+
+                      const SizedBox(height: 18),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Divider(
+                              color: Colors.grey[400],
+                              thickness: 1,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Text(
+                              'o',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: Colors.grey[600],
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Divider(
+                              color: Colors.grey[400],
+                              thickness: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      SizedBox(
+                        height: 48,
+                        child: OutlinedButton(
+                          onPressed: authState.isLoading
+                              ? null
+                              : _registerWithGoogle,
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: AppTheme.deepNavy,
+                            side: BorderSide(color: Colors.grey.shade300),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildGoogleLogo(),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Registrarse con Google',
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
                       const SizedBox(height: 16),
                       TextButton(
                         onPressed: authState.isLoading

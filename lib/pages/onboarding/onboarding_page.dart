@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/pages/home/pages/customer/customer_home_page.dart';
 import 'package:ocean_rent/pages/login/login_page.dart';
+import 'package:ocean_rent/pages/login/pages/register_page.dart';
 
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
@@ -19,6 +20,13 @@ class OnboardingPage extends StatelessWidget {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const LoginPage()),
+    );
+  }
+
+  void _goToRegister(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const RegisterPage()),
     );
   }
 
@@ -130,9 +138,9 @@ class OnboardingPage extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 TextButton(
-                  onPressed: () => _goToLogin(context),
+                  onPressed: () => _goToRegister(context),
                   child: Text(
-                    'Saltar introducción',
+                    'Registrarme',
                     style: GoogleFonts.montserrat(
                       color: AppTheme.pearlWhite,
                       fontSize: 16,
