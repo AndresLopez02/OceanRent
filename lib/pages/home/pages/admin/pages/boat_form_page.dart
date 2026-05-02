@@ -1,9 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/pages/home/pages/admin/admin_home_page.dart';
 import 'package:ocean_rent/services/boat/boat_service.dart';
-import 'dart:io';
 
 import '../../../../../services/image/image_compress.dart';
 import '../../../../../services/image/image_picker_service.dart';
@@ -37,7 +38,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
 
   String? _selectedBoatType;
   bool _isSaving = false;
-  File? _selectedImage;           
+  File? _selectedImage;
   bool _isPickingImage = false;
   String imageUrlCloud = "noURL";
 
@@ -123,32 +124,32 @@ class _BoatFormPageState extends State<BoatFormPage> {
     _imageUrlController.dispose();
     super.dispose();
   }
-  
+
   Future<void> _pickImage() async {
-  setState(() => _isPickingImage = true);
+    setState(() => _isPickingImage = true);
 
-  try {
-    final pickerService = ImagePickerService();
+    try {
+      final pickerService = ImagePickerService();
 
-    final images = await pickerService.pickMultipleImages();
+      final images = await pickerService.pickMultipleImages();
 
-    if (images.isEmpty) return;
+      if (images.isEmpty) return;
 
-    final compressed = await compressImage(images.first);
+      final compressed = await compressImage(images.first);
 
-    if (compressed != null) {
-      setState(() {
-        _selectedImage = compressed;
-      });
+      if (compressed != null) {
+        setState(() {
+          _selectedImage = compressed;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error seleccionando imagen: $e");
     }
-  } catch (e) {
-    print("Error seleccionando imagen: $e");
+
+    setState(() => _isPickingImage = false);
   }
 
-  setState(() => _isPickingImage = false);
-}
-
-    Future<void> _save() async {
+  Future<void> _save() async {
     FocusScope.of(context).unfocus();
 
     if (!_formKey.currentState!.validate()) return;
@@ -165,7 +166,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
           throw Exception('No se pudo subir la imagen a Cloudinary');
         }
 
-        imageUrlCloud = finalImageUrl; 
+        imageUrlCloud = finalImageUrl;
       }
 
       final name = _nameController.text.trim();
@@ -176,7 +177,9 @@ class _BoatFormPageState extends State<BoatFormPage> {
       );
       final description = _descriptionController.text.trim();
 
-      final imageUrl = finalImageUrl.isNotEmpty ? finalImageUrl : _imageUrlController.text.trim();
+      final imageUrl = finalImageUrl.isNotEmpty
+          ? finalImageUrl
+          : _imageUrlController.text.trim();
 
       if (isEditing) {
         await BoatService.instance.updateBoat(
@@ -215,9 +218,9 @@ class _BoatFormPageState extends State<BoatFormPage> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error guardando barco: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error guardando barco: $e')));
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);
@@ -295,18 +298,15 @@ class _BoatFormPageState extends State<BoatFormPage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(14),
-                    child: _selectedImage != null
-        ?           Image.file(
-                    _selectedImage!,
-                    fit: BoxFit.cover,
-                  )
+            child: _selectedImage != null
+                ? Image.file(_selectedImage!, fit: BoxFit.cover)
                 : (url.isNotEmpty
-                    ? Image.network(
-                        url,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => _buildImagePlaceholder(),
-                      )
-                    : _buildImagePlaceholder()),
+                      ? Image.network(
+                          url,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => _buildImagePlaceholder(),
+                        )
+                      : _buildImagePlaceholder()),
           ),
         ),
 
@@ -316,7 +316,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: _isPickingImage ? null : _pickImage,
-           child: _isPickingImage
+            child: _isPickingImage
                 ? const CircularProgressIndicator(color: Colors.white)
                 : const Text("Seleccionar imagen"),
           ),
@@ -333,7 +333,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
           TextButton(
             onPressed: () => setState(() => _selectedImage = null),
             child: const Text("Eliminar imagen"),
-        ),
+          ),
       ],
     );
   }
@@ -424,7 +424,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
               SizedBox(
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: _isSaving ? null : _save,   // ← Así debe estar
+                  onPressed: _isSaving ? null : _save, // ← Así debe estar
                   child: Text(_isSaving ? 'Guardando...' : 'Guardar'),
                 ),
               ),

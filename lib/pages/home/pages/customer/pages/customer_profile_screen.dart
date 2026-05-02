@@ -1,6 +1,6 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ocean_rent/models/user_model.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
@@ -12,10 +12,14 @@ enum NauticalLicenseStatus { pending, verified, rejected, none }
 
 NauticalLicenseStatus _statusFromString(String s) {
   switch (s.toLowerCase()) {
-    case 'pending':  return NauticalLicenseStatus.pending;
-    case 'verified': return NauticalLicenseStatus.verified;
-    case 'rejected': return NauticalLicenseStatus.rejected;
-    default:         return NauticalLicenseStatus.none;
+    case 'pending':
+      return NauticalLicenseStatus.pending;
+    case 'verified':
+      return NauticalLicenseStatus.verified;
+    case 'rejected':
+      return NauticalLicenseStatus.rejected;
+    default:
+      return NauticalLicenseStatus.none;
   }
 }
 
@@ -29,10 +33,8 @@ class CustomerProfileScreen extends ConsumerStatefulWidget {
       _CustomerProfileScreenState();
 }
 
-class _CustomerProfileScreenState
-    extends ConsumerState<CustomerProfileScreen>
+class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
     with SingleTickerProviderStateMixin {
-
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _nameCtrl;
@@ -43,33 +45,32 @@ class _CustomerProfileScreenState
   bool _isLoading = true;
 
   NauticalLicenseStatus _licenseStatus = NauticalLicenseStatus.none;
-  String  _licenseType    = 'none';
+  String _licenseType = 'none';
   String? _pickedFileName;
-  bool    _isUploading    = false;
-  bool    _isSaving       = false;
+  bool _isUploading = false;
+  bool _isSaving = false;
 
   late AnimationController _fadeController;
-  late Animation<double>   _fadeAnim;
+  late Animation<double> _fadeAnim;
 
   static const _licenseTypes = [
     ('none', 'Sin licencia'),
-    ('pnb',  'Patrón de Navegación Básica (PNB)'),
-    ('per',  'Patrón de Embarcaciones de Recreo (PER)'),
+    ('pnb', 'Patrón de Navegación Básica (PNB)'),
+    ('per', 'Patrón de Embarcaciones de Recreo (PER)'),
   ];
 
   @override
   void initState() {
     super.initState();
-    _nameCtrl    = TextEditingController();
+    _nameCtrl = TextEditingController();
     _surnameCtrl = TextEditingController();
-    _emailCtrl   = TextEditingController();
+    _emailCtrl = TextEditingController();
 
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _fadeAnim = CurvedAnimation(
-        parent: _fadeController, curve: Curves.easeOut);
+    _fadeAnim = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
 
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadProfile());
   }
@@ -101,19 +102,20 @@ class _CustomerProfileScreenState
     }
 
     try {
-      final repo    = ref.read(userRepositoryProvider);
+      final repo = ref.read(userRepositoryProvider);
       final profile = await repo.getUser(uid);
 
       if (!mounted) return;
       setState(() {
-        _profile          = profile;
-        _nameCtrl.text    = profile.name;
+        _profile = profile;
+        _nameCtrl.text = profile.name;
         _surnameCtrl.text = profile.surname;
-        _emailCtrl.text   = profile.email;
-        _licenseStatus    = _statusFromString(
-            profile.nauticalLicense?.status ?? 'none');
-        _licenseType      = profile.nauticalLicense?.type ?? 'none';
-        _isLoading        = false;
+        _emailCtrl.text = profile.email;
+        _licenseStatus = _statusFromString(
+          profile.nauticalLicense?.status ?? 'none',
+        );
+        _licenseType = profile.nauticalLicense?.type ?? 'none';
+        _isLoading = false;
       });
       _fadeController.forward();
     } catch (e) {
@@ -133,31 +135,35 @@ class _CustomerProfileScreenState
 
     setState(() {
       _pickedFileName = result.files.single.name;
-      _isUploading    = true;
+      _isUploading = true;
     });
 
     try {
-      final uid  = ref.read(authNotifierProvider).currentUser!.uid;
+      final uid = ref.read(authNotifierProvider).currentUser!.uid;
       final repo = ref.read(userRepositoryProvider);
       final file = XFile(result.files.single.path!);
 
       final url = await repo.uploadLicenseDocument(uid: uid, file: file);
 
       await repo.updateNauticalLicense(
-        uid:         uid,
-        type:        _licenseType,
+        uid: uid,
+        type: _licenseType,
         documentUrl: url,
-        status:      'pending',
+        status: 'pending',
       );
 
       setState(() {
-        _isUploading   = false;
+        _isUploading = false;
         _licenseStatus = NauticalLicenseStatus.pending;
       });
-      if (mounted) _showSnack('Documento enviado para verificación', isError: false);
+      if (mounted) {
+        _showSnack('Documento enviado para verificación', isError: false);
+      }
     } catch (e) {
       setState(() => _isUploading = false);
-      if (mounted) _showSnack('Error al subir el documento: $e', isError: true);
+      if (mounted) {
+        _showSnack('Error al subir el documento: $e', isError: true);
+      }
     }
   }
 
@@ -166,15 +172,17 @@ class _CustomerProfileScreenState
     setState(() => _isSaving = true);
 
     try {
-      final uid  = ref.read(authNotifierProvider).currentUser!.uid;
+      final uid = ref.read(authNotifierProvider).currentUser!.uid;
       final repo = ref.read(userRepositoryProvider);
 
       await repo.updateProfile(
-        uid:     uid,
-        name:    _nameCtrl.text.trim(),
+        uid: uid,
+        name: _nameCtrl.text.trim(),
         surname: _surnameCtrl.text.trim(),
       );
-      if (mounted) _showSnack('Perfil actualizado correctamente', isError: false);
+      if (mounted) {
+        _showSnack('Perfil actualizado correctamente', isError: false);
+      }
     } catch (e) {
       if (mounted) _showSnack('Error al guardar el perfil: $e', isError: true);
     } finally {
@@ -185,11 +193,13 @@ class _CustomerProfileScreenState
   void _showSnack(String msg, {required bool isError}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content:         Text(msg),
-        backgroundColor: isError ? _OceanRentColors.error : _OceanRentColors.success,
-        behavior:        SnackBarBehavior.floating,
+        content: Text(msg),
+        backgroundColor: isError
+            ? _OceanRentColors.error
+            : _OceanRentColors.success,
+        behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin:          const EdgeInsets.all(16),
+        margin: const EdgeInsets.all(16),
       ),
     );
   }
@@ -199,9 +209,7 @@ class _CustomerProfileScreenState
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (_profile == null) {
@@ -248,31 +256,34 @@ class _CustomerProfileScreenState
       elevation: 0,
       centerTitle: true,
       leading: IconButton(
-        icon:  const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
         color: Colors.white,
         onPressed: () => Navigator.of(context).maybePop(),
       ),
       title: const Text(
         'OceanRent',
         style: TextStyle(
-          color:         Colors.white,
-          fontWeight:    FontWeight.w700,
-          fontSize:      18,
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 18,
           letterSpacing: 0.2,
         ),
       ),
       actions: const [
         Padding(
           padding: EdgeInsets.only(right: 16),
-          child: Icon(Icons.directions_boat_rounded,
-              color: Colors.white, size: 24),
+          child: Icon(
+            Icons.directions_boat_rounded,
+            color: Colors.white,
+            size: 24,
+          ),
         ),
       ],
     );
   }
 
   Widget _buildAvatarSection() {
-    final name    = _profile!.name;
+    final name = _profile!.name;
     final surname = _profile!.surname;
     final initials = '${name[0]}${surname[0]}'.toUpperCase();
 
@@ -282,19 +293,20 @@ class _CustomerProfileScreenState
           Stack(
             children: [
               Container(
-                width: 90, height: 90,
+                width: 90,
+                height: 90,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [_OceanRentColors.teal, _OceanRentColors.tealDark],
-                    begin:  Alignment.topLeft,
-                    end:    Alignment.bottomRight,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                    color:      _OceanRentColors.teal.withOpacity(0.35),
+                      color: _OceanRentColors.teal.withValues(alpha: 0.35),
                       blurRadius: 20,
-                      offset:     const Offset(0, 8),
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
@@ -302,25 +314,32 @@ class _CustomerProfileScreenState
                   child: Text(
                     initials,
                     style: const TextStyle(
-                      color:      Colors.white,
-                      fontSize:   30,
+                      color: Colors.white,
+                      fontSize: 30,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
               ),
               Positioned(
-                bottom: 0, right: 0,
+                bottom: 0,
+                right: 0,
                 child: Container(
-                  width: 28, height: 28,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
-                    color:  _OceanRentColors.surface,
-                    shape:  BoxShape.circle,
+                    color: _OceanRentColors.surface,
+                    shape: BoxShape.circle,
                     border: Border.all(
-                        color: _OceanRentColors.divider, width: 1.5),
+                      color: _OceanRentColors.divider,
+                      width: 1.5,
+                    ),
                   ),
-                  child: const Icon(Icons.camera_alt_rounded,
-                      size: 14, color: _OceanRentColors.textSecondary),
+                  child: const Icon(
+                    Icons.camera_alt_rounded,
+                    size: 14,
+                    color: _OceanRentColors.textSecondary,
+                  ),
                 ),
               ),
             ],
@@ -329,9 +348,9 @@ class _CustomerProfileScreenState
           Text(
             '$name $surname',
             style: const TextStyle(
-              fontSize:      20,
-              fontWeight:    FontWeight.w700,
-              color:         _OceanRentColors.textPrimary,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: _OceanRentColors.textPrimary,
               letterSpacing: -0.4,
             ),
           ),
@@ -339,14 +358,14 @@ class _CustomerProfileScreenState
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
             decoration: BoxDecoration(
-              color:        _OceanRentColors.teal.withOpacity(0.12),
+              color: _OceanRentColors.teal.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Text(
               'Cliente',
               style: TextStyle(
-                fontSize:   12,
-                color:      _OceanRentColors.teal,
+                fontSize: 12,
+                color: _OceanRentColors.teal,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -359,9 +378,9 @@ class _CustomerProfileScreenState
   Widget _sectionLabel(String text) => Text(
     text,
     style: const TextStyle(
-      fontSize:      13,
-      fontWeight:    FontWeight.w700,
-      color:         _OceanRentColors.textSecondary,
+      fontSize: 13,
+      fontWeight: FontWeight.w700,
+      color: _OceanRentColors.textSecondary,
       letterSpacing: 0.8,
     ),
   );
@@ -372,26 +391,26 @@ class _CustomerProfileScreenState
         children: [
           _buildField(
             controller: _nameCtrl,
-            label:      'Nombre',
-            icon:       Icons.person_outline_rounded,
-            validator:  (v) =>
+            label: 'Nombre',
+            icon: Icons.person_outline_rounded,
+            validator: (v) =>
                 (v == null || v.trim().isEmpty) ? 'Campo requerido' : null,
           ),
           const SizedBox(height: 20),
           _buildField(
             controller: _surnameCtrl,
-            label:      'Apellidos',
-            icon:       Icons.badge_outlined,
-            validator:  (v) =>
+            label: 'Apellidos',
+            icon: Icons.badge_outlined,
+            validator: (v) =>
                 (v == null || v.trim().isEmpty) ? 'Campo requerido' : null,
           ),
           const SizedBox(height: 20),
           _buildField(
-            controller:   _emailCtrl,
-            label:        'Correo Electrónico',
-            icon:         Icons.mail_outline_rounded,
+            controller: _emailCtrl,
+            label: 'Correo Electrónico',
+            icon: Icons.mail_outline_rounded,
             keyboardType: TextInputType.emailAddress,
-            readOnly:     true,
+            readOnly: true,
             validator: (v) {
               if (v == null || v.trim().isEmpty) return 'Campo requerido';
               if (!v.contains('@')) return 'Email inválido';
@@ -405,51 +424,57 @@ class _CustomerProfileScreenState
 
   Widget _buildField({
     required TextEditingController controller,
-    required String   label,
+    required String label,
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
     bool readOnly = false,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
-      controller:   controller,
+      controller: controller,
       keyboardType: keyboardType,
-      readOnly:     readOnly,
-      validator:    validator,
+      readOnly: readOnly,
+      validator: validator,
       style: TextStyle(
-        fontSize:   15,
-        color:      readOnly
+        fontSize: 15,
+        color: readOnly
             ? _OceanRentColors.textSecondary
             : _OceanRentColors.textPrimary,
         fontWeight: FontWeight.w500,
       ),
       decoration: InputDecoration(
-        labelText:  label,
+        labelText: label,
         labelStyle: const TextStyle(
-            color: _OceanRentColors.textSecondary, fontSize: 13),
+          color: _OceanRentColors.textSecondary,
+          fontSize: 13,
+        ),
         prefixIcon: Icon(icon, size: 18, color: _OceanRentColors.textSecondary),
-        filled:     true,
-        fillColor:  readOnly
+        filled: true,
+        fillColor: readOnly
             ? _OceanRentColors.backgroundDim
             : _OceanRentColors.surface,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:   const BorderSide(color: _OceanRentColors.fieldBorder),
+          borderSide: const BorderSide(color: _OceanRentColors.fieldBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:   const BorderSide(color: _OceanRentColors.fieldBorder),
+          borderSide: const BorderSide(color: _OceanRentColors.fieldBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              const BorderSide(color: _OceanRentColors.teal, width: 1.5),
+          borderSide: const BorderSide(
+            color: _OceanRentColors.teal,
+            width: 1.5,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:   const BorderSide(color: _OceanRentColors.error),
+          borderSide: const BorderSide(color: _OceanRentColors.error),
         ),
       ),
     );
@@ -479,9 +504,9 @@ class _CustomerProfileScreenState
         const Text(
           'Estado de verificación',
           style: TextStyle(
-            fontSize:   14,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
-            color:      _OceanRentColors.textPrimary,
+            color: _OceanRentColors.textPrimary,
           ),
         ),
         const Spacer(),
@@ -489,9 +514,9 @@ class _CustomerProfileScreenState
           duration: const Duration(milliseconds: 300),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           decoration: BoxDecoration(
-            color:        cfg.color.withOpacity(0.12),
+            color: cfg.color.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(20),
-            border:       Border.all(color: cfg.color.withOpacity(0.3)),
+            border: Border.all(color: cfg.color.withValues(alpha: 0.3)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -501,8 +526,8 @@ class _CustomerProfileScreenState
               Text(
                 cfg.label,
                 style: TextStyle(
-                  fontSize:   12,
-                  color:      cfg.color,
+                  fontSize: 12,
+                  color: cfg.color,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -515,38 +540,47 @@ class _CustomerProfileScreenState
 
   Widget _buildLicenseTypeDropdown() {
     return DropdownButtonFormField<String>(
-      value: _licenseType,
+      initialValue: _licenseType,
       decoration: InputDecoration(
-        labelText:  'Tipo de titulación',
+        labelText: 'Tipo de titulación',
         labelStyle: const TextStyle(
-            color: _OceanRentColors.textSecondary, fontSize: 13),
-        prefixIcon: const Icon(Icons.anchor_rounded,
-            size: 18, color: _OceanRentColors.textSecondary),
-        filled:    true,
+          color: _OceanRentColors.textSecondary,
+          fontSize: 13,
+        ),
+        prefixIcon: const Icon(
+          Icons.anchor_rounded,
+          size: 18,
+          color: _OceanRentColors.textSecondary,
+        ),
+        filled: true,
         fillColor: _OceanRentColors.surface,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:   const BorderSide(color: _OceanRentColors.fieldBorder),
+          borderSide: const BorderSide(color: _OceanRentColors.fieldBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:   const BorderSide(color: _OceanRentColors.fieldBorder),
+          borderSide: const BorderSide(color: _OceanRentColors.fieldBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              const BorderSide(color: _OceanRentColors.teal, width: 1.5),
+          borderSide: const BorderSide(
+            color: _OceanRentColors.teal,
+            width: 1.5,
+          ),
         ),
       ),
       style: const TextStyle(
-        fontSize:   15,
-        color:      _OceanRentColors.textPrimary,
+        fontSize: 15,
+        color: _OceanRentColors.textPrimary,
         fontWeight: FontWeight.w500,
       ),
       dropdownColor: _OceanRentColors.surface,
-      borderRadius:  BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(12),
       items: _licenseTypes
           .map((t) => DropdownMenuItem(value: t.$1, child: Text(t.$2)))
           .toList(),
@@ -557,7 +591,8 @@ class _CustomerProfileScreenState
   }
 
   Widget _buildDocumentUpload() {
-    final hasFile = _pickedFileName != null ||
+    final hasFile =
+        _pickedFileName != null ||
         (_profile?.nauticalLicense?.documentUrl.isNotEmpty ?? false);
 
     return Column(
@@ -566,32 +601,31 @@ class _CustomerProfileScreenState
         const Text(
           'Documento acreditativo',
           style: TextStyle(
-            fontSize:   14,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
-            color:      _OceanRentColors.textPrimary,
+            color: _OceanRentColors.textPrimary,
           ),
         ),
         const SizedBox(height: 4),
         const Text(
           'Sube tu titulación en formato PDF, JPG o PNG (máx. 10 MB)',
-          style: TextStyle(
-              fontSize: 12, color: _OceanRentColors.textSecondary),
+          style: TextStyle(fontSize: 12, color: _OceanRentColors.textSecondary),
         ),
         const SizedBox(height: 14),
         GestureDetector(
           onTap: _isUploading ? null : _pickDocument,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width:    double.infinity,
-            padding:  const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             decoration: BoxDecoration(
               color: hasFile
-                  ? _OceanRentColors.teal.withOpacity(0.04)
+                  ? _OceanRentColors.teal.withValues(alpha: 0.04)
                   : _OceanRentColors.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: hasFile
-                    ? _OceanRentColors.teal.withOpacity(0.4)
+                    ? _OceanRentColors.teal.withValues(alpha: 0.4)
                     : _OceanRentColors.fieldBorder,
                 width: 1.5,
               ),
@@ -600,17 +634,18 @@ class _CustomerProfileScreenState
                 ? const Column(
                     children: [
                       SizedBox(
-                        width: 28, height: 28,
+                        width: 28,
+                        height: 28,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.5,
-                          color:       _OceanRentColors.teal,
+                          color: _OceanRentColors.teal,
                         ),
                       ),
                       SizedBox(height: 10),
                       Text(
                         'Subiendo documento...',
                         style: TextStyle(
-                          color:    _OceanRentColors.textSecondary,
+                          color: _OceanRentColors.textSecondary,
                           fontSize: 13,
                         ),
                       ),
@@ -632,11 +667,15 @@ class _CustomerProfileScreenState
                       Flexible(
                         child: Text(
                           _pickedFileName ??
-                              ((_profile?.nauticalLicense?.documentUrl.isNotEmpty ?? false)
+                              ((_profile
+                                          ?.nauticalLicense
+                                          ?.documentUrl
+                                          .isNotEmpty ??
+                                      false)
                                   ? 'Documento subido'
                                   : 'Seleccionar documento'),
                           style: TextStyle(
-                            fontSize:   13,
+                            fontSize: 13,
                             fontWeight: FontWeight.w500,
                             color: hasFile
                                 ? _OceanRentColors.teal
@@ -649,17 +688,21 @@ class _CustomerProfileScreenState
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
-                            color:        _OceanRentColors.teal.withOpacity(0.12),
+                            color: _OceanRentColors.teal.withValues(
+                              alpha: 0.12,
+                            ),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: const Text(
                             'Examinar',
                             style: TextStyle(
-                              fontSize:   11,
+                              fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color:      _OceanRentColors.teal,
+                              color: _OceanRentColors.teal,
                             ),
                           ),
                         ),
@@ -672,24 +715,24 @@ class _CustomerProfileScreenState
           const SizedBox(height: 10),
           _InfoBanner(
             color: _OceanRentColors.error,
-            icon:  Icons.info_outline_rounded,
-            text:  'Tu documento fue rechazado. Por favor, sube uno nuevo.',
+            icon: Icons.info_outline_rounded,
+            text: 'Tu documento fue rechazado. Por favor, sube uno nuevo.',
           ),
         ],
         if (_licenseStatus == NauticalLicenseStatus.pending) ...[
           const SizedBox(height: 10),
           _InfoBanner(
             color: _OceanRentColors.warning,
-            icon:  Icons.hourglass_top_rounded,
-            text:  'Documento en revisión. Te avisaremos cuando sea verificado.',
+            icon: Icons.hourglass_top_rounded,
+            text: 'Documento en revisión. Te avisaremos cuando sea verificado.',
           ),
         ],
         if (_licenseStatus == NauticalLicenseStatus.verified) ...[
           const SizedBox(height: 10),
           _InfoBanner(
             color: _OceanRentColors.success,
-            icon:  Icons.verified_rounded,
-            text:  'Tu titulación náutica ha sido verificada correctamente.',
+            icon: Icons.verified_rounded,
+            text: 'Tu titulación náutica ha sido verificada correctamente.',
           ),
         ],
       ],
@@ -703,24 +746,28 @@ class _CustomerProfileScreenState
       child: ElevatedButton(
         onPressed: _isSaving ? null : _saveProfile,
         style: ElevatedButton.styleFrom(
-          backgroundColor:         _OceanRentColors.teal,
-          disabledBackgroundColor: _OceanRentColors.teal.withOpacity(0.5),
-          foregroundColor:         Colors.white,
+          backgroundColor: _OceanRentColors.teal,
+          disabledBackgroundColor: _OceanRentColors.teal.withValues(alpha: 0.5),
+          foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14)),
+            borderRadius: BorderRadius.circular(14),
+          ),
         ),
         child: _isSaving
             ? const SizedBox(
-                width: 22, height: 22,
+                width: 22,
+                height: 22,
                 child: CircularProgressIndicator(
-                    strokeWidth: 2.5, color: Colors.white),
+                  strokeWidth: 2.5,
+                  color: Colors.white,
+                ),
               )
             : const Text(
                 'Guardar cambios',
                 style: TextStyle(
-                  fontSize:      15,
-                  fontWeight:    FontWeight.w700,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: 0.2,
                 ),
               ),
@@ -732,75 +779,86 @@ class _CustomerProfileScreenState
 //  CONFIGURACIÓN DE ESTADOS DE LICENCIA NÁUTICAS
 
 class _StatusConfig {
-  final Color    color;
+  final Color color;
   final IconData icon;
-  final String   label;
-  const _StatusConfig(
-      {required this.color, required this.icon, required this.label});
+  final String label;
+
+  const _StatusConfig({
+    required this.color,
+    required this.icon,
+    required this.label,
+  });
 }
 
 _StatusConfig _licenseStatusConfig(NauticalLicenseStatus status) {
   switch (status) {
     case NauticalLicenseStatus.verified:
       return const _StatusConfig(
-          color: _OceanRentColors.success,
-          icon:  Icons.check_circle_rounded,
-          label: 'Verificado');
+        color: _OceanRentColors.success,
+        icon: Icons.check_circle_rounded,
+        label: 'Verificado',
+      );
     case NauticalLicenseStatus.pending:
       return const _StatusConfig(
-          color: _OceanRentColors.warning,
-          icon:  Icons.hourglass_top_rounded,
-          label: 'Pendiente');
+        color: _OceanRentColors.warning,
+        icon: Icons.hourglass_top_rounded,
+        label: 'Pendiente',
+      );
     case NauticalLicenseStatus.rejected:
       return const _StatusConfig(
-          color: _OceanRentColors.error,
-          icon:  Icons.cancel_rounded,
-          label: 'Rechazado');
+        color: _OceanRentColors.error,
+        icon: Icons.cancel_rounded,
+        label: 'Rechazado',
+      );
     case NauticalLicenseStatus.none:
       return const _StatusConfig(
-          color: _OceanRentColors.textSecondary,
-          icon:  Icons.remove_circle_outline_rounded,
-          label: 'Sin verificar');
+        color: _OceanRentColors.textSecondary,
+        icon: Icons.remove_circle_outline_rounded,
+        label: 'Sin verificar',
+      );
   }
 }
 
 // COLORES PERSONALIZADOS DE LA APP EN UN SOLO LUGAR
 
 class _OceanRentColors {
-  static const Color navy          = Color(0xFF1A2B4A); // AppBar del login
-  static const Color teal          = Color(0xFF3DBFA8); // Botón "Entrar" del login
-  static const Color tealDark      = Color(0xFF2A9D8C);
-  static const Color background    = Color(0xFFF2F2F2); // Fondo gris del login
+  static const Color navy = Color(0xFF1A2B4A); // AppBar del login
+  static const Color teal = Color(0xFF3DBFA8); // Botón "Entrar" del login
+  static const Color tealDark = Color(0xFF2A9D8C);
+  static const Color background = Color(0xFFF2F2F2); // Fondo gris del login
   static const Color backgroundDim = Color(0xFFE8E8E8);
-  static const Color surface       = Color(0xFFFFFFFF);
-  static const Color fieldBorder   = Color(0xFF1A2B4A); // Borde azul oscuro del login
-  static const Color textPrimary   = Color(0xFF1A1D23);
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color fieldBorder = Color(
+    0xFF1A2B4A,
+  ); // Borde azul oscuro del login
+  static const Color textPrimary = Color(0xFF1A1D23);
   static const Color textSecondary = Color(0xFF7B8194);
-  static const Color divider       = Color(0xFFE4E7EF);
-  static const Color success       = Color(0xFF00C07F);
-  static const Color warning       = Color(0xFFF59E0B);
-  static const Color error         = Color(0xFFEF4444);
+  static const Color divider = Color(0xFFE4E7EF);
+  static const Color success = Color(0xFF00C07F);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color error = Color(0xFFEF4444);
 }
 
-// WIDGETS REUTILIZABLES 
+// WIDGETS REUTILIZABLES
 
 class _Card extends StatelessWidget {
   final Widget child;
+
   const _Card({required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width:   double.infinity,
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color:        _OceanRentColors.surface,
+        color: _OceanRentColors.surface,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color:      Colors.black.withOpacity(0.055),
+            color: Colors.black.withValues(alpha: 0.055),
             blurRadius: 20,
-            offset:     const Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -810,20 +868,24 @@ class _Card extends StatelessWidget {
 }
 
 class _InfoBanner extends StatelessWidget {
-  final Color    color;
+  final Color color;
   final IconData icon;
-  final String   text;
-  const _InfoBanner(
-      {required this.color, required this.icon, required this.text});
+  final String text;
+
+  const _InfoBanner({
+    required this.color,
+    required this.icon,
+    required this.text,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color:        color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
-        border:       Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -834,10 +896,10 @@ class _InfoBanner extends StatelessWidget {
             child: Text(
               text,
               style: TextStyle(
-                fontSize:   12,
-                color:      color,
+                fontSize: 12,
+                color: color,
                 fontWeight: FontWeight.w500,
-                height:     1.4,
+                height: 1.4,
               ),
             ),
           ),

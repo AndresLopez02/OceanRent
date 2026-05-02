@@ -53,6 +53,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     final pickedDate = await showDatePicker(
       context: context,
+      locale: const Locale('es', 'ES'),
       initialDate: initialDate,
       firstDate: DateTime(1900),
       lastDate: now,
