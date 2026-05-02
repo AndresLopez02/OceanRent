@@ -163,7 +163,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
   }
 
-  //Método para registrar con Google (este método se puede llamar desde un botón adicional en la interfaz)
   Future<void> _registerWithGoogle() async {
     FocusScope.of(context).unfocus();
     ref.read(authNotifierProvider).clearError();
@@ -187,7 +186,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
   }
 
-  // Método para construir el botón de registro con Google
   Widget _buildGoogleLogo() {
     return Image.asset(
       'assets/icons/google_logo.png',
