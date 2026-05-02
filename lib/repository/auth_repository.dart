@@ -45,7 +45,7 @@ class AuthRepository {
       nauticalLicense: const NauticalLicense(
         type: 'none',
         documentUrl: '',
-        status: 'Verified',
+        status: 'verified',
       ),
     );
 
@@ -72,7 +72,7 @@ class AuthRepository {
         nauticalLicense: const NauticalLicense(
           type: 'none',
           documentUrl: '',
-          status: 'Verified',
+          status: 'verified',
         ),
       );
       await _db.collection('users').doc(uid).set(user.toMap());
