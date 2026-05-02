@@ -8,9 +8,12 @@ import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
 import 'package:ocean_rent/services/boat/boat_cache_service.dart';
 import 'package:ocean_rent/services/firebase_options.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('es_ES', null);
 
   await Hive.initFlutter();
   Hive.registerAdapter(BoatModelAdapter());
@@ -23,7 +26,6 @@ Future<void> main() async {
   }
 
   BoatCacheService().syncWithFirebase();
-
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -35,6 +37,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      locale: const Locale('es', 'ES'),
+      supportedLocales: const [
+        Locale('es', 'ES'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const OnboardingPage(),
     );
   }
