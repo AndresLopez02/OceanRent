@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
-import 'package:ocean_rent/pages/login/login_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
+import 'package:ocean_rent/widgets/app_navigator.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class DisponibilityPage extends ConsumerStatefulWidget {
@@ -144,10 +144,7 @@ class _DisponibilityPageState extends ConsumerState<DisponibilityPage> {
                 ? null
                 : () {
                     if (isAnonymous) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginPage()),
-                      );
+                      AppNavigator.goToLogin(context);
                     } else {
                       // Añadir el flujo de reserva
                     }

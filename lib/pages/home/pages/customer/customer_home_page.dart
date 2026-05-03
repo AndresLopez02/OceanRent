@@ -9,13 +9,12 @@ import 'package:ocean_rent/pages/login/login_page.dart';
 import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/widgets/dialog_confirmacion.dart';
+import 'package:ocean_rent/widgets/app_navigator.dart';
 
 class CustomerHomePage extends ConsumerWidget {
-  final bool isGuest;
+  const CustomerHomePage({super.key,});
 
-  const CustomerHomePage({super.key, this.isGuest = false});
-
-  // Esta página se ha creado para los usuarios regulares que tengan solo el rol de cliente en la base de datos
+  // Esta página se ha creado para los usuarios regulares que tengan solo el rol de cliente u anónimos
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
     await ref.read(authNotifierProvider).signOut();
@@ -28,15 +27,13 @@ class CustomerHomePage extends ConsumerWidget {
     );
   }
 
-  void _goToLogin(BuildContext context) {
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage()));
-  }
+  
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final user = ref.watch(authNotifierProvider).currentUser;
+  final isAnonymous = user == null;
 
     return Scaffold(
       appBar: AppBar(
@@ -45,8 +42,8 @@ class CustomerHomePage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.person_outline_rounded),
             onPressed: () {
-              if (isGuest) {
-                _goToLogin(context);
+              if (isAnonymous) {
+                AppNavigator.goToLogin(context);
                 return;
               }
 
@@ -59,10 +56,10 @@ class CustomerHomePage extends ConsumerWidget {
             },
           ),
           IconButton(
-            icon: Icon(isGuest ? Icons.login : Icons.logout),
+            icon: Icon(isAnonymous ? Icons.login : Icons.logout),
             onPressed: () {
-              if (isGuest) {
-                _goToLogin(context);
+              if (isAnonymous) {
+                AppNavigator.goToLogin(context);
                 return;
               }
 
