@@ -143,7 +143,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop(_resetEmailController.text.trim());
+                Navigator.of(
+                  dialogContext,
+                ).pop(_resetEmailController.text.trim());
               },
               child: const Text('Enviar'),
             ),
@@ -197,7 +199,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       scaffoldMessenger.hideCurrentSnackBar();
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text(error ?? 'No se pudo enviar el correo de recuperación.'),
+          content: Text(
+            error ?? 'No se pudo enviar el correo de recuperación.',
+          ),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
         ),
@@ -346,7 +350,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       Row(
                         children: [
                           Expanded(
-                            child: Divider(color: Colors.grey[400], thickness: 1),
+                            child: Divider(
+                              color: Colors.grey[400],
+                              thickness: 1,
+                            ),
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -359,7 +366,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ),
                           Expanded(
-                            child: Divider(color: Colors.grey[400], thickness: 1),
+                            child: Divider(
+                              color: Colors.grey[400],
+                              thickness: 1,
+                            ),
                           ),
                         ],
                       ),
@@ -369,7 +379,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       SizedBox(
                         height: 48,
                         child: OutlinedButton(
-                          onPressed: authState.isLoading ? null : _loginWithGoogle,
+                          onPressed: authState.isLoading
+                              ? null
+                              : _loginWithGoogle,
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: AppTheme.deepNavy,
@@ -442,4 +454,3 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 }
-
