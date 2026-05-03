@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ocean_rent/services/storage_service.dart';
+import 'package:ocean_rent/services/storage/storage_service.dart';
 
 class UploadImagePage extends StatefulWidget {
   const UploadImagePage({super.key});

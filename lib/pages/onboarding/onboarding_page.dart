@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/pages/home/pages/customer/customer_home_page.dart';
-import 'package:ocean_rent/pages/login/login_page.dart';
-import 'package:ocean_rent/pages/login/pages/register_page.dart';
+import 'package:ocean_rent/widgets/app_navigator.dart';
+
 
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
@@ -12,26 +12,11 @@ class OnboardingPage extends StatelessWidget {
   void _goToExploreBoats(BuildContext context) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const CustomerHomePage(isGuest: true)),
+      MaterialPageRoute(builder: (_) => const CustomerHomePage()),
     );
   }
 
-  void _goToLogin(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-    );
-  }
 
-  void _goToRegister(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const RegisterPage()),
-    );
-  }
-
-  // Para esta demo, ambos botones llevan a la misma página de login, pero en una app real podrían llevar a flujos diferentes
-  // El botón "Explorar Barcos" podría llevar a una versión limitada de la app sin necesidad de iniciar sesión, mientras que "Ya tengo una cuenta" llevaría al login tradicional
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -72,7 +57,7 @@ class OnboardingPage extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 Text(
-                  'Alquila tu barco perfecto\nahora mismo',
+                  'Alquila tu barco perfecto \n ahora mismo',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.montserrat(
                     color: AppTheme.pearlWhite.withValues(alpha: 0.72),
@@ -115,7 +100,7 @@ class OnboardingPage extends StatelessWidget {
                   width: double.infinity,
                   height: 72,
                   child: ElevatedButton(
-                    onPressed: () => _goToLogin(context),
+                    onPressed: () => AppNavigator.goToLogin(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.pearlWhite,
                       foregroundColor: AppTheme.deepNavy,
@@ -138,9 +123,9 @@ class OnboardingPage extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 TextButton(
-                  onPressed: () => _goToRegister(context),
+                  onPressed: () => _goToExploreBoats(context),
                   child: Text(
-                    'Registrarme',
+                    'Saltar Introducción',
                     style: GoogleFonts.montserrat(
                       color: AppTheme.pearlWhite,
                       fontSize: 16,
