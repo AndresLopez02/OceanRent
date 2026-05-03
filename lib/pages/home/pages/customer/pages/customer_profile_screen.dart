@@ -217,68 +217,37 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
         body: Center(child: Text('No se pudo cargar el perfil')),
       );
     }
-
     return Scaffold(
       backgroundColor: _OceanRentColors.background,
-      appBar: _buildAppBar(),
-      body: FadeTransition(
-        opacity: _fadeAnim,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildAvatarSection(),
-                const SizedBox(height: 32),
-                _sectionLabel('Datos Personales'),
-                const SizedBox(height: 16),
-                _buildPersonalDataCard(),
-                const SizedBox(height: 28),
-                _sectionLabel('Titulación Náutica'),
-                const SizedBox(height: 16),
-                _buildNauticalCard(),
-                const SizedBox(height: 36),
-                _buildSaveButton(),
-                const SizedBox(height: 40),
-              ],
+      body: SafeArea(
+        child: 
+        FadeTransition(
+          opacity: _fadeAnim,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildAvatarSection(),
+                  const SizedBox(height: 32),
+                  _sectionLabel('Datos Personales'),
+                  const SizedBox(height: 16),
+                  _buildPersonalDataCard(),
+                  const SizedBox(height: 28),
+                  _sectionLabel('Titulación Náutica'),
+                  const SizedBox(height: 16),
+                  _buildNauticalCard(),
+                  const SizedBox(height: 36),
+                  _buildSaveButton(),
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: _OceanRentColors.navy,
-      elevation: 0,
-      centerTitle: true,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-        color: Colors.white,
-        onPressed: () => Navigator.of(context).maybePop(),
-      ),
-      title: const Text(
-        'OceanRent',
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-          fontSize: 18,
-          letterSpacing: 0.2,
-        ),
-      ),
-      actions: const [
-        Padding(
-          padding: EdgeInsets.only(right: 16),
-          child: Icon(
-            Icons.directions_boat_rounded,
-            color: Colors.white,
-            size: 24,
-          ),
-        ),
-      ],
+      )
     );
   }
 
