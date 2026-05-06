@@ -8,7 +8,11 @@ import 'package:ocean_rent/widgets/dialog_confirmacion.dart';
 import 'package:ocean_rent/widgets/app_navigator.dart';
 
 class CustomerHomePage extends ConsumerStatefulWidget {
-  const CustomerHomePage({super.key,});
+  final List<String> initialCategories;
+  const CustomerHomePage({
+    super.key, 
+    this.initialCategories = const [],
+    });
 
   // Esta página se ha creado para los usuarios regulares que tengan solo el rol de cliente u anónimos
   @override
@@ -43,7 +47,7 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage>{
   final user = ref.watch(authNotifierProvider).currentUser;
   final isAnonymous = user == null;
   final List<Widget> pages = [
-  const BoatListPage(),  
+  BoatListPage(categoriasIniciales: widget.initialCategories),  
   const Center(child: Text('Mapa')),  // Se tiene que implementar el mapa 
   const Center(child: Text('Chat')),  // Posible implementación de un chat para hablar con el admin del barco
   const Center(child: Text('Reservas')),  // Se tiene que implementar, aquí se deberían de ver las solitudes de reservas(aceptadas o pendientes)

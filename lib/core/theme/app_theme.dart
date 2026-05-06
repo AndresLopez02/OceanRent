@@ -25,15 +25,16 @@ class AppTheme {
 
       // Añadimos la tipografía Montserrat
       textTheme: TextTheme(
-        headlineLarge: GoogleFonts.montserrat(fontWeight: FontWeight.w700, fontSize: 24, color: deepNavy),
+        headlineLarge: GoogleFonts.montserrat(fontWeight: FontWeight.w700, fontSize: 20, color: deepNavy),        
         headlineMedium: GoogleFonts.montserrat(fontWeight: FontWeight.w700, fontSize: 18, color: deepNavy),
-        headlineSmall: GoogleFonts.montserrat(fontWeight: FontWeight.w700, fontSize: 14, color: deepNavy),
+        headlineSmall: GoogleFonts.montserrat(fontWeight: FontWeight.w700, fontSize: 16, color: deepNavy),
         titleLarge: GoogleFonts.montserrat(fontWeight: FontWeight.w700, fontSize: 24, color: deepNavy),
-
+        titleMedium: GoogleFonts.montserrat(fontWeight: FontWeight.w700, fontSize: 20, color: deepNavy),
+        titleSmall: GoogleFonts.montserrat(fontWeight: FontWeight.w700, fontSize: 18, color: deepNavy),
         // La otra tipografía predefinida para el cuerpo
         bodyLarge:  GoogleFonts.openSans(fontSize: 18, color: deepNavy),
         bodyMedium: GoogleFonts.openSans(fontSize: 16, color: Colors.grey),
-        bodySmall: GoogleFonts.openSans(fontSize: 14, color: Colors.grey)
+        bodySmall: GoogleFonts.openSans(fontSize: 12, color: Colors.grey)
       ),
 
       appBarTheme: AppBarTheme(
