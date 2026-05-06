@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/pages/home/pages/customer/customer_home_page.dart';
 import 'package:ocean_rent/widgets/app_navigator.dart';
-
 
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
@@ -15,7 +13,6 @@ class OnboardingPage extends StatelessWidget {
       MaterialPageRoute(builder: (_) => const CustomerHomePage()),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -30,113 +27,121 @@ class OnboardingPage extends StatelessWidget {
         backgroundColor: AppTheme.deepNavy,
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              children: [
-                const SizedBox(height: 22),
-
-                const _OnboardingIndicator(),
-
-                const SizedBox(height: 34),
-
-                const _BoatIllustration(),
-
-                const SizedBox(height: 28),
-
-                Text(
-                  'El mar te espera',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.montserrat(
-                    color: AppTheme.pearlWhite,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.2,
-                  ),
+            padding: AppTheme.responsiveHorizontalScreenPadding(context),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: AppTheme.maxContentWidth(context),
                 ),
+                child: Column(
+                  children: [
+                    const SizedBox(height: AppTheme.spacing22),
 
-                const SizedBox(height: 12),
+                    const _OnboardingIndicator(),
 
-                Text(
-                  'Alquila tu barco perfecto \n ahora mismo',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.montserrat(
-                    color: AppTheme.pearlWhite.withValues(alpha: 0.72),
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    height: 1.25,
-                    letterSpacing: 0.2,
-                  ),
-                ),
+                    const SizedBox(height: AppTheme.spacing34),
 
-                const Spacer(),
+                    const _BoatIllustration(),
 
-                SizedBox(
-                  width: double.infinity,
-                  height: 72,
-                  child: ElevatedButton(
-                    onPressed: () => _goToExploreBoats(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.oceanBlue,
-                      foregroundColor: AppTheme.pearlWhite,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                    const SizedBox(height: AppTheme.spacing28),
+
+                    Text(
+                      'El mar te espera',
+                      textAlign: TextAlign.center,
+                      style: AppTheme.onboardingTitleStyle.copyWith(
+                        fontSize: AppTheme.responsiveFontSize(
+                          context,
+                          AppTheme.fontSize24,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      'Explorar Barcos',
-                      style: GoogleFonts.montserrat(
-                        fontSize: 22,
+
+                    const SizedBox(height: AppTheme.spacing12),
+
+                    Text(
+                      'Alquila tu barco perfecto \n ahora mismo',
+                      textAlign: TextAlign.center,
+                      style: AppTheme.onboardingSubtitleStyle.copyWith(
+                        color: AppTheme.pearlWhite.withValues(
+                          alpha: AppTheme.alphaTextSoft,
+                        ),
+                        fontSize: AppTheme.responsiveFontSize(
+                          context,
+                          AppTheme.fontSize24,
+                        ),
                         fontWeight: FontWeight.w800,
-                        letterSpacing: 0.3,
+                        height: AppTheme.lineHeightTight,
                       ),
                     ),
-                  ),
-                ),
 
-                const SizedBox(height: 20),
+                    const Spacer(),
 
-                SizedBox(
-                  width: double.infinity,
-                  height: 72,
-                  child: ElevatedButton(
-                    onPressed: () => AppNavigator.goToLogin(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.pearlWhite,
-                      foregroundColor: AppTheme.deepNavy,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                    SizedBox(
+                      width: double.infinity,
+                      height: AppTheme.onboardingButtonHeight,
+                      child: ElevatedButton(
+                        onPressed: () => _goToExploreBoats(context),
+                        style: AppTheme.onboardingButtonStyle(
+                          backgroundColor: AppTheme.oceanBlue,
+                          foregroundColor: AppTheme.pearlWhite,
+                        ),
+                        child: Text(
+                          'Explorar Barcos',
+                          style: AppTheme.onboardingPrimaryButtonTextStyle
+                              .copyWith(
+                                fontSize: AppTheme.responsiveFontSize(
+                                  context,
+                                  AppTheme.fontSize22,
+                                ),
+                              ),
+                        ),
                       ),
                     ),
-                    child: Text(
-                      'Ya tengo una cuenta',
-                      style: GoogleFonts.montserrat(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.2,
+
+                    const SizedBox(height: AppTheme.spacing20),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: AppTheme.onboardingButtonHeight,
+                      child: ElevatedButton(
+                        onPressed: () => AppNavigator.goToLogin(context),
+                        style: AppTheme.onboardingButtonStyle(
+                          backgroundColor: AppTheme.pearlWhite,
+                          foregroundColor: AppTheme.deepNavy,
+                        ),
+                        child: Text(
+                          'Ya tengo una cuenta',
+                          style: AppTheme.onboardingSecondaryButtonTextStyle
+                              .copyWith(
+                                fontSize: AppTheme.responsiveFontSize(
+                                  context,
+                                  AppTheme.fontSize20,
+                                ),
+                              ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
 
-                const SizedBox(height: 12),
+                    const SizedBox(height: AppTheme.spacing12),
 
-                TextButton(
-                  onPressed: () => _goToExploreBoats(context),
-                  child: Text(
-                    'Saltar Introducción',
-                    style: GoogleFonts.montserrat(
-                      color: AppTheme.pearlWhite,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.2,
+                    TextButton(
+                      style: AppTheme.textButtonStyle,
+                      onPressed: () => _goToExploreBoats(context),
+                      child: Text(
+                        'Saltar Introducción',
+                        style: AppTheme.onboardingLinkTextStyle.copyWith(
+                          fontSize: AppTheme.responsiveFontSize(
+                            context,
+                            AppTheme.fontSize16,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
 
-                const SizedBox(height: 28),
-              ],
+                    const SizedBox(height: AppTheme.spacing28),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -154,16 +159,16 @@ class _OnboardingIndicator extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          width: 28,
-          height: 8,
-          decoration: BoxDecoration(
+          width: AppTheme.onboardingIndicatorWidth,
+          height: AppTheme.onboardingIndicatorHeight,
+          decoration: const BoxDecoration(
             color: AppTheme.oceanBlue,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: AppTheme.borderRadiusBadge,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppTheme.spacing8),
         const _IndicatorDot(),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppTheme.spacing8),
         const _IndicatorDot(),
       ],
     );
@@ -176,10 +181,10 @@ class _IndicatorDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 9,
-      height: 9,
+      width: AppTheme.onboardingDotSize,
+      height: AppTheme.onboardingDotSize,
       decoration: BoxDecoration(
-        color: AppTheme.pearlWhite.withValues(alpha: 0.85),
+        color: AppTheme.pearlWhite.withValues(alpha: AppTheme.alphaTextMuted),
         shape: BoxShape.circle,
       ),
     );
@@ -191,18 +196,16 @@ class _BoatIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 260,
-      height: 140,
+    return const SizedBox(
+      width: AppTheme.onboardingIllustrationWidth,
+      height: AppTheme.onboardingIllustrationHeight,
       child: CustomPaint(painter: _BoatIllustrationPainter()),
     );
   }
 }
 
 class _BoatIllustrationPainter extends CustomPainter {
-  static const Color _boatPurple = Color(0xFF514964);
-  static const Color _boatDark = Color(0xFF28334F);
-  static const Color _windowBlue = Color(0xFF1D6F9F);
+  const _BoatIllustrationPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -215,16 +218,16 @@ class _BoatIllustrationPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final Paint boatPaint = Paint()
-      ..color = _boatPurple
+      ..color = AppTheme.boatPurple
       ..style = PaintingStyle.fill;
 
     final Paint boatDarkPaint = Paint()
-      ..color = _boatDark
+      ..color = AppTheme.boatDark
       ..style = PaintingStyle.fill;
 
     final Paint wavePaint = Paint()
-      ..color = _windowBlue
-      ..strokeWidth = 2
+      ..color = AppTheme.windowBlue
+      ..strokeWidth = AppTheme.borderWidthStrong
       ..strokeCap = StrokeCap.round;
 
     final double w = size.width;
@@ -252,7 +255,7 @@ class _BoatIllustrationPainter extends CustomPainter {
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(w * 0.61, h * 0.39, w * 0.20, h * 0.035),
-        const Radius.circular(8),
+        const Radius.circular(AppTheme.radiusSm),
       ),
       boatDarkPaint,
     );
@@ -291,7 +294,7 @@ class _BoatIllustrationPainter extends CustomPainter {
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(w * 0.42, h * 0.51, w * 0.32, h * 0.05),
-        const Radius.circular(10),
+        const Radius.circular(AppTheme.radiusMd),
       ),
       boatDarkPaint,
     );
@@ -299,7 +302,7 @@ class _BoatIllustrationPainter extends CustomPainter {
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(w * 0.52, h * 0.61, w * 0.34, h * 0.05),
-        const Radius.circular(10),
+        const Radius.circular(AppTheme.radiusMd),
       ),
       boatDarkPaint,
     );
@@ -308,7 +311,7 @@ class _BoatIllustrationPainter extends CustomPainter {
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(w * 0.38, h * 0.70, w * 0.44, h * 0.06),
-        const Radius.circular(10),
+        const Radius.circular(AppTheme.radiusMd),
       ),
       boatDarkPaint,
     );
@@ -317,7 +320,10 @@ class _BoatIllustrationPainter extends CustomPainter {
       final double left = w * (0.42 + i * 0.055);
       canvas.drawRect(
         Rect.fromLTWH(left, h * 0.715, w * 0.027, h * 0.035),
-        Paint()..color = _windowBlue.withValues(alpha: 0.55),
+        Paint()
+          ..color = AppTheme.windowBlue.withValues(
+            alpha: AppTheme.alphaTextSecondary,
+          ),
       );
     }
 

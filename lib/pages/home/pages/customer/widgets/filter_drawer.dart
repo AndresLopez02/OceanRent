@@ -28,41 +28,78 @@ class FilterDrawer extends StatelessWidget {
     return Drawer(
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppTheme.listPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Filtros', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,color: AppTheme.deepNavy)),
+                  Text(
+                    'Filtros',
+                    style: AppTheme.cardTitleStyle.copyWith(
+                      color: AppTheme.deepNavy,
+                    ),
+                  ),
                   TextButton(
                     onPressed: onReset,
-                    child: const Text('Limpiar')
-                  )
+                    style: AppTheme.compactTextButtonStyle,
+                    child: Text(
+                      'Limpiar',
+                      style: AppTheme.labelMedium.copyWith(
+                        color: AppTheme.oceanBlue,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
                 ],
               ),
-              const Divider(),
-              const SizedBox(height: 16),
-              Text('Categoría', style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.deepNavy)),
-              const SizedBox(height: 8),
+              const Divider(
+                color: AppTheme.dividerStrong,
+                thickness: AppTheme.borderWidthThin,
+              ),
+              const SizedBox(height: AppTheme.spacing16),
+              Text(
+                'Categoría',
+                style: AppTheme.labelLarge.copyWith(color: AppTheme.deepNavy),
+              ),
+              const SizedBox(height: AppTheme.spacing8),
               DropdownButton<String>(
                 isExpanded: true,
                 value: selectedCategory,
-                hint: const Text('Selecciona categoría'),
-                items: categories.map((category) => DropdownMenuItem<String>(
-                          value: category,
-                          child: Text(
-                            category[0].toUpperCase() + category.substring(1),),
-                        )).toList(),
-                onChanged: onCategoryChanged
+                hint: Text('Selecciona categoría', style: AppTheme.bodySmall),
+                items: categories
+                    .map(
+                      (category) => DropdownMenuItem<String>(
+                        value: category,
+                        child: Text(
+                          category[0].toUpperCase() + category.substring(1),
+                          style: AppTheme.bodyMedium.copyWith(
+                            color: AppTheme.deepNavy,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: onCategoryChanged,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppTheme.spacing24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Precio por día (€)', style: TextStyle(fontWeight: FontWeight.w600,color: AppTheme.deepNavy)),
-                  Text('${rangedPrice.start.toInt()}€ - ${rangedPrice.end.toInt()}€',style: TextStyle(color: AppTheme.deepNavy)),
+                  Text(
+                    'Precio por día (€)',
+                    style: AppTheme.labelLarge.copyWith(
+                      color: AppTheme.deepNavy,
+                    ),
+                  ),
+                  Text(
+                    '${rangedPrice.start.toInt()}€ - ${rangedPrice.end.toInt()}€',
+                    style: AppTheme.bodySmall.copyWith(
+                      color: AppTheme.deepNavy,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
               RangeSlider(
@@ -71,18 +108,33 @@ class FilterDrawer extends StatelessWidget {
                 max: 1000,
                 divisions: 100,
                 activeColor: AppTheme.deepNavy,
-                inactiveColor: AppTheme.deepNavy.withValues(alpha: 0.2),
-                labels: RangeLabels('${rangedPrice.start.toInt()}€','${rangedPrice.end.toInt()}€'),
+                inactiveColor: AppTheme.deepNavy.withValues(
+                  alpha: AppTheme.alphaOverlayLight,
+                ),
+                labels: RangeLabels(
+                  '${rangedPrice.start.toInt()}€',
+                  '${rangedPrice.end.toInt()}€',
+                ),
                 onChanged: onPriceChanged,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppTheme.spacing24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Capacidad', style: TextStyle(fontWeight: FontWeight.w600,color: AppTheme.deepNavy)),
-                  Text('${rangedCapacity.start.toInt()} - ${rangedCapacity.end.toInt()} personas', style: TextStyle(color: AppTheme.deepNavy),
-                  )
-                ]
+                  Text(
+                    'Capacidad',
+                    style: AppTheme.labelLarge.copyWith(
+                      color: AppTheme.deepNavy,
+                    ),
+                  ),
+                  Text(
+                    '${rangedCapacity.start.toInt()} - ${rangedCapacity.end.toInt()} personas',
+                    style: AppTheme.bodySmall.copyWith(
+                      color: AppTheme.deepNavy,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
               RangeSlider(
                 values: rangedCapacity,
@@ -90,14 +142,19 @@ class FilterDrawer extends StatelessWidget {
                 max: 100,
                 divisions: 25,
                 activeColor: AppTheme.deepNavy,
-                inactiveColor: AppTheme.deepNavy.withValues(alpha: 0.2),
-                labels: RangeLabels('${rangedCapacity.start.toInt()}','${rangedCapacity.end.toInt()}',),
+                inactiveColor: AppTheme.deepNavy.withValues(
+                  alpha: AppTheme.alphaOverlayLight,
+                ),
+                labels: RangeLabels(
+                  '${rangedCapacity.start.toInt()}',
+                  '${rangedCapacity.end.toInt()}',
+                ),
                 onChanged: onCapacityChanged,
-              )
+              ),
             ],
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
   }
 }

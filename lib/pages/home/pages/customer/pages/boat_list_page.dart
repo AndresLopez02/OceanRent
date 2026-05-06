@@ -29,9 +29,19 @@ class _BoatListPageState extends State<BoatListPage> {
 
   List<BoatModel> filterBoats(List<BoatModel> boats) {
     return boats.where((boat) {
-      if (selectedCategory != null && selectedCategory != 'todos' && boat.category != selectedCategory) return false;
-      if (boat.pricePerDay < rangedPrice.start || boat.pricePerDay > rangedPrice.end) return false;
-      if (boat.capacity < rangedCapacity.start || boat.capacity > rangedCapacity.end) return false;
+      if (selectedCategory != null &&
+          selectedCategory != 'todos' &&
+          boat.category != selectedCategory) {
+        return false;
+      }
+      if (boat.pricePerDay < rangedPrice.start ||
+          boat.pricePerDay > rangedPrice.end) {
+        return false;
+      }
+      if (boat.capacity < rangedCapacity.start ||
+          boat.capacity > rangedCapacity.end) {
+        return false;
+      }
       return true;
     }).toList();
   }
@@ -44,11 +54,8 @@ class _BoatListPageState extends State<BoatListPage> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
     return Scaffold(
       drawer: FilterDrawer(
         selectedCategory: selectedCategory,
@@ -63,27 +70,41 @@ class _BoatListPageState extends State<BoatListPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            padding: AppTheme.filterHeaderPadding,
             child: Row(
               children: [
                 Builder(
                   builder: (context) => OutlinedButton.icon(
                     onPressed: () => Scaffold.of(context).openDrawer(),
-                    icon: const Icon(Icons.tune),
-                    label: const Text('Filtros'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.deepNavy,
-                      side: BorderSide(color: AppTheme.deepNavy),
+                    icon: const Icon(Icons.tune, size: AppTheme.iconSizeLarge),
+                    label: Text(
+                      'Filtros',
+                      style: AppTheme.labelMedium.copyWith(
+                        color: AppTheme.deepNavy,
+                      ),
                     ),
+                    style: AppTheme.outlinedButtonStyle,
                   ),
                 ),
-                if (selectedCategory != null || rangedCapacity.start != 1 || rangedCapacity.end != 100 || rangedPrice.start != 0 || rangedPrice.end != 1000)
+                if (selectedCategory != null ||
+                    rangedCapacity.start != 1 ||
+                    rangedCapacity.end != 100 ||
+                    rangedPrice.start != 0 ||
+                    rangedPrice.end != 1000)
                   Padding(
-                    padding: const EdgeInsets.only(left: 8),
+                    padding: AppTheme.activeFilterChipMargin,
                     child: Chip(
-                      label: const Text('Filtros activos'),
-                      backgroundColor: AppTheme.oceanBlue.withValues(alpha: 0.15),
-                      deleteIcon: const Icon(Icons.close, size: 16),
+                      label: Text(
+                        'Filtros activos',
+                        style: AppTheme.badgeTextStyle,
+                      ),
+                      backgroundColor: AppTheme.oceanBlue.withValues(
+                        alpha: AppTheme.alphaChip,
+                      ),
+                      deleteIcon: const Icon(
+                        Icons.close,
+                        size: AppTheme.iconSizeMd,
+                      ),
                       onDeleted: _resetFilters,
                     ),
                   ),
@@ -98,16 +119,28 @@ class _BoatListPageState extends State<BoatListPage> {
                 final filteredBoats = filterBoats(boats);
                 if (boats.isEmpty) {
                   return Center(
-                    child: Text('No hay barcos disponibles', style: textTheme.bodyLarge?.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w600)),
+                    child: Text(
+                      'No hay barcos disponibles',
+                      style: AppTheme.bodyLarge.copyWith(
+                        color: AppTheme.deepNavy,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   );
                 }
                 if (filteredBoats.isEmpty) {
                   return Center(
-                    child: Text('No hay barcos con esa disposición', style: textTheme.bodyLarge?.copyWith(color: AppTheme.deepNavy, fontWeight: FontWeight.w600)),
+                    child: Text(
+                      'No hay barcos con esa disposición',
+                      style: AppTheme.bodyLarge.copyWith(
+                        color: AppTheme.deepNavy,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   );
                 }
                 return ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppTheme.listPadding,
                   itemCount: filteredBoats.length,
                   itemBuilder: (context, index) {
                     return CustomerBoatCard(boat: filteredBoats[index]);
