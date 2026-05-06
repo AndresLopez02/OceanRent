@@ -84,10 +84,7 @@ class _AdminProfileScreenState extends ConsumerState<AdminProfileScreen>
     final uid = ref.read(authNotifierProvider).currentUser?.uid;
 
     if (uid == null) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-
+      if (mounted) setState(() => _isLoading = false);
       _snack('No se pudo obtener el usuario', error: true);
       return;
     }
@@ -107,10 +104,7 @@ class _AdminProfileScreenState extends ConsumerState<AdminProfileScreen>
 
       _fadeCtrl.forward();
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-
+      if (mounted) setState(() => _isLoading = false);
       _snack('Error al cargar el perfil: $e', error: true);
     }
   }
@@ -123,9 +117,7 @@ class _AdminProfileScreenState extends ConsumerState<AdminProfileScreen>
     try {
       final uid = ref.read(authNotifierProvider).currentUser!.uid;
 
-      await ref
-          .read(userRepositoryProvider)
-          .updateProfile(
+      await ref.read(userRepositoryProvider).updateProfile(
             uid: uid,
             name: _nameCtrl.text.trim(),
             surname: _surnameCtrl.text.trim(),
@@ -135,9 +127,7 @@ class _AdminProfileScreenState extends ConsumerState<AdminProfileScreen>
     } catch (e) {
       _snack('Error al guardar el perfil: $e', error: true);
     } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -224,7 +214,6 @@ class _AdminProfileScreenState extends ConsumerState<AdminProfileScreen>
   }
 }
 
-// Widgets anidados
 // AppBar
 
 class _AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -238,16 +227,26 @@ class _AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      backgroundColor: AppTheme.deepNavy,
+      foregroundColor: AppTheme.white,
+      centerTitle: true,
+      elevation: 0,
+      titleTextStyle: AppTheme.appBarTitleStyle,
       leading: IconButton(
         icon: const Icon(
           Icons.arrow_back_ios_new_rounded,
           size: AppTheme.iconSizeLg,
+          color: AppTheme.white,
         ),
         onPressed: onBack,
       ),
       title: const Text('OceanRent'),
       actions: const [
-        Icon(Icons.directions_boat_rounded, size: AppTheme.iconSizeLarge),
+        Icon(
+          Icons.directions_boat_rounded,
+          size: AppTheme.iconSizeLarge,
+          color: AppTheme.white,
+        ),
         SizedBox(width: AppTheme.spacing16),
       ],
     );
@@ -479,11 +478,8 @@ class _SaveButton extends StatelessWidget {
         style: AppTheme.accentButtonStyle.copyWith(
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.disabled)) {
-              return AppTheme.oceanBlue.withValues(
-                alpha: AppTheme.alphaDisabled,
-              );
+              return AppTheme.oceanBlue.withValues(alpha: AppTheme.alphaDisabled);
             }
-
             return AppTheme.oceanBlue;
           }),
         ),
