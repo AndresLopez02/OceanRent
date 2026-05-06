@@ -6,16 +6,28 @@ import 'package:ocean_rent/pages/home/pages/customer/widgets/customer_boat_card.
 import 'package:ocean_rent/pages/home/pages/customer/widgets/filter_drawer.dart';
 
 class BoatListPage extends StatefulWidget {
-  const BoatListPage({super.key});
+  final List<String> categoriasIniciales;
+  const BoatListPage({
+    super.key, 
+  this.categoriasIniciales = const []
+  });
 
   @override
   State<BoatListPage> createState() => _BoatListPageState();
 }
 
 class _BoatListPageState extends State<BoatListPage> {
-  String? selectedCategory;
+  List<String> selectedCategories = [];
   RangeValues rangedPrice = const RangeValues(0, 1000);
   RangeValues rangedCapacity = const RangeValues(1, 100);
+
+  @override
+  void initState(){
+    super.initState();
+    if(widget.categoriasIniciales.isNotEmpty){
+      selectedCategories = List.from(widget.categoriasIniciales);
+    }
+  }
 
   final List<String> categories = [
     'todos',
@@ -48,7 +60,7 @@ class _BoatListPageState extends State<BoatListPage> {
 
   void _resetFilters() {
     setState(() {
-      selectedCategory = null;
+      selectedCategories = [];
       rangedPrice = const RangeValues(0, 1000);
       rangedCapacity = const RangeValues(1, 100);
     });
@@ -58,12 +70,14 @@ class _BoatListPageState extends State<BoatListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: FilterDrawer(
-        selectedCategory: selectedCategory,
+        selectedCategory: selectedCategories,
         rangedPrice: rangedPrice,
         rangedCapacity: rangedCapacity,
         categories: categories,
         onReset: _resetFilters,
-        onCategoryChanged: (value) => setState(() => selectedCategory = value),
+        onCategoryChanged: (value) => setState(() {
+          selectedCategories.contains(value)? selectedCategories.remove(value) : selectedCategories.add(value);
+        }),
         onPriceChanged: (values) => setState(() => rangedPrice = values),
         onCapacityChanged: (values) => setState(() => rangedCapacity = values),
       ),

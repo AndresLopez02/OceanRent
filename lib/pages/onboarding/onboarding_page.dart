@@ -153,6 +153,9 @@ class OnboardingPage extends StatelessWidget {
 class _OnboardingIndicator extends StatelessWidget {
   const _OnboardingIndicator();
 
+ class _OnboardingPageState extends State<OnboardingPage>{
+  List<String> _selectedCategories = [];
+  final pageController = PageController();
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -173,11 +176,8 @@ class _OnboardingIndicator extends StatelessWidget {
       ],
     );
   }
-}
-
-class _IndicatorDot extends StatelessWidget {
-  const _IndicatorDot();
-
+  int currentPage = 0;
+  
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -366,7 +366,4 @@ class _BoatIllustrationPainter extends CustomPainter {
       wavePaint,
     );
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
+ }

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 
 class FilterDrawer extends StatelessWidget {
-  final String? selectedCategory;
+  final List<String> selectedCategory;
   final RangeValues rangedPrice;
   final RangeValues rangedCapacity;
   final List<String> categories;
   final VoidCallback onReset;
-  final ValueChanged<String?> onCategoryChanged;
+  final ValueChanged<String> onCategoryChanged;
   final ValueChanged<RangeValues> onPriceChanged;
   final ValueChanged<RangeValues> onCapacityChanged;
 
