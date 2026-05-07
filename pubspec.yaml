@@ -90,6 +90,12 @@ flutter:
   assets:
     - assets/icons/google_logo.png
     - assets/icons/icon_ocean_rent.png
+    - assets/icons/veleroOriginal.svg
+    - assets/icons/catamaranModificado.svg
+    - assets/icons/lanchaModificada.svg
+    - assets/icons/yateModificado.svg
+    - assets/icons/jetskiModificado.svg
+    - assets/icons/playa.svg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

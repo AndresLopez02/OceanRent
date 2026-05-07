@@ -5,7 +5,7 @@ import 'package:ocean_rent/core/theme/app_theme.dart';
 class CustomCard extends StatelessWidget {
   final String title;
   final String description;
-  //final String imagePath;
+  final String imagePath;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -13,7 +13,7 @@ class CustomCard extends StatelessWidget {
     super.key, 
     required this.title,
     required this.description,
-    //required this.imagePath,
+    required this.imagePath,
     required this.isSelected,
     required this.onTap,
   });
@@ -30,22 +30,22 @@ class CustomCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected? AppTheme.oceanBlue : Colors.grey.shade300,
-            width: isSelected ? 1.5 : 1,
+            width: isSelected? 1.5 : 1,
           ),
         ),
         child: Row(
           children: [
             // Imagen
-          /*ClipRRect(
+          ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: SvgPicture.asset(
                 imagePath,
-                width: 120,
-                height: 120,
+                width: 64,
+                height: 64,
                 fit: BoxFit.cover,
                 colorFilter: isSelected? null : ColorFilter.mode(const Color.fromARGB(255, 214, 214, 214), BlendMode.saturation),
               ),
-            ),  Dejo esta parte en comentarios debido a que necesito editar todos los svgs de los respectivos barcos*/ 
+            ),
             const SizedBox(width: 16),
             // Texto
             Expanded(
