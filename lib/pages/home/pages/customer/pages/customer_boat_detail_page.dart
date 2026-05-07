@@ -1,37 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
-import 'package:ocean_rent/pages/home/pages/customer/pages/disponibility_page.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 // Pantalla de detalle para el cliente.
 // Recibe el barco seleccionado desde el listado y muestra su información completa.
-class CustomerBoatDetailPage extends StatelessWidget {
+class CustomerBoatDetailPage extends StatefulWidget {
   final BoatModel boat;
 
   const CustomerBoatDetailPage({super.key, required this.boat});
 
   @override
+  State<CustomerBoatDetailPage> createState() => _CustomerBoatDetailPageState();
+}
+
+class _CustomerBoatDetailPageState extends State<CustomerBoatDetailPage> {
+  DateTime? _rangeStart;
+  DateTime? _rangeEnd;
+  DateTime _focusedDay = DateTime.now();
+
+  final List<DateTime> _unavailableDates = [
+    DateTime(2026, 5, 5),
+    DateTime(2026, 5, 6),
+    DateTime(2026, 5, 10),
+  ];
+
+  bool _isUnavailable(DateTime day) {
+    return _unavailableDates.any(
+      (d) => d.year == day.year && d.month == day.month && d.day == day.day,
+    );
+  }
+
+  bool _rangeHasUnavailableDates(DateTime start, DateTime end) {
+    DateTime current = start;
+    while (current.isBefore(end) || isSameDay(current, end)) {
+      if (_isUnavailable(current)) return true;
+      current = current.add(const Duration(days: 1));
+    }
+    return false;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final boat = widget.boat;
     return Scaffold(
       appBar: AppBar(title: Text(boat.name)),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: AppTheme.detailBottomButtonPadding,
-          child: ElevatedButton(
-            style: AppTheme.accentButtonStyle,
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => DisponibilityPage(boat: boat)),
-            ),
-            child: Text(
-              'Mirar Disponibilidad',
-              style: AppTheme.buttonTextStyle.copyWith(
-                color: AppTheme.pearlWhite,
-              ),
-            ),
-          ),
-        ),
-      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,6 +122,158 @@ class CustomerBoatDetailPage extends StatelessWidget {
                     style: AppTheme.bodyMedium.copyWith(
                       color: AppTheme.textMuted,
                       height: AppTheme.lineHeightInfo,
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacing24),
+
+                  Text(
+                    'Disponibilidad',
+                    style: AppTheme.titleMedium.copyWith(
+                      color: AppTheme.deepNavy,
+                    ),
+                  ),
+
+                  const SizedBox(height: AppTheme.spacing12),
+
+                  // Calendario integrado en el detalle del barco para seleccionar fechas de reserva.
+                  TableCalendar(
+                    firstDay: DateTime.now(),
+                    lastDay: DateTime.now().add(const Duration(days: 365)),
+                    focusedDay: _focusedDay,
+                    calendarFormat: CalendarFormat.month,
+                    rangeSelectionMode: RangeSelectionMode.toggledOn,
+                    rangeStartDay: _rangeStart,
+                    rangeEndDay: _rangeEnd,
+                    enabledDayPredicate: (day) => !_isUnavailable(day),
+                    onRangeSelected: (start, end, focusedDay) {
+                      if (start != null &&
+                          end != null &&
+                          _rangeHasUnavailableDates(start, end)) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'El rango contiene fechas no disponibles',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+
+                      setState(() {
+                        _rangeStart = start;
+                        _rangeEnd = end;
+                        _focusedDay = focusedDay;
+                      });
+                    },
+                    onPageChanged: (focusedDay) {
+                      _focusedDay = focusedDay;
+                    },
+                    calendarBuilders: CalendarBuilders(
+                      disabledBuilder: (context, day, focusedDay) {
+                        if (_isUnavailable(day)) {
+                          return Container(
+                            margin: const EdgeInsets.all(6),
+                            alignment: Alignment.center,
+                            decoration: const BoxDecoration(
+                              color: AppTheme.alertRed,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              '${day.day}',
+                              style: const TextStyle(
+                                color: AppTheme.pearlWhite,
+                              ),
+                            ),
+                          );
+                        }
+
+                        return Container(
+                          margin: const EdgeInsets.all(6),
+                          alignment: Alignment.center,
+                          decoration: const BoxDecoration(
+                            color: AppTheme.backgroundDim,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            '${day.day}',
+                            style: const TextStyle(
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    headerStyle: AppTheme.calendarHeaderStyle,
+                    daysOfWeekStyle: AppTheme.calendarDaysOfWeekStyle,
+                    calendarStyle: CalendarStyle(
+                      todayDecoration: BoxDecoration(
+                        color: AppTheme.oceanBlue.withValues(
+                          alpha: AppTheme.alphaOverlay,
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      todayTextStyle: const TextStyle(color: AppTheme.deepNavy),
+                      selectedDecoration: const BoxDecoration(
+                        color: AppTheme.oceanBlue,
+                        shape: BoxShape.circle,
+                      ),
+                      selectedTextStyle: const TextStyle(
+                        color: AppTheme.pearlWhite,
+                      ),
+                      disabledDecoration: const BoxDecoration(
+                        color: AppTheme.backgroundDim,
+                        shape: BoxShape.circle,
+                      ),
+                      disabledTextStyle: const TextStyle(
+                        color: AppTheme.textSecondary,
+                      ),
+                      rangeStartDecoration: const BoxDecoration(
+                        color: AppTheme.oceanBlue,
+                        shape: BoxShape.circle,
+                      ),
+                      rangeEndDecoration: const BoxDecoration(
+                        color: AppTheme.oceanBlue,
+                        shape: BoxShape.circle,
+                      ),
+                      withinRangeDecoration: BoxDecoration(
+                        color: AppTheme.sunsetGold.withValues(
+                          alpha: AppTheme.alphaMedium,
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      defaultDecoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                      ),
+                      defaultTextStyle: const TextStyle(
+                        color: AppTheme.deepNavy,
+                      ),
+                      weekendDecoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                      ),
+                      weekendTextStyle: const TextStyle(
+                        color: AppTheme.oceanBlue,
+                      ),
+                      outsideDaysVisible: false,
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacing24),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: AppTheme.buttonHeight,
+                    child: ElevatedButton(
+                      onPressed: _rangeStart == null
+                          ? null
+                          : () {
+                              // TODO: conectar con el flujo de reserva
+                            },
+                      style: AppTheme.accentButtonStyle,
+                      child: Text(
+                        'Reservar',
+                        style: AppTheme.buttonTextStyle.copyWith(
+                          color: AppTheme.pearlWhite,
+                        ),
+                      ),
                     ),
                   ),
                 ],
