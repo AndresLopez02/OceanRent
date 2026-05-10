@@ -90,26 +90,19 @@ class OnboardingCategoryPageState extends State<OnboardingCategoryPage>{
                 SizedBox(
                   width: double.infinity,
                   height: 52,
-                  
                   child: ElevatedButton(
                     onPressed:() => widget.onNext(selected),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.oceanBlue,
                       foregroundColor: AppTheme.pearlWhite,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
                     ),
-                    child: Text(
-                      'Siguiente', style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: AppTheme.pearlWhite)
+                    child: Text('Siguiente', style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: AppTheme.pearlWhite)
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 Container(
                   width: double.infinity,
                   height: 52,
