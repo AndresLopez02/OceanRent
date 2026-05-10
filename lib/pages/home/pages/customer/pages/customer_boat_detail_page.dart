@@ -72,22 +72,30 @@ class _CustomerBoatDetailPageState extends State<CustomerBoatDetailPage> {
                     ),
                   ),
                   const SizedBox(height: AppTheme.spacing12),
-                  Text(
-                    boat.category.isEmpty ? 'Sin categoría' : boat.category,
-                    style: AppTheme.bodyLarge.copyWith(
-                      color: AppTheme.textMuted,
-                    ),
+                  _BoatDetailInfoItem(
+                    icon: Icons.directions_boat_outlined,
+                    label: _formatBoatCategory(boat.category),
+                  ),
+                  const SizedBox(height: AppTheme.spacing12),
+
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.payments_outlined,
+                        color: AppTheme.oceanBlue,
+                        size: AppTheme.iconSizeLarge,
+                      ),
+                      const SizedBox(width: AppTheme.spacing8),
+                      Text(
+                        '${boat.pricePerDay.toStringAsFixed(0)} €/día',
+                        style: AppTheme.titleLarge.copyWith(
+                          color: AppTheme.deepNavy,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: AppTheme.spacing16),
-
-                  Text(
-                    '${boat.pricePerDay.toStringAsFixed(0)} €/día',
-                    style: AppTheme.titleLarge.copyWith(
-                      color: AppTheme.sunsetGold,
-                    ),
-                  ),
-                  const SizedBox(height: AppTheme.spacing16),
-
                   Row(
                     children: [
                       const Icon(
@@ -282,6 +290,52 @@ class _CustomerBoatDetailPageState extends State<CustomerBoatDetailPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+String _formatBoatCategory(String category) {
+  final normalizedCategory = category.trim().toLowerCase();
+
+  switch (normalizedCategory) {
+    case 'lancha':
+      return 'Lancha';
+    case 'semirigida':
+      return 'Semirrígida';
+    case 'velero':
+      return 'Velero';
+    case 'yate':
+      return 'Yate';
+    case 'catamaran':
+      return 'Catamarán';
+    case 'jetski':
+      return 'Jet Ski';
+    default:
+      return category.trim().isEmpty ? 'Sin categoría' : category.trim();
+  }
+}
+
+class _BoatDetailInfoItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _BoatDetailInfoItem({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: AppTheme.iconSizeLarge, color: AppTheme.oceanBlue),
+        const SizedBox(width: AppTheme.spacing8),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTheme.bodyLarge.copyWith(color: AppTheme.textMuted),
+          ),
+        ),
+      ],
     );
   }
 }
