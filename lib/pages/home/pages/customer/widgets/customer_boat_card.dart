@@ -68,14 +68,14 @@ class CustomerBoatCard extends StatelessWidget {
                           children: [
                             _BoatInfoItem(
                               icon: Icons.directions_boat_outlined,
-                              label: boat.category.isEmpty
-                                  ? 'Sin categoría'
-                                  : boat.category,
+                              label: _formatBoatCategory(boat.category),
                             ),
                             const SizedBox(height: AppTheme.spacing6),
                             _BoatInfoItem(
-                              icon: Icons.directions_boat_outlined,
-                              label: _formatBoatCategory(boat.category),
+                              icon: Icons.location_on_outlined,
+                              label: boat.portName.trim().isEmpty
+                                  ? 'Sin ubicación'
+                                  : boat.portName.trim(),
                             ),
                             const SizedBox(height: AppTheme.spacing6),
                             _BoatInfoItem(
