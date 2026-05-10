@@ -65,7 +65,7 @@ class _OnboardingPlacePageState extends State<OnboardingPlacePage> {
                 }),
                 imagePath: 'assets/icons/playa.svg'
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 224),
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -77,9 +77,7 @@ class _OnboardingPlacePageState extends State<OnboardingPlacePage> {
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
                   ),
-                  child: Text(
-                    'Empezar',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: AppTheme.pearlWhite),
+                  child: Text('Explorar Barcos', style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: AppTheme.pearlWhite),
                   ),
                 ),
               ),
