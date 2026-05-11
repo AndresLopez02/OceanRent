@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
+import 'package:ocean_rent/models/user_model.dart';
 import 'package:ocean_rent/pages/home/pages/customer/widgets/customer_boat_card.dart';
 import 'package:ocean_rent/pages/home/pages/customer/widgets/filter_drawer.dart';
+import 'package:ocean_rent/providers/auth_providers.dart';
+import 'package:ocean_rent/providers/user_providers.dart';
+import 'package:ocean_rent/pages/home/pages/customer/widgets/license_comparer.dart';
 
-class BoatListPage extends StatefulWidget {
+class BoatListPage extends ConsumerStatefulWidget {
   final List<String> categoriasIniciales;
 
   const BoatListPage({super.key, this.categoriasIniciales = const []});
 
   @override
-  State<BoatListPage> createState() => _BoatListPageState();
+ ConsumerState<BoatListPage> createState() => _BoatListPageState();
 }
 
-class _BoatListPageState extends State<BoatListPage> {
+class _BoatListPageState extends ConsumerState<BoatListPage> {
   List<String> selectedCategories = [];
   List<String> selectedPorts = [];
   RangeValues rangedPrice = const RangeValues(0, 1000);
   RangeValues rangedCapacity = const RangeValues(1, 100);
   bool onlyAvailable = false;
+  UserModel? currentUser;
 
   @override
   void initState() {
@@ -27,6 +33,20 @@ class _BoatListPageState extends State<BoatListPage> {
     if (widget.categoriasIniciales.isNotEmpty) {
       selectedCategories = List.from(widget.categoriasIniciales);
     }
+     loadCurrentUser();
+  }
+   Future<void> loadCurrentUser() async {
+    final uid = ref.read(authNotifierProvider).currentUser?.uid;
+
+    if (uid == null) return;
+
+    final user = await ref
+        .read(userRepositoryProvider)
+        .getUser(uid);
+
+    setState(() {
+      currentUser = user;
+    });
   }
 
   final List<String> categories = [
@@ -61,7 +81,11 @@ class _BoatListPageState extends State<BoatListPage> {
           boat.capacity > rangedCapacity.end) {
         return false;
       }
-
+      if (onlyAvailable && 
+          !LicenseComparer.canDriveBoat( nauticalLicense: currentUser?.nauticalLicense,
+           requiredLicense: boat.requiredLicense,)) {
+        return false;
+      }
       return true;
     }).toList();
   }
@@ -90,7 +114,8 @@ class _BoatListPageState extends State<BoatListPage> {
         selectedCategories.length +
         selectedPorts.length +
         (rangedPrice.start != 0 || rangedPrice.end != 1000 ? 1 : 0) +
-        (rangedCapacity.start != 1 || rangedCapacity.end != 100 ? 1 : 0);
+        (rangedCapacity.start != 1 || rangedCapacity.end != 100 ? 1 : 0)+
+        (onlyAvailable ? 1 : 0);
     return Scaffold(
       drawer: FilterDrawer(
         selectedCategory: selectedCategories,
@@ -142,7 +167,8 @@ class _BoatListPageState extends State<BoatListPage> {
                     rangedCapacity.start != 1 ||
                     rangedCapacity.end != 100 ||
                     rangedPrice.start != 0 ||
-                    rangedPrice.end != 1000)
+                    rangedPrice.end != 1000||
+                    onlyAvailable)
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: Chip(
