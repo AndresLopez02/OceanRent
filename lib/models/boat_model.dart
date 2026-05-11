@@ -68,7 +68,7 @@ class BoatModel {
       portName: (map['port_name'] ?? '') as String, 
       ratingAvg: (map['rating_avg'] ?? 0).toDouble(), 
       ratingCount: (map['rating_count'] ?? 0) as int, 
-      requiredLicense: (map['required_license'] ?? 'Indeterminado') as String, 
+      requiredLicense: (map['required_license'] ?? 'NONE') as String, 
       location: map['location'] != null ? map['location'] as GeoPoint : null,
     );
   }
