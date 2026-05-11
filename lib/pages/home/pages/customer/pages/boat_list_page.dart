@@ -19,6 +19,7 @@ class _BoatListPageState extends State<BoatListPage> {
   List<String> selectedPorts = [];
   RangeValues rangedPrice = const RangeValues(0, 1000);
   RangeValues rangedCapacity = const RangeValues(1, 100);
+  bool onlyAvailable = false;
 
   @override
   void initState() {
@@ -71,6 +72,7 @@ class _BoatListPageState extends State<BoatListPage> {
       selectedPorts = [];
       rangedPrice = const RangeValues(0, 1000);
       rangedCapacity = const RangeValues(1, 100);
+      onlyAvailable = false;
     });
   }
 
@@ -97,6 +99,7 @@ class _BoatListPageState extends State<BoatListPage> {
         rangedCapacity: rangedCapacity,
         categories: categories,
         ports: ports,
+        onlyAvailable: onlyAvailable,
         onReset: _resetFilters,
         onCategoryChanged: (value) => setState(() {
           selectedCategories.contains(value)
@@ -110,6 +113,8 @@ class _BoatListPageState extends State<BoatListPage> {
         }),
         onPriceChanged: (values) => setState(() => rangedPrice = values),
         onCapacityChanged: (values) => setState(() => rangedCapacity = values),
+      
+        onOnlyAvailableChanged: (value) =>setState(() => onlyAvailable = value),
       ),
       body: Column(
         children: [

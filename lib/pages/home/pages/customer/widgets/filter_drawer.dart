@@ -8,11 +8,13 @@ class FilterDrawer extends StatelessWidget {
   final RangeValues rangedCapacity;
   final List<String> categories;
   final List<String> ports;
+  final bool onlyAvailable;
   final VoidCallback onReset;
   final ValueChanged<String> onCategoryChanged;
   final ValueChanged<String> onPortChanged;
   final ValueChanged<RangeValues> onPriceChanged;
   final ValueChanged<RangeValues> onCapacityChanged;
+  final ValueChanged<bool> onOnlyAvailableChanged;
 
   const FilterDrawer({
     super.key,
@@ -22,11 +24,13 @@ class FilterDrawer extends StatelessWidget {
     required this.rangedCapacity,
     required this.categories,
     required this.ports,
+    required this.onlyAvailable,
     required this.onReset,
     required this.onCategoryChanged,
     required this.onPortChanged,
     required this.onPriceChanged,
     required this.onCapacityChanged,
+    required this.onOnlyAvailableChanged,
   });
 
   @override
@@ -179,7 +183,7 @@ class FilterDrawer extends StatelessWidget {
                   ),
                   onChanged: onPriceChanged,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 24), 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -209,6 +213,34 @@ class FilterDrawer extends StatelessWidget {
                   ),
                   onChanged: onCapacityChanged,
                 ),
+                 GestureDetector(
+                  onTap: () => onOnlyAvailableChanged(!onlyAvailable),
+                  child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                      AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration( 
+                        color: onlyAvailable? AppTheme.oceanBlue: Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                        color: onlyAvailable? AppTheme.oceanBlue: AppTheme.deepNavy.withValues(alpha: 0.4),
+                        width: 2,
+                      ),
+                   ),
+                 child: onlyAvailable? const Icon(Icons.check,size: 14,color: Colors.white,) : null,
+                 ),
+
+               const SizedBox(width: 10),
+              Expanded(
+               child: Text('Mostrar solo barcos disponibles para su titulación',style: TextStyle(fontWeight: FontWeight.w600,color: AppTheme.deepNavy, fontSize: 13, ),
+             ),
+           ),
+         ],
+        ),
+      ),
               ],
             ),
           ),
