@@ -9,6 +9,8 @@ import 'package:ocean_rent/services/boat/boat_service.dart';
 import '../../../../../services/image/image_compress.dart';
 import '../../../../../services/image/image_picker_service.dart';
 import '../../../../../services/image/image_saver_service.dart';
+import '../widgets/boat_form_field.dart';
+import '../widgets/boat_image_picker.dart';
 
 class BoatFormPage extends StatefulWidget {
   final BoatModel? boat;
@@ -25,6 +27,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
   final _nameController = TextEditingController();
   final _capacityController = TextEditingController();
   final _priceController = TextEditingController();
+  final _depositController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _imageUrlController = TextEditingController();
   final _portNameController = TextEditingController();
@@ -38,7 +41,14 @@ class _BoatFormPageState extends State<BoatFormPage> {
     'jetski',
   ];
 
+  static const List<(String, String)> _licenseTypes = [
+    ('none', 'Sin licencia'),
+    ('pbn', 'Patrón de Barco a Navegación (PBN)'),
+    ('per', 'Patrón de Embarcaciones de Recreo (PER)'),
+  ];
+
   String? _selectedBoatType;
+  String _selectedLicense = 'none';
   bool _isSaving = false;
   bool _isPickingImage = false;
   File? _selectedImage;
@@ -57,9 +67,11 @@ class _BoatFormPageState extends State<BoatFormPage> {
       _selectedBoatType = _normalizeBoatType(boat.category);
       _capacityController.text = boat.capacity.toString();
       _priceController.text = boat.pricePerDay.toString();
+      _depositController.text = boat.depositAmount.toString();
       _descriptionController.text = boat.description;
       _imageUrlController.text = boat.imageUrl;
       _portNameController.text = boat.portName;
+      _selectedLicense = _normalizeLicense(boat.requiredLicense);
     }
 
     _imageUrlController.addListener(() {
@@ -74,6 +86,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
     _nameController.dispose();
     _capacityController.dispose();
     _priceController.dispose();
+    _depositController.dispose();
     _descriptionController.dispose();
     _imageUrlController.dispose();
     _portNameController.dispose();
@@ -183,6 +196,9 @@ class _BoatFormPageState extends State<BoatFormPage> {
       final price = double.parse(
         _priceController.text.trim().replaceAll(',', '.'),
       );
+      final deposit = double.parse(
+        _depositController.text.trim().replaceAll(',', '.'),
+      );
       final description = _descriptionController.text.trim();
       final portName = _portNameController.text.trim();
       final imageUrl = finalImageUrl.isNotEmpty
@@ -199,6 +215,8 @@ class _BoatFormPageState extends State<BoatFormPage> {
           description: description,
           imageUrl: imageUrl,
           portName: portName,
+          depositAmount: deposit,
+          requiredLicense: _selectedLicense,
         );
       } else {
         await BoatService.instance.createBoat(
@@ -209,6 +227,8 @@ class _BoatFormPageState extends State<BoatFormPage> {
           description: description,
           imageUrl: imageUrl,
           portName: portName,
+          depositAmount: deposit,
+          requiredLicense: _selectedLicense,
         );
       }
 
@@ -283,112 +303,26 @@ class _BoatFormPageState extends State<BoatFormPage> {
     return null;
   }
 
+  String? _validateDeposit(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Campo obligatorio';
+    }
+    final parsed = double.tryParse(value.trim().replaceAll(',', '.'));
+
+    if (parsed == null) return 'Introduce un importe válido';
+    if (parsed < 0) return 'La fianza no puede ser negativa';
+
+    return null;
+  }
+
+  String _normalizeLicense(String license) {
+    final lower = license.toLowerCase();
+    if (_licenseTypes.any((t) => t.$1 == lower)) return lower;
+    return 'none';
+  }
+
   InputDecoration _inputDecoration(String label, {IconData? icon}) {
     return AppTheme.inputDecoration(labelText: label, icon: icon);
-  }
-
-  Widget _buildImagePlaceholder() {
-    return Container(
-      color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft),
-      child: Center(
-        child: Icon(
-          Icons.image_outlined,
-          size: AppTheme.imagePickerIconSize,
-          color: AppTheme.deepNavy.withValues(
-            alpha: AppTheme.alphaTextSecondary,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildImageSection() {
-    final url = _imageUrlController.text.trim();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Foto del barco',
-          style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy),
-        ),
-        const SizedBox(height: AppTheme.spacing8),
-        Container(
-          height: AppTheme.formImagePreviewHeight,
-          width: double.infinity,
-          decoration: AppTheme.cardDecoration(
-            color: AppTheme.surface,
-            radius: AppTheme.radiusButton,
-            border: Border.all(
-              color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaChip),
-            ),
-            boxShadow: [],
-          ),
-          child: ClipRRect(
-            borderRadius: AppTheme.borderRadiusButton,
-            child: _selectedImage != null
-                ? Image.file(_selectedImage!, fit: BoxFit.cover)
-                : url.isNotEmpty
-                ? Image.network(
-                    url,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => _buildImagePlaceholder(),
-                  )
-                : _buildImagePlaceholder(),
-          ),
-        ),
-        const SizedBox(height: AppTheme.spacing12),
-        SizedBox(
-          width: double.infinity,
-          height: AppTheme.compactButtonHeight,
-          child: ElevatedButton.icon(
-            onPressed: _isPickingImage ? null : _pickImage,
-            style: AppTheme.accentButtonStyle,
-            icon: _isPickingImage
-                ? const SizedBox(
-                    width: AppTheme.loadingSize,
-                    height: AppTheme.loadingSize,
-                    child: CircularProgressIndicator(
-                      strokeWidth: AppTheme.progressStrokeWidth,
-                      color: AppTheme.white,
-                    ),
-                  )
-                : const Icon(
-                    Icons.image_outlined,
-                    size: AppTheme.iconSizeLarge,
-                  ),
-            label: Text(
-              _isPickingImage ? 'Seleccionando...' : 'Seleccionar imagen',
-              style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.white),
-            ),
-          ),
-        ),
-        const SizedBox(height: AppTheme.spacing6),
-        Text(
-          'Selecciona una imagen. Se subirá cuando guardes el formulario.',
-          style: AppTheme.helperTextStyle.copyWith(color: AppTheme.textMuted),
-        ),
-        if (_selectedImage != null) ...[
-          const SizedBox(height: AppTheme.spacing8),
-          TextButton.icon(
-            onPressed: () => setState(() => _selectedImage = null),
-            style: AppTheme.compactTextButtonStyle,
-            icon: const Icon(
-              Icons.delete_outline,
-              size: AppTheme.iconSizeLarge,
-              color: AppTheme.alertRed,
-            ),
-            label: Text(
-              'Eliminar imagen',
-              style: AppTheme.labelMedium.copyWith(
-                color: AppTheme.alertRed,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
   }
 
   @override
@@ -402,24 +336,24 @@ class _BoatFormPageState extends State<BoatFormPage> {
           child: ListView(
             padding: AppTheme.listPadding,
             children: [
-              _buildImageSection(),
+              BoatImagePicker(
+                selectedImage: _selectedImage,
+                imageUrl: _imageUrlController.text.trim(),
+                isPickingImage: _isPickingImage,
+                onPickImage: _pickImage,
+                onRemoveImage: () => setState(() => _selectedImage = null),
+              ),
               const SizedBox(height: AppTheme.spacing20),
-              TextFormField(
+              BoatFormField(
                 controller: _nameController,
-                style: AppTheme.fieldTextStyle,
-                decoration: _inputDecoration(
-                  'Nombre',
-                  icon: Icons.directions_boat_outlined,
-                ),
+                label: 'Nombre',
+                icon: Icons.directions_boat_outlined,
                 validator: _validateRequired,
               ),
               const SizedBox(height: AppTheme.spacing12),
               DropdownButtonFormField<String>(
                 initialValue: _selectedBoatType,
-                decoration: _inputDecoration(
-                  'Tipo de barco',
-                  icon: Icons.category_outlined,
-                ),
+                decoration: _inputDecoration('Tipo de barco', icon: Icons.category_outlined),
                 dropdownColor: AppTheme.surface,
                 borderRadius: AppTheme.borderRadiusInput,
                 style: AppTheme.fieldTextStyle,
@@ -427,71 +361,68 @@ class _BoatFormPageState extends State<BoatFormPage> {
                     .map(
                       (type) => DropdownMenuItem<String>(
                         value: type,
-                        child: Text(
-                          _boatTypeLabel(type),
-                          style: AppTheme.bodyMedium.copyWith(
-                            color: AppTheme.deepNavy,
-                          ),
-                        ),
+                        child: Text(_boatTypeLabel(type), style: AppTheme.bodyMedium.copyWith(color: AppTheme.deepNavy),
+                        )
                       ),
-                    )
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedBoatType = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Campo obligatorio';
-                  }
-
-                  return null;
-                },
+                    ).toList(),
+                onChanged: (value) => setState(() => _selectedBoatType = value),
+                validator: (value) =>
+                    (value == null || value.trim().isEmpty) ? 'Campo obligatorio' : null,
               ),
               const SizedBox(height: AppTheme.spacing12),
-              TextFormField(
+              BoatFormField(
                 controller: _capacityController,
+                label: 'Capacidad',
+                icon: Icons.people_outline,
                 keyboardType: TextInputType.number,
-                style: AppTheme.fieldTextStyle,
-                decoration: _inputDecoration(
-                  'Capacidad',
-                  icon: Icons.people_outline,
-                ),
                 validator: _validateCapacity,
               ),
               const SizedBox(height: AppTheme.spacing12),
-              TextFormField(
+              BoatFormField(
                 controller: _portNameController,
-                style: AppTheme.fieldTextStyle,
-                decoration: _inputDecoration(
-                  'Puerto / ubicación',
-                  icon: Icons.location_on_outlined,
-                ),
+                label: 'Puerto / ubicación',
+                icon: Icons.location_on_outlined,
                 validator: _validateRequired,
               ),
               const SizedBox(height: AppTheme.spacing12),
-              TextFormField(
+              BoatFormField(
                 controller: _priceController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                style: AppTheme.fieldTextStyle,
-                decoration: _inputDecoration(
-                  'Precio por día (€)',
-                  icon: Icons.euro_outlined,
-                ),
+                label: 'Precio por día (€)',
+                icon: Icons.euro_outlined,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: _validatePrice,
               ),
               const SizedBox(height: AppTheme.spacing12),
-              TextFormField(
-                controller: _descriptionController,
-                maxLines: 4,
+              BoatFormField(
+                controller: _depositController,
+                label: 'Fianza (€)',
+                icon: Icons.lock_outline,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                validator: _validateDeposit,
+              ),
+              const SizedBox(height: AppTheme.spacing12),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedLicense,
+                isExpanded: true,
+                decoration: _inputDecoration('Licencia requerida', icon: Icons.verified_outlined),
+                dropdownColor: AppTheme.surface,
+                borderRadius: AppTheme.borderRadiusInput,
                 style: AppTheme.fieldTextStyle,
-                decoration: _inputDecoration(
-                  'Descripción',
-                  icon: Icons.description_outlined,
-                ),
+                items: _licenseTypes.map(((String, String) entry) => DropdownMenuItem<String>(
+                        value: entry.$1,
+                        child: Text(entry.$2, style: AppTheme.bodyMedium.copyWith(color: AppTheme.deepNavy)),
+                      ),
+                    ).toList(),
+                onChanged: (value) {
+                  if (value != null) setState(() => _selectedLicense = value);
+                },
+              ),
+              const SizedBox(height: AppTheme.spacing12),
+              BoatFormField(
+                controller: _descriptionController,
+                label: 'Descripción',
+                icon: Icons.description_outlined,
+                maxLines: 4,
               ),
               const SizedBox(height: AppTheme.spacing24),
               SizedBox(
@@ -499,12 +430,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
                 child: ElevatedButton(
                   onPressed: _isSaving ? null : _save,
                   style: AppTheme.fullWidthPrimaryButtonStyle,
-                  child: Text(
-                    _isSaving ? 'Guardando...' : 'Guardar',
-                    style: AppTheme.buttonTextStyle.copyWith(
-                      color: AppTheme.pearlWhite,
-                    ),
-                  ),
+                  child: Text(_isSaving ? 'Guardando...' : 'Guardar', style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.pearlWhite)),
                 ),
               ),
               if (!isEditing) ...[
@@ -520,11 +446,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
                       );
                     },
                     style: AppTheme.outlinedButtonStyle,
-                    child: Text(
-                      'Volver al panel',
-                      style: AppTheme.buttonTextStyle.copyWith(
-                        color: AppTheme.deepNavy,
-                      ),
+                    child: Text('Volver al panel', style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.deepNavy),
                     ),
                   ),
                 ),

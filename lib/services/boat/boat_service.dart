@@ -27,6 +27,8 @@ class BoatService {
     required String description,
     required String imageUrl,
     required String portName,
+    required double depositAmount,
+    required String requiredLicense,
   }) async {
     await _boatsCollection.add({
       'name': name.trim(),
@@ -36,6 +38,8 @@ class BoatService {
       'description': description.trim(),
       'imageUrl': imageUrl.trim(),
       'port_name': portName.trim(),
+      'deposit_amount': depositAmount,
+      'required_license': requiredLicense,
     });
   }
 
@@ -48,6 +52,8 @@ class BoatService {
     required String description,
     required String imageUrl,
     required String portName,
+    required double depositAmount,
+    required String requiredLicense,
   }) async {
     await _boatsCollection.doc(id).update({
       'name': name.trim(),
@@ -57,6 +63,8 @@ class BoatService {
       'description': description.trim(),
       'imageUrl': imageUrl.trim(),
       'port_name': portName.trim(),
+      'deposit_amount': depositAmount,
+      'required_license': requiredLicense,
     });
   }
 
