@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
+import 'package:ocean_rent/pages/home/pages/customer/widgets/license_detail_section.dart';
+import 'package:ocean_rent/providers/auth_providers.dart';
+import 'package:ocean_rent/widgets/app_navigator.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 // Pantalla de detalle para el cliente.
 // Recibe el barco seleccionado desde el listado y muestra su información completa.
-class CustomerBoatDetailPage extends StatefulWidget {
+class CustomerBoatDetailPage extends ConsumerStatefulWidget {
   final BoatModel boat;
 
   const CustomerBoatDetailPage({super.key, required this.boat});
 
   @override
-  State<CustomerBoatDetailPage> createState() => _CustomerBoatDetailPageState();
+  ConsumerState<CustomerBoatDetailPage> createState() => _CustomerBoatDetailPageState();
 }
 
-class _CustomerBoatDetailPageState extends State<CustomerBoatDetailPage> {
+class _CustomerBoatDetailPageState extends ConsumerState<CustomerBoatDetailPage> {
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
   DateTime _focusedDay = DateTime.now();
@@ -65,11 +69,7 @@ class _CustomerBoatDetailPageState extends State<CustomerBoatDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    boat.name,
-                    style: AppTheme.headlineMedium.copyWith(
-                      color: AppTheme.deepNavy,
-                    ),
+                  Text(boat.name,style: AppTheme.headlineMedium.copyWith(color: AppTheme.deepNavy)
                   ),
                   const SizedBox(height: AppTheme.spacing12),
                   _BoatDetailInfoItem(
@@ -77,7 +77,11 @@ class _CustomerBoatDetailPageState extends State<CustomerBoatDetailPage> {
                     label: _formatBoatCategory(boat.category),
                   ),
                   const SizedBox(height: AppTheme.spacing12),
-
+                  _BoatDetailInfoItem(
+                    icon: Icons.location_on_outlined,
+                    label: boat.portName.trim().isEmpty? 'Sin ubicación' : boat.portName.trim(),
+                  ),
+                  const SizedBox(height: AppTheme.spacing12),
                   Row(
                     children: [
                       const Icon(
@@ -86,16 +90,17 @@ class _CustomerBoatDetailPageState extends State<CustomerBoatDetailPage> {
                         size: AppTheme.iconSizeLarge,
                       ),
                       const SizedBox(width: AppTheme.spacing8),
-                      Text(
-                        '${boat.pricePerDay.toStringAsFixed(0)} €/día',
-                        style: AppTheme.titleLarge.copyWith(
-                          color: AppTheme.deepNavy,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      Text('${boat.pricePerDay.toStringAsFixed(0)} €/día',
+                        style: AppTheme.titleLarge.copyWith(color: AppTheme.deepNavy, fontWeight: FontWeight.w700),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppTheme.spacing16),
+                  const SizedBox(height: AppTheme.spacing12),
+                  _BoatDetailInfoItem(
+                    icon: Icons.lock_outline,
+                    label: 'Fianza: ${boat.depositAmount.toStringAsFixed(0)} €',
+                  ),
+                  const SizedBox(height: AppTheme.spacing12),
                   Row(
                     children: [
                       const Icon(
@@ -104,45 +109,29 @@ class _CustomerBoatDetailPageState extends State<CustomerBoatDetailPage> {
                         size: AppTheme.iconSizeLarge,
                       ),
                       const SizedBox(width: AppTheme.spacing8),
-                      Text(
-                        'Capacidad: ${boat.capacity} personas',
-                        style: AppTheme.bodyMedium.copyWith(
-                          color: AppTheme.deepNavy,
-                        ),
+                      Text('Capacidad: ${boat.capacity} personas',
+                        style: AppTheme.bodyMedium.copyWith(color: AppTheme.deepNavy)
                       ),
                     ],
                   ),
-
+                  if (boat.requiredLicense.toLowerCase() != 'none') ...[
+                    const SizedBox(height: AppTheme.spacing16),
+                    LicenseDetailSection(license: boat.requiredLicense),
+                  ],
                   const SizedBox(height: AppTheme.spacing24),
-
-                  Text(
-                    'Descripción',
-                    style: AppTheme.titleMedium.copyWith(
-                      color: AppTheme.deepNavy,
-                    ),
+                  Text('Descripción',style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy)
                   ),
                   const SizedBox(height: AppTheme.spacing8),
-
                   Text(
-                    boat.description.isEmpty
-                        ? 'Sin descripción disponible.'
-                        : boat.description,
-                    style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.textMuted,
-                      height: AppTheme.lineHeightInfo,
+                    boat.description.isEmpty? 'Sin descripción disponible.' : boat.description,
+                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted, height: AppTheme.lineHeightInfo,
                     ),
                   ),
                   const SizedBox(height: AppTheme.spacing24),
 
-                  Text(
-                    'Disponibilidad',
-                    style: AppTheme.titleMedium.copyWith(
-                      color: AppTheme.deepNavy,
-                    ),
+                  Text('Disponibilidad', style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy)
                   ),
-
                   const SizedBox(height: AppTheme.spacing12),
-
                   // Calendario integrado en el detalle del barco para seleccionar fechas de reserva.
                   TableCalendar(
                     firstDay: DateTime.now(),
@@ -269,19 +258,26 @@ class _CustomerBoatDetailPageState extends State<CustomerBoatDetailPage> {
                   SizedBox(
                     width: double.infinity,
                     height: AppTheme.buttonHeight,
-                    child: ElevatedButton(
-                      onPressed: _rangeStart == null
-                          ? null
-                          : () {
-                              // TODO: conectar con el flujo de reserva
-                            },
-                      style: AppTheme.accentButtonStyle,
-                      child: Text(
-                        'Reservar',
-                        style: AppTheme.buttonTextStyle.copyWith(
-                          color: AppTheme.pearlWhite,
-                        ),
-                      ),
+                    child: ref.watch(authStateChangesProvider).when(
+                      data: (user) => user == null
+                          ? ElevatedButton.icon(
+                              onPressed: () =>  AppNavigator.goToLogin(context),  
+                              style: AppTheme.accentButtonStyle,
+                              icon: const Icon(Icons.login, color: AppTheme.pearlWhite),
+                              label: Text('Iniciar sesión para reservar',style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.pearlWhite)
+                              ),
+                            )
+                          : ElevatedButton(
+                              onPressed: _rangeStart == null ? null
+                              : () {
+                                      // TODO: conectar con el flujo de reserva
+                                    },
+                              style: AppTheme.accentButtonStyle,
+                              child: Text('Reservar', style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.pearlWhite)
+                              ),
+                            ),
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, s) => const SizedBox.shrink(),
                     ),
                   ),
                 ],
