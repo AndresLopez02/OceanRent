@@ -145,6 +145,8 @@ class _CustomerBoatDetailPageState extends State<CustomerBoatDetailPage> {
 
                   // Calendario integrado en el detalle del barco para seleccionar fechas de reserva.
                   TableCalendar(
+                    locale: 'es_ES',
+                    startingDayOfWeek: StartingDayOfWeek.monday,
                     firstDay: DateTime.now(),
                     lastDay: DateTime.now().add(const Duration(days: 365)),
                     focusedDay: _focusedDay,
