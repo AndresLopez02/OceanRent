@@ -180,11 +180,7 @@ class _CustomerBoatDetailPageState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    boat.name,
-                    style: AppTheme.headlineMedium.copyWith(
-                      color: AppTheme.deepNavy,
-                    ),
+                  Text(boat.name,style: AppTheme.headlineMedium.copyWith(color: AppTheme.deepNavy)
                   ),
                   const SizedBox(height: AppTheme.spacing12),
                   _BoatDetailInfoItem(
@@ -208,34 +204,23 @@ class _CustomerBoatDetailPageState
                         ? 'Puerto no indicado'
                         : boat.portName,
                   ),
-
+                  if (boat.requiredLicense.toLowerCase() != 'none') ...[
+                    const SizedBox(height: AppTheme.spacing16),
+                    LicenseDetailSection(license: boat.requiredLicense),
+                  ],
                   const SizedBox(height: AppTheme.spacing24),
-
-                  Text(
-                    'Descripción',
-                    style: AppTheme.titleMedium.copyWith(
-                      color: AppTheme.deepNavy,
-                    ),
+                  Text('Descripción',style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy)
                   ),
                   const SizedBox(height: AppTheme.spacing8),
-
                   Text(
-                    boat.description.isEmpty
-                        ? 'Sin descripción disponible.'
-                        : boat.description,
-                    style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.textMuted,
-                      height: AppTheme.lineHeightInfo,
+                    boat.description.isEmpty? 'Sin descripción disponible.' : boat.description,
+                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted, height: AppTheme.lineHeightInfo,
                     ),
                   ),
 
                   const SizedBox(height: AppTheme.spacing24),
 
-                  Text(
-                    'Disponibilidad',
-                    style: AppTheme.titleMedium.copyWith(
-                      color: AppTheme.deepNavy,
-                    ),
+                  Text('Disponibilidad', style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy)
                   ),
                   const SizedBox(height: AppTheme.spacing8),
 

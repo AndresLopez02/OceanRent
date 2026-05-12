@@ -99,6 +99,10 @@ class CustomerBoatCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  if (boat.requiredLicense.toLowerCase() != 'none') ...[
+                    const SizedBox(height: AppTheme.spacing8),
+                    _LicenseBadge(license: boat.requiredLicense),
+                  ],
                 ],
               ),
             ),
@@ -151,6 +155,58 @@ class _BoatInfoItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _LicenseBadge extends StatelessWidget {
+  final String license;
+
+  const _LicenseBadge({required this.license});
+
+  String _licenseLabel(String license) {
+    switch (license.toLowerCase()) {
+      case 'pbn':
+        return 'Requiere licencia PBN';
+      case 'per':
+        return 'Requiere licencia PER';
+      default:
+        return 'Requiere licencia';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spacing8,
+        vertical: AppTheme.spacing4,
+      ),
+      decoration: BoxDecoration(
+        color: AppTheme.sunsetGold.withValues(alpha: AppTheme.alphaLight),
+        borderRadius: BorderRadius.circular(AppTheme.spacing6),
+        border: Border.all(
+          color: AppTheme.sunsetGold.withValues(alpha: AppTheme.alphaOverlay),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.verified_outlined,
+            size: AppTheme.iconSizeMedium,
+            color: AppTheme.sunsetGold,
+          ),
+          const SizedBox(width: AppTheme.spacing4),
+          Text(
+            _licenseLabel(license),
+            style: AppTheme.bodySmall.copyWith(
+              color: AppTheme.sunsetGold,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -44,6 +44,7 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
         .read(userRepositoryProvider)
         .getUser(uid);
 
+    if (!mounted) return;
     setState(() {
       currentUser = user;
     });
