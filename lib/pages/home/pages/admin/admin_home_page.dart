@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
+import 'package:ocean_rent/models/booking_model.dart';
+import 'package:ocean_rent/pages/home/pages/admin/pages/admin_bookings_page.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_calendar_page.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_profile_screen.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/boat_form_page.dart';
@@ -11,6 +13,7 @@ import 'package:ocean_rent/pages/home/pages/admin/widgets/admin_summary_card.dar
 import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/boat_providers.dart';
+import 'package:ocean_rent/providers/booking_providers.dart';
 
 class AdminHomePage extends ConsumerWidget {
   const AdminHomePage({super.key});
@@ -81,10 +84,13 @@ class AdminHomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final boatsAsync = ref.watch(boatsStreamProvider);
+    final bookingsAsync = ref.watch(bookingsStreamProvider);
+
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('Panel Admin - Barcos'),
+        title: const Text('Panel Admin'),
         actions: [
           IconButton(
             tooltip: 'Perfil',
@@ -119,9 +125,28 @@ class AdminHomePage extends ConsumerWidget {
           style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.white),
         ),
       ),
-      body: ref
-          .watch(boatsStreamProvider)
-          .when(
+      body: boatsAsync.when(
+        loading: () => const Center(
+          child: CircularProgressIndicator(
+            color: AppTheme.oceanBlue,
+            strokeWidth: AppTheme.borderWidthMedium,
+          ),
+        ),
+        error: (error, _) => Center(
+          child: Padding(
+            padding: AppTheme.screenPadding,
+            child: Text(
+              'Error cargando el panel:\n$error',
+              textAlign: TextAlign.center,
+              style: AppTheme.bodyLarge.copyWith(
+                color: AppTheme.alertRed,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+        data: (boats) {
+          return bookingsAsync.when(
             loading: () => const Center(
               child: CircularProgressIndicator(
                 color: AppTheme.oceanBlue,
@@ -132,7 +157,7 @@ class AdminHomePage extends ConsumerWidget {
               child: Padding(
                 padding: AppTheme.screenPadding,
                 child: Text(
-                  'Error cargando el panel:\n$error',
+                  'Error cargando reservas:\n$error',
                   textAlign: TextAlign.center,
                   style: AppTheme.bodyLarge.copyWith(
                     color: AppTheme.alertRed,
@@ -141,9 +166,10 @@ class AdminHomePage extends ConsumerWidget {
                 ),
               ),
             ),
-            data: (boats) {
+            data: (bookings) {
               return _AdminDashboard(
                 boats: boats,
+                bookings: bookings,
                 onCreateBoat: () async {
                   await Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const BoatFormPage()),
@@ -157,19 +183,23 @@ class AdminHomePage extends ConsumerWidget {
                 onDeleteBoat: (boat) => _deleteBoat(context, ref, boat),
               );
             },
-          ),
+          );
+        },
+      ),
     );
   }
 }
 
 class _AdminDashboard extends StatelessWidget {
   final List<BoatModel> boats;
+  final List<BookingModel> bookings;
   final VoidCallback onCreateBoat;
   final ValueChanged<BoatModel> onEditBoat;
   final ValueChanged<BoatModel> onDeleteBoat;
 
   const _AdminDashboard({
     required this.boats,
+    required this.bookings,
     required this.onCreateBoat,
     required this.onEditBoat,
     required this.onDeleteBoat,
@@ -177,6 +207,41 @@ class _AdminDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final today = DateTime.now();
+    final todayOnly = DateTime(today.year, today.month, today.day);
+
+    final upcomingBookings = bookings.where((booking) {
+      final startDate = DateTime(
+        booking.startDate.year,
+        booking.startDate.month,
+        booking.startDate.day,
+      );
+
+      return booking.status != BookingModel.statusCancelled &&
+          !startDate.isBefore(todayOnly);
+    }).length;
+
+    final pendingBookings = bookings
+        .where((booking) => booking.status == BookingModel.statusPending)
+        .length;
+
+    final heldDepositsAmount = bookings
+        .where(
+          (booking) =>
+              booking.status != BookingModel.statusCancelled &&
+              booking.depositStatus == BookingModel.depositStatusHeld,
+        )
+        .fold<double>(0, (total, booking) => total + booking.depositAmount);
+
+    final recentBookings = [...bookings]
+      ..sort((a, b) {
+        final firstDate = a.createdAt ?? a.startDate;
+        final secondDate = b.createdAt ?? b.startDate;
+        return secondDate.compareTo(firstDate);
+      });
+
+    final boatNames = {for (final boat in boats) boat.id: boat.name};
+
     return ListView(
       padding: AppTheme.adminDashboardPadding,
       children: [
@@ -195,17 +260,17 @@ class _AdminDashboard extends StatelessWidget {
           crossAxisSpacing: AppTheme.spacing12,
           childAspectRatio: AppTheme.adminSummaryAspectRatio,
           children: [
-            const AdminSummaryCard(
+            AdminSummaryCard(
               title: 'Reservas próximas',
-              value: '0',
-              subtitle: 'Pendiente de bookings',
+              value: '$upcomingBookings',
+              subtitle: '$pendingBookings pendientes',
               icon: Icons.calendar_month_outlined,
               color: AppTheme.oceanBlue,
             ),
-            const AdminSummaryCard(
-              title: 'Fianzas pendientes',
-              value: '0 €',
-              subtitle: 'Pendiente de Stripe',
+            AdminSummaryCard(
+              title: 'Fianzas retenidas',
+              value: '${heldDepositsAmount.toStringAsFixed(0)} €',
+              subtitle: 'Estado held',
               icon: Icons.payments_outlined,
               color: AppTheme.sunsetGold,
             ),
@@ -237,10 +302,8 @@ class _AdminDashboard extends StatelessWidget {
           icon: Icons.assignment_outlined,
           color: AppTheme.oceanBlue,
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Reservas se conectará en una próxima tarea.'),
-              ),
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AdminBookingsPage()),
             );
           },
         ),
@@ -275,15 +338,27 @@ class _AdminDashboard extends StatelessWidget {
         const SizedBox(height: AppTheme.spacing26),
         const _SectionTitle(
           title: 'Pedidos recientes',
-          subtitle: 'Preparado para conectarse con la colección bookings.',
+          subtitle: 'Últimas reservas registradas en Firestore.',
         ),
         const SizedBox(height: AppTheme.spacing12),
-        const AdminEmptySection(
-          icon: Icons.event_note_outlined,
-          title: 'No hay reservas conectadas todavía',
-          message:
-              'Cuando se implemente bookings, aquí aparecerán los pedidos recientes.',
-        ),
+        if (recentBookings.isEmpty)
+          const AdminEmptySection(
+            icon: Icons.event_note_outlined,
+            title: 'No hay reservas todavía',
+            message: 'Cuando un cliente reserve, aparecerá aquí.',
+          )
+        else
+          ...recentBookings
+              .take(3)
+              .map(
+                (booking) => Padding(
+                  padding: AppTheme.cardBottomMargin,
+                  child: _RecentBookingCard(
+                    booking: booking,
+                    boatName: boatNames[booking.boatId] ?? booking.boatId,
+                  ),
+                ),
+              ),
         const SizedBox(height: AppTheme.spacing26),
         _SectionTitle(
           title: 'Gestión de flota',
@@ -445,6 +520,87 @@ class _SectionTitle extends StatelessWidget {
       ],
     );
   }
+}
+
+class _RecentBookingCard extends StatelessWidget {
+  final BookingModel booking;
+  final String boatName;
+
+  const _RecentBookingCard({required this.booking, required this.boatName});
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = _bookingStatusColor(booking.status);
+
+    return Container(
+      padding: AppTheme.compactCardPadding,
+      decoration: AppTheme.adminCardDecoration(),
+      child: Row(
+        children: [
+          Container(
+            width: AppTheme.summaryIconBoxSize,
+            height: AppTheme.summaryIconBoxSize,
+            decoration: AppTheme.adminIconBoxDecoration(statusColor),
+            child: Icon(
+              Icons.event_available_outlined,
+              color: statusColor,
+              size: AppTheme.iconSize2xl,
+            ),
+          ),
+          const SizedBox(width: AppTheme.spacing12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  boatName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTheme.titleSmall.copyWith(color: AppTheme.deepNavy),
+                ),
+                const SizedBox(height: AppTheme.spacing4),
+                Text(
+                  '${_formatBookingDate(booking.startDate)} - ${_formatBookingDate(booking.endDate)}',
+                  style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppTheme.spacing10),
+          Container(
+            padding: AppTheme.licenseStatusBadgePadding,
+            decoration: AppTheme.badgeDecoration(color: statusColor),
+            child: Text(
+              booking.status,
+              style: AppTheme.labelSmall.copyWith(
+                color: statusColor,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Color _bookingStatusColor(String status) {
+  switch (status) {
+    case BookingModel.statusConfirmed:
+      return AppTheme.oceanBlue;
+    case BookingModel.statusCancelled:
+      return AppTheme.alertRed;
+    case BookingModel.statusPending:
+    default:
+      return AppTheme.sunsetGold;
+  }
+}
+
+String _formatBookingDate(DateTime date) {
+  final day = date.day.toString().padLeft(2, '0');
+  final month = date.month.toString().padLeft(2, '0');
+
+  return '$day/$month/${date.year}';
 }
 
 class _BoatAdminCard extends StatelessWidget {

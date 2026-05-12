@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/boat_list_page.dart';
+import 'package:ocean_rent/pages/home/pages/customer/pages/customer_bookings_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_profile_screen.dart';
 import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
@@ -49,7 +50,7 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
       // Se tiene que implementar el mapa
       const Center(child: Text('Chat')),
       // Posible implementación de un chat para hablar con el admin del barco
-      const Center(child: Text('Reservas')),
+      const CustomerBookingsPage(),
       // Se tiene que implementar, aquí se deberían de ver las solitudes de reservas(aceptadas o pendientes)
       isAnonymous
           ? const Center(child: Text('Inicia sesión para ver tu perfil'))
