@@ -50,7 +50,7 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
       const CustomerMapPage(), 
       const Center(child: Text('Chat')),
       // Posible implementación de un chat para hablar con el admin del barco
-      const Center(child: Text('Reservas')),
+      const CustomerBookingsPage(),
       // Se tiene que implementar, aquí se deberían de ver las solitudes de reservas(aceptadas o pendientes)
       isAnonymous
           ? const Center(child: Text('Inicia sesión para ver tu perfil'))
