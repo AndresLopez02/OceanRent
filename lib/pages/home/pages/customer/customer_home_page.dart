@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/boat_list_page.dart';
+import 'package:ocean_rent/pages/home/pages/customer/pages/customer_map_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_profile_screen.dart';
 import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
@@ -45,8 +46,8 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
     final isAnonymous = user == null;
     final List<Widget> pages = [
       BoatListPage(categoriasIniciales: widget.initialCategories),
-      const Center(child: Text('Mapa')),
-      // Se tiene que implementar el mapa
+      // Mapa implementado en el proyecto
+      const CustomerMapPage(), 
       const Center(child: Text('Chat')),
       // Posible implementación de un chat para hablar con el admin del barco
       const Center(child: Text('Reservas')),

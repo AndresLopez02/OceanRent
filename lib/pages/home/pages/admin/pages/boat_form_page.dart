@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
@@ -31,6 +32,15 @@ class _BoatFormPageState extends State<BoatFormPage> {
   final _descriptionController = TextEditingController();
   final _imageUrlController = TextEditingController();
   final _portNameController = TextEditingController();
+  final _latController = TextEditingController();
+  final _lngController = TextEditingController();
+
+  //  Ubicaciones fijas de la app 
+  static const Map<String, ({double lat, double lng})> _knownPorts = {
+    'marbella': (lat: 36.5061, lng: -4.8889),
+    'malaga': (lat: 36.7167, lng: -4.4167),
+    'cabo canaveral': (lat: 36.6170, lng: -4.5120),
+  };
 
   final List<String> _boatTypes = const [
     'lancha',
@@ -53,6 +63,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
   bool _isPickingImage = false;
   File? _selectedImage;
   String imageUrlCloud = 'noURL';
+  bool _coordsAutoFilled = false;
 
   bool get isEditing => widget.boat != null;
 
@@ -72,13 +83,71 @@ class _BoatFormPageState extends State<BoatFormPage> {
       _imageUrlController.text = boat.imageUrl;
       _portNameController.text = boat.portName;
       _selectedLicense = _normalizeLicense(boat.requiredLicense);
+      if (boat.locationLat != null) {
+        _latController.text = boat.locationLat.toString();
+        _coordsAutoFilled = true;
+      }
+      if (boat.locationLng != null) {
+        _lngController.text = boat.locationLng.toString();
+      }
     }
 
     _imageUrlController.addListener(() {
-      if (mounted) {
-        setState(() {});
-      }
+      if (mounted) setState(() {});
     });
+
+    _portNameController.addListener(_onPortNameChanged);
+  }
+
+  /// Normaliza un string eliminando tildes y espacios para comparar con _knownPorts
+  String _normalize(String text) {
+    return text
+        .trim()
+        .toLowerCase()
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u')
+        .replaceAll('ñ', 'n');
+  }
+
+  void _onPortNameChanged() {
+    final input = _normalize(_portNameController.text);
+    if (input.isEmpty) {
+      if (_coordsAutoFilled) {
+        setState(() {
+          _latController.clear();
+          _lngController.clear();
+          _coordsAutoFilled = false;
+        });
+      }
+      return;
+    }
+
+    for (final entry in _knownPorts.entries) {
+      if (input.contains(entry.key) || entry.key.contains(input)) {
+        if (_latController.text.isEmpty ||
+            _lngController.text.isEmpty ||
+            _coordsAutoFilled) {
+          setState(() {
+            _latController.text = entry.value.lat.toString();
+            _lngController.text = entry.value.lng.toString();
+            _coordsAutoFilled = true;
+          });
+        }
+        return;
+      }
+    }
+
+    // No coincide: limpia solo si fueron autocompletadas
+    if (_coordsAutoFilled) {
+      setState(() {
+        _latController.clear();
+        _lngController.clear();
+        _coordsAutoFilled = false;
+      });
+    }
   }
 
   @override
@@ -90,21 +159,15 @@ class _BoatFormPageState extends State<BoatFormPage> {
     _descriptionController.dispose();
     _imageUrlController.dispose();
     _portNameController.dispose();
+    _latController.dispose();
+    _lngController.dispose();
     super.dispose();
   }
 
   String? _normalizeBoatType(String? type) {
     if (type == null) return null;
 
-    final normalized = type
-        .trim()
-        .toLowerCase()
-        .replaceAll('á', 'a')
-        .replaceAll('é', 'e')
-        .replaceAll('í', 'i')
-        .replaceAll('ó', 'o')
-        .replaceAll('ú', 'u')
-        .replaceAll(' ', '');
+    final normalized = _normalize(type).replaceAll(' ', '');
 
     switch (normalized) {
       case 'lancha':
@@ -170,6 +233,16 @@ class _BoatFormPageState extends State<BoatFormPage> {
     }
   }
 
+  GeoPoint? _buildGeoPoint() {
+    final latText = _latController.text.trim().replaceAll(',', '.');
+    final lngText = _lngController.text.trim().replaceAll(',', '.');
+    if (latText.isEmpty || lngText.isEmpty) return null;
+    final lat = double.tryParse(latText);
+    final lng = double.tryParse(lngText);
+    if (lat == null || lng == null) return null;
+    return GeoPoint(lat, lng);
+  }
+
   Future<void> _save() async {
     FocusScope.of(context).unfocus();
 
@@ -204,6 +277,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
       final imageUrl = finalImageUrl.isNotEmpty
           ? finalImageUrl
           : _imageUrlController.text.trim();
+      final location = _buildGeoPoint();
 
       if (isEditing) {
         await BoatService.instance.updateBoat(
@@ -217,6 +291,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
           portName: portName,
           depositAmount: deposit,
           requiredLicense: _selectedLicense,
+          location: location,
         );
       } else {
         await BoatService.instance.createBoat(
@@ -229,6 +304,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
           portName: portName,
           depositAmount: deposit,
           requiredLicense: _selectedLicense,
+          location: location,
         );
       }
 
@@ -270,48 +346,38 @@ class _BoatFormPageState extends State<BoatFormPage> {
   }
 
   String? _validateRequired(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Campo obligatorio';
-    }
-
+    if (value == null || value.trim().isEmpty) return 'Campo obligatorio';
     return null;
   }
 
   String? _validateCapacity(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Campo obligatorio';
-    }
-
+    if (value == null || value.trim().isEmpty) return 'Campo obligatorio';
     final number = int.tryParse(value.trim());
-
     if (number == null) return 'Introduce un número válido';
     if (number <= 0) return 'La capacidad debe ser mayor que 0';
-
     return null;
   }
 
   String? _validatePrice(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Campo obligatorio';
-    }
-
+    if (value == null || value.trim().isEmpty) return 'Campo obligatorio';
     final parsed = double.tryParse(value.trim().replaceAll(',', '.'));
-
     if (parsed == null) return 'Introduce un precio válido';
     if (parsed <= 0) return 'El precio debe ser mayor que 0';
-
     return null;
   }
 
   String? _validateDeposit(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Campo obligatorio';
-    }
+    if (value == null || value.trim().isEmpty) return 'Campo obligatorio';
     final parsed = double.tryParse(value.trim().replaceAll(',', '.'));
-
     if (parsed == null) return 'Introduce un importe válido';
     if (parsed < 0) return 'La fianza no puede ser negativa';
+    return null;
+  }
 
+  String? _validateCoordinate(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    final parsed = double.tryParse(value.trim().replaceAll(',', '.'));
+    if (parsed == null) return 'Número no válido (ej: 36.5097)';
     return null;
   }
 
@@ -353,7 +419,10 @@ class _BoatFormPageState extends State<BoatFormPage> {
               const SizedBox(height: AppTheme.spacing12),
               DropdownButtonFormField<String>(
                 initialValue: _selectedBoatType,
-                decoration: _inputDecoration('Tipo de barco', icon: Icons.category_outlined),
+                decoration: _inputDecoration(
+                  'Tipo de barco',
+                  icon: Icons.category_outlined,
+                ),
                 dropdownColor: AppTheme.surface,
                 borderRadius: AppTheme.borderRadiusInput,
                 style: AppTheme.fieldTextStyle,
@@ -361,13 +430,20 @@ class _BoatFormPageState extends State<BoatFormPage> {
                     .map(
                       (type) => DropdownMenuItem<String>(
                         value: type,
-                        child: Text(_boatTypeLabel(type), style: AppTheme.bodyMedium.copyWith(color: AppTheme.deepNavy),
-                        )
+                        child: Text(
+                          _boatTypeLabel(type),
+                          style: AppTheme.bodyMedium
+                              .copyWith(color: AppTheme.deepNavy),
+                        ),
                       ),
-                    ).toList(),
-                onChanged: (value) => setState(() => _selectedBoatType = value),
+                    )
+                    .toList(),
+                onChanged: (value) =>
+                    setState(() => _selectedBoatType = value),
                 validator: (value) =>
-                    (value == null || value.trim().isEmpty) ? 'Campo obligatorio' : null,
+                    (value == null || value.trim().isEmpty)
+                        ? 'Campo obligatorio'
+                        : null,
               ),
               const SizedBox(height: AppTheme.spacing12),
               BoatFormField(
@@ -378,18 +454,65 @@ class _BoatFormPageState extends State<BoatFormPage> {
                 validator: _validateCapacity,
               ),
               const SizedBox(height: AppTheme.spacing12),
-              BoatFormField(
-                controller: _portNameController,
-                label: 'Puerto / ubicación',
-                icon: Icons.location_on_outlined,
-                validator: _validateRequired,
+
+              // Puerto con badge de autocompletado 
+              Stack(
+                children: [
+                  BoatFormField(
+                    controller: _portNameController,
+                    label: 'Puerto / ubicación',
+                    icon: Icons.location_on_outlined,
+                    validator: _validateRequired,
+                  ),
+                  if (_coordsAutoFilled)
+                    Positioned(
+                      right: AppTheme.spacing12,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.spacing8,
+                            vertical: AppTheme.spacing2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.success.withValues(
+                              alpha: AppTheme.alphaChip,
+                            ),
+                            borderRadius: AppTheme.borderRadiusPill,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.my_location,
+                                size: AppTheme.iconSizeMini,
+                                color: AppTheme.success,
+                              ),
+                              const SizedBox(width: AppTheme.spacing4),
+                              Text(
+                                'GPS',
+                                style: AppTheme.helperTextStyle.copyWith(
+                                  color: AppTheme.success,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
+              // FIN campo puerto 
+
               const SizedBox(height: AppTheme.spacing12),
               BoatFormField(
                 controller: _priceController,
                 label: 'Precio por día (€)',
                 icon: Icons.euro_outlined,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 validator: _validatePrice,
               ),
               const SizedBox(height: AppTheme.spacing12),
@@ -397,22 +520,33 @@ class _BoatFormPageState extends State<BoatFormPage> {
                 controller: _depositController,
                 label: 'Fianza (€)',
                 icon: Icons.lock_outline,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 validator: _validateDeposit,
               ),
               const SizedBox(height: AppTheme.spacing12),
               DropdownButtonFormField<String>(
                 initialValue: _selectedLicense,
                 isExpanded: true,
-                decoration: _inputDecoration('Licencia requerida', icon: Icons.verified_outlined),
+                decoration: _inputDecoration(
+                  'Licencia requerida',
+                  icon: Icons.verified_outlined,
+                ),
                 dropdownColor: AppTheme.surface,
                 borderRadius: AppTheme.borderRadiusInput,
                 style: AppTheme.fieldTextStyle,
-                items: _licenseTypes.map(((String, String) entry) => DropdownMenuItem<String>(
+                items: _licenseTypes
+                    .map(
+                      ((String, String) entry) => DropdownMenuItem<String>(
                         value: entry.$1,
-                        child: Text(entry.$2, style: AppTheme.bodyMedium.copyWith(color: AppTheme.deepNavy)),
+                        child: Text(
+                          entry.$2,
+                          style: AppTheme.bodyMedium
+                              .copyWith(color: AppTheme.deepNavy),
+                        ),
                       ),
-                    ).toList(),
+                    )
+                    .toList(),
                 onChanged: (value) {
                   if (value != null) setState(() => _selectedLicense = value);
                 },
@@ -424,13 +558,104 @@ class _BoatFormPageState extends State<BoatFormPage> {
                 icon: Icons.description_outlined,
                 maxLines: 4,
               ),
+
+              // Coordenadas (readonly si fueron autocompletadas) 
+              const SizedBox(height: AppTheme.spacing20),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.my_location,
+                    size: AppTheme.iconSizeMd,
+                    color: AppTheme.textSecondary,
+                  ),
+                  const SizedBox(width: AppTheme.spacing8),
+                  Text(
+                    'Coordenadas del puerto',
+                    style: AppTheme.fieldLabelStyle,
+                  ),
+                  const SizedBox(width: AppTheme.spacing6),
+                  Text(
+                    _coordsAutoFilled ? '(autocompletadas ✓)' : '(opcional)',
+                    style: AppTheme.helperTextStyle.copyWith(
+                      color: _coordsAutoFilled
+                          ? AppTheme.success
+                          : AppTheme.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppTheme.spacing8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _latController,
+                      readOnly: _coordsAutoFilled,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                        signed: true,
+                      ),
+                      style: AppTheme.fieldTextStyle.copyWith(
+                        color: _coordsAutoFilled
+                            ? AppTheme.textSecondary
+                            : AppTheme.textPrimary,
+                      ),
+                      decoration: AppTheme.inputDecoration(
+                        labelText: 'Latitud',
+                        icon: Icons.arrow_upward_outlined,
+                        readOnly: _coordsAutoFilled,
+                      ),
+                      validator: _validateCoordinate,
+                    ),
+                  ),
+                  const SizedBox(width: AppTheme.spacing12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _lngController,
+                      readOnly: _coordsAutoFilled,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                        signed: true,
+                      ),
+                      style: AppTheme.fieldTextStyle.copyWith(
+                        color: _coordsAutoFilled
+                            ? AppTheme.textSecondary
+                            : AppTheme.textPrimary,
+                      ),
+                      decoration: AppTheme.inputDecoration(
+                        labelText: 'Longitud',
+                        icon: Icons.arrow_forward_outlined,
+                        readOnly: _coordsAutoFilled,
+                      ),
+                      validator: _validateCoordinate,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppTheme.spacing6),
+              Text(
+                _coordsAutoFilled
+                    ? 'Coordenadas rellenadas automáticamente según el puerto'
+                    : 'Se rellenan automáticamente al escribir Marbella, Málaga o Cabo Cañaveral',
+                style: AppTheme.helperTextStyle.copyWith(
+                  color: _coordsAutoFilled
+                      ? AppTheme.success
+                      : AppTheme.textSecondary,
+                ),
+              ),
+              // Fin campos coordenadas ─────────────────────────────────────────
+
               const SizedBox(height: AppTheme.spacing24),
               SizedBox(
                 height: AppTheme.buttonHeight,
                 child: ElevatedButton(
                   onPressed: _isSaving ? null : _save,
                   style: AppTheme.fullWidthPrimaryButtonStyle,
-                  child: Text(_isSaving ? 'Guardando...' : 'Guardar', style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.pearlWhite)),
+                  child: Text(
+                    _isSaving ? 'Guardando...' : 'Guardar',
+                    style: AppTheme.buttonTextStyle
+                        .copyWith(color: AppTheme.pearlWhite),
+                  ),
                 ),
               ),
               if (!isEditing) ...[
@@ -446,7 +671,10 @@ class _BoatFormPageState extends State<BoatFormPage> {
                       );
                     },
                     style: AppTheme.outlinedButtonStyle,
-                    child: Text('Volver al panel', style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.deepNavy),
+                    child: Text(
+                      'Volver al panel',
+                      style: AppTheme.buttonTextStyle
+                          .copyWith(color: AppTheme.deepNavy),
                     ),
                   ),
                 ),
