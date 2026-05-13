@@ -5,8 +5,8 @@ import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/pages/home/pages/customer/widgets/license_detail_section.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/booking_providers.dart';
-import 'package:ocean_rent/utils/boat_utils.dart';
 import 'package:ocean_rent/widgets/app_navigator.dart';
+import 'package:ocean_rent/utils/boat_utils.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 // Pantalla de detalle para el cliente.
@@ -202,9 +202,7 @@ class _CustomerBoatDetailPageState
                   const SizedBox(height: AppTheme.spacing12),
                   _BoatDetailInfoItem(
                     icon: Icons.anchor_outlined,
-                    label: boat.portName.isEmpty
-                        ? 'Puerto no indicado'
-                        : boat.portName,
+                    label: boat.portName.isEmpty? 'Puerto no indicado' : boat.portName,
                   ),
                   if (boat.requiredLicense.toLowerCase() != 'none') ...[
                     const SizedBox(height: AppTheme.spacing16),
@@ -216,36 +214,24 @@ class _CustomerBoatDetailPageState
                   const SizedBox(height: AppTheme.spacing8),
                   Text(
                     boat.description.isEmpty? 'Sin descripción disponible.' : boat.description,
-                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted, height: AppTheme.lineHeightInfo,
-                    ),
+                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted, height: AppTheme.lineHeightInfo)
                   ),
-
                   const SizedBox(height: AppTheme.spacing24),
-
                   Text('Disponibilidad', style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy)
                   ),
                   const SizedBox(height: AppTheme.spacing8),
-
                   if (bookingState.isLoading)
                     Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: AppTheme.spacing12,
-                      ),
+                      padding: const EdgeInsets.only(bottom: AppTheme.spacing12),
                       child: Row(
                         children: [
                           const SizedBox(
                             width: AppTheme.loadingSize,
                             height: AppTheme.loadingSize,
-                            child: CircularProgressIndicator(
-                              strokeWidth: AppTheme.progressStrokeWidth,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: AppTheme.progressStrokeWidth)
                           ),
                           const SizedBox(width: AppTheme.spacing10),
-                          Text(
-                            'Cargando disponibilidad...',
-                            style: AppTheme.bodySmall.copyWith(
-                              color: AppTheme.textMuted,
-                            ),
+                          Text('Cargando disponibilidad...',style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted)
                           ),
                         ],
                       ),
@@ -319,11 +305,7 @@ class _CustomerBoatDetailPageState
                             color: AppTheme.backgroundDim,
                             shape: BoxShape.circle,
                           ),
-                          child: Text(
-                            '${day.day}',
-                            style: const TextStyle(
-                              color: AppTheme.textSecondary,
-                            ),
+                          child: Text('${day.day}',style: const TextStyle(color: AppTheme.textSecondary),
                           ),
                         );
                       },
@@ -332,9 +314,7 @@ class _CustomerBoatDetailPageState
                     daysOfWeekStyle: AppTheme.calendarDaysOfWeekStyle,
                     calendarStyle: CalendarStyle(
                       todayDecoration: BoxDecoration(
-                        color: AppTheme.oceanBlue.withValues(
-                          alpha: AppTheme.alphaOverlay,
-                        ),
+                        color: AppTheme.oceanBlue.withValues(alpha: AppTheme.alphaOverlay),
                         shape: BoxShape.circle,
                       ),
                       todayTextStyle: const TextStyle(color: AppTheme.deepNavy),
@@ -342,16 +322,12 @@ class _CustomerBoatDetailPageState
                         color: AppTheme.oceanBlue,
                         shape: BoxShape.circle,
                       ),
-                      selectedTextStyle: const TextStyle(
-                        color: AppTheme.pearlWhite,
-                      ),
+                      selectedTextStyle: const TextStyle(color: AppTheme.pearlWhite),
                       disabledDecoration: const BoxDecoration(
                         color: AppTheme.backgroundDim,
                         shape: BoxShape.circle,
                       ),
-                      disabledTextStyle: const TextStyle(
-                        color: AppTheme.textSecondary,
-                      ),
+                      disabledTextStyle: const TextStyle(color: AppTheme.textSecondary),
                       rangeStartDecoration: const BoxDecoration(
                         color: AppTheme.oceanBlue,
                         shape: BoxShape.circle,
@@ -361,29 +337,19 @@ class _CustomerBoatDetailPageState
                         shape: BoxShape.circle,
                       ),
                       withinRangeDecoration: BoxDecoration(
-                        color: AppTheme.sunsetGold.withValues(
-                          alpha: AppTheme.alphaMedium,
-                        ),
+                        color: AppTheme.sunsetGold.withValues(alpha: AppTheme.alphaMedium),
                         shape: BoxShape.circle,
                       ),
                       defaultDecoration: const BoxDecoration(
                         shape: BoxShape.circle,
                       ),
-                      defaultTextStyle: const TextStyle(
-                        color: AppTheme.deepNavy,
-                      ),
-                      weekendDecoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                      ),
-                      weekendTextStyle: const TextStyle(
-                        color: AppTheme.oceanBlue,
-                      ),
+                      defaultTextStyle: const TextStyle(color: AppTheme.deepNavy),
+                      weekendDecoration: const BoxDecoration(shape: BoxShape.circle),
+                      weekendTextStyle: const TextStyle(color: AppTheme.oceanBlue),
                       outsideDaysVisible: false,
                     ),
                   ),
-
                   const SizedBox(height: AppTheme.spacing24),
-
                   _CrewSelector(
                     crewCount: _crewCount,
                     maxCrew: maxCrew,
@@ -431,13 +397,8 @@ class _CustomerBoatDetailPageState
                                 color: AppTheme.pearlWhite,
                               ),
                             )
-                          : Text(
-                              isAnonymous
-                                  ? 'Inicia sesión para reservar'
-                                  : 'Reservar',
-                              style: AppTheme.buttonTextStyle.copyWith(
-                                color: AppTheme.pearlWhite,
-                              ),
+                          : Text(isAnonymous? 'Inicia sesión para reservar' : 'Reservar',
+                              style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.pearlWhite)
                             ),
                     ),
                   ),
@@ -506,14 +467,10 @@ class _CrewSelector extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Tripulantes',
-                  style: AppTheme.titleSmall.copyWith(color: AppTheme.deepNavy),
+                Text('Tripulantes',style: AppTheme.titleSmall.copyWith(color: AppTheme.deepNavy)
                 ),
                 const SizedBox(height: AppTheme.spacing4),
-                Text(
-                  'Máximo permitido: $maxCrew',
-                  style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted),
+                Text('Máximo permitido: $maxCrew',style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted)
                 ),
               ],
             ),
@@ -521,16 +478,14 @@ class _CrewSelector extends StatelessWidget {
           IconButton(
             onPressed: onDecrease,
             icon: const Icon(Icons.remove_circle_outline),
-            color: AppTheme.deepNavy,
+            color: AppTheme.deepNavy
           ),
-          Text(
-            '$crewCount',
-            style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy),
+          Text('$crewCount',style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy)
           ),
           IconButton(
             onPressed: onIncrease,
             icon: const Icon(Icons.add_circle_outline),
-            color: AppTheme.oceanBlue,
+            color: AppTheme.oceanBlue
           ),
         ],
       ),
@@ -561,9 +516,7 @@ class _BookingSummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Resumen de la reserva',
-            style: AppTheme.titleSmall.copyWith(color: AppTheme.deepNavy),
+          Text('Resumen de la reserva', style: AppTheme.titleSmall.copyWith(color: AppTheme.deepNavy),
           ),
           const SizedBox(height: AppTheme.spacing10),
           _SummaryRow(label: 'Inicio', value: startDate),
@@ -596,17 +549,10 @@ class _SummaryRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              label,
-              style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted),
+            child: Text(label, style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted)
             ),
           ),
-          Text(
-            value,
-            style: AppTheme.bodySmall.copyWith(
-              color: AppTheme.deepNavy,
-              fontWeight: FontWeight.w700,
-            ),
+          Text(value,style: AppTheme.bodySmall.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w700)
           ),
         ],
       ),
@@ -630,12 +576,10 @@ class _DetailImagePlaceholder extends StatelessWidget {
           Icon(
             Icons.directions_boat_filled_outlined,
             size: AppTheme.detailPlaceholderIconSize,
-            color: AppTheme.deepNavy,
+            color: AppTheme.deepNavy
           ),
           const SizedBox(height: AppTheme.spacing8),
-          Text(
-            'Imagen no disponible',
-            style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy),
+          Text('Imagen no disponible',style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy)
           ),
         ],
       ),

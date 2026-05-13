@@ -14,7 +14,6 @@ class CustomerBoatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: AppTheme.borderRadiusCard,
-      // Al pulsar la tarjeta se abre la pantalla de detalle del barco.
       onTap: () {
         Navigator.push(
           context,
@@ -27,9 +26,7 @@ class CustomerBoatCard extends StatelessWidget {
         decoration: AppTheme.cardDecoration(
           color: AppTheme.surface,
           radius: AppTheme.radiusCard,
-          border: Border.all(
-            color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft),
-          ),
+          border: Border.all(color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft)),
           boxShadow: AppTheme.softShadow(),
         ),
         child: Column(
@@ -60,12 +57,7 @@ class CustomerBoatCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    boat.name,
-                    style: AppTheme.titleLarge.copyWith(
-                      color: AppTheme.deepNavy,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  Text(boat.name,style: AppTheme.titleLarge.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w700)
                   ),
                   const SizedBox(height: AppTheme.spacing10),
                   Row(
@@ -82,9 +74,7 @@ class CustomerBoatCard extends StatelessWidget {
                             const SizedBox(height: AppTheme.spacing6),
                             _BoatInfoItem(
                               icon: Icons.location_on_outlined,
-                              label: boat.portName.trim().isEmpty
-                                  ? 'Sin ubicación'
-                                  : boat.portName.trim(),
+                              label: boat.portName.trim().isEmpty? 'Sin ubicación' : boat.portName.trim(),
                             ),
                             const SizedBox(height: AppTheme.spacing6),
                             _BoatInfoItem(
@@ -101,10 +91,7 @@ class CustomerBoatCard extends StatelessWidget {
                       const SizedBox(width: AppTheme.spacing10),
                       Text(
                         '${boat.pricePerDay.toStringAsFixed(0)} €/día',
-                        style: AppTheme.titleMedium.copyWith(
-                          color: AppTheme.deepNavy,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w700)
                       ),
                     ],
                   ),
@@ -125,9 +112,7 @@ class CustomerBoatCard extends StatelessWidget {
 class _BoatInfoItem extends StatelessWidget {
   final IconData icon;
   final String label;
-
   const _BoatInfoItem({required this.icon, required this.label});
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -173,9 +158,7 @@ class _LicenseBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.sunsetGold.withValues(alpha: AppTheme.alphaLight),
         borderRadius: BorderRadius.circular(AppTheme.spacing6),
-        border: Border.all(
-          color: AppTheme.sunsetGold.withValues(alpha: AppTheme.alphaOverlay),
-        ),
+        border: Border.all(color: AppTheme.sunsetGold.withValues(alpha: AppTheme.alphaOverlay))
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -186,12 +169,7 @@ class _LicenseBadge extends StatelessWidget {
             color: AppTheme.sunsetGold,
           ),
           const SizedBox(width: AppTheme.spacing4),
-          Text(
-            _licenseLabel(license),
-            style: AppTheme.bodySmall.copyWith(
-              color: AppTheme.sunsetGold,
-              fontWeight: FontWeight.w600,
-            ),
+          Text( _licenseLabel(license), style: AppTheme.bodySmall.copyWith(color: AppTheme.sunsetGold,fontWeight: FontWeight.w600),
           ),
         ],
       ),

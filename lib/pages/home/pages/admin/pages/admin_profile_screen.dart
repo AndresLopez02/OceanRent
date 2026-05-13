@@ -157,10 +157,7 @@ class _AdminProfileScreenState extends ConsumerState<AdminProfileScreen>
         body: Center(
           child: Text(
             'No se pudo cargar el perfil',
-            style: AppTheme.bodyLarge.copyWith(
-              color: AppTheme.deepNavy,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTheme.bodyLarge.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w600)
           ),
         ),
       );
@@ -180,11 +177,7 @@ class _AdminProfileScreenState extends ConsumerState<AdminProfileScreen>
               children: [
                 _AvatarSection(profile: _profile!),
                 const SizedBox(height: AppTheme.spacing32),
-                ProfileSectionLabel(
-                  'Datos Personales',
-                  color: AppTheme.deepNavy.withValues(
-                    alpha: AppTheme.alphaDisabled,
-                  ),
+                ProfileSectionLabel('Datos Personales', color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaDisabled)
                 ),
                 const SizedBox(height: AppTheme.spacing16),
                 _PersonalDataCard(
@@ -268,12 +261,7 @@ class _AvatarSection extends StatelessWidget {
                 height: AppTheme.avatarSize,
                 decoration: AppTheme.profileAvatarDecoration(),
                 child: Center(
-                  child: Text(
-                    initials,
-                    style: AppTheme.titleLarge.copyWith(
-                      color: AppTheme.white,
-                      fontSize: AppTheme.fontSize30,
-                    ),
+                  child: Text(initials, style: AppTheme.titleLarge.copyWith(color: AppTheme.white,fontSize: AppTheme.fontSize30)
                   ),
                 ),
               ),
@@ -287,9 +275,7 @@ class _AvatarSection extends StatelessWidget {
                   child: Icon(
                     Icons.camera_alt_rounded,
                     size: AppTheme.iconSizeSmall,
-                    color: AppTheme.deepNavy.withValues(
-                      alpha: AppTheme.alphaDisabled,
-                    ),
+                    color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaDisabled)
                   ),
                 ),
               ),
@@ -298,7 +284,7 @@ class _AvatarSection extends StatelessWidget {
           const SizedBox(height: AppTheme.spacing12),
           Text(
             '${profile.name} ${profile.surname}',
-            style: AppTheme.cardTitleStyle.copyWith(color: AppTheme.deepNavy),
+            style: AppTheme.cardTitleStyle.copyWith(color: AppTheme.deepNavy)
           ),
           const SizedBox(height: AppTheme.spacing4),
           Container(
@@ -313,11 +299,7 @@ class _AvatarSection extends StatelessWidget {
                   color: AppTheme.deepNavy,
                 ),
                 const SizedBox(width: AppTheme.spacing4),
-                Text(
-                  'Administrador',
-                  style: AppTheme.badgeTextStyle.copyWith(
-                    color: AppTheme.deepNavy,
-                  ),
+                Text('Administrador',style: AppTheme.badgeTextStyle.copyWith(color: AppTheme.deepNavy)
                 ),
               ],
             ),

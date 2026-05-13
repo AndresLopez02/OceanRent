@@ -189,22 +189,12 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
               Expanded(
                 child: boats.isEmpty
                     ? Center(
-                        child: Text(
-                          'No hay barcos disponibles',
-                          style: textTheme.bodyLarge?.copyWith(
-                            color: AppTheme.deepNavy,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        child: Text('No hay barcos disponibles',style: textTheme.bodyLarge?.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w600)
                         ),
                       )
                     : filteredBoats.isEmpty
                     ? Center(
-                        child: Text(
-                          'No hay barcos con esa disposición',
-                          style: textTheme.bodyLarge?.copyWith(
-                            color: AppTheme.deepNavy,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        child: Text('No hay barcos con esa disposición',style: textTheme.bodyLarge?.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w600),
                         ),
                       )
                     : ListView.builder(
