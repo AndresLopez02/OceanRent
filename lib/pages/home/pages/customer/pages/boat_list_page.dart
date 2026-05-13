@@ -8,7 +8,7 @@ import 'package:ocean_rent/pages/home/pages/customer/widgets/customer_boat_card.
 import 'package:ocean_rent/pages/home/pages/customer/widgets/filter_drawer.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/user_providers.dart';
-import 'package:ocean_rent/pages/home/pages/customer/widgets/license_comparer.dart';
+
 
 class BoatListPage extends ConsumerStatefulWidget {
   final List<String> categoriasIniciales;
@@ -25,6 +25,7 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
   RangeValues rangedPrice = const RangeValues(0, 1000);
   RangeValues rangedCapacity = const RangeValues(1, 100);
   bool onlyAvailable = false;
+  String? selectedLicense;
   UserModel? currentUser;
 
   @override
@@ -82,9 +83,8 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
           boat.capacity > rangedCapacity.end) {
         return false;
       }
-      if (onlyAvailable && 
-          !LicenseComparer.canDriveBoat( nauticalLicense: currentUser?.nauticalLicense,
-           requiredLicense: boat.requiredLicense,)) {
+      if (selectedLicense != null &&
+          boat.requiredLicense.toLowerCase() != selectedLicense) {
         return false;
       }
       return true;
@@ -98,6 +98,7 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
       rangedPrice = const RangeValues(0, 1000);
       rangedCapacity = const RangeValues(1, 100);
       onlyAvailable = false;
+      selectedLicense = null;
     });
   }
 
@@ -115,8 +116,9 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
         selectedCategories.length +
         selectedPorts.length +
         (rangedPrice.start != 0 || rangedPrice.end != 1000 ? 1 : 0) +
-        (rangedCapacity.start != 1 || rangedCapacity.end != 100 ? 1 : 0)+
-        (onlyAvailable ? 1 : 0);
+        (rangedCapacity.start != 1 || rangedCapacity.end != 100 ? 1 : 0) +
+        (onlyAvailable ? 1 : 0) +
+        (selectedLicense != null ? 1 : 0);
     return Scaffold(
       drawer: FilterDrawer(
         selectedCategory: selectedCategories,
@@ -140,7 +142,9 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
         onPriceChanged: (values) => setState(() => rangedPrice = values),
         onCapacityChanged: (values) => setState(() => rangedCapacity = values),
       
-        onOnlyAvailableChanged: (value) =>setState(() => onlyAvailable = value),
+        onOnlyAvailableChanged: (value) => setState(() => onlyAvailable = value),
+        selectedLicense: selectedLicense,
+        onLicenseChanged: (value) => setState(() => selectedLicense = value),
       ),
       body: Column(
         children: [
@@ -168,8 +172,9 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
                     rangedCapacity.start != 1 ||
                     rangedCapacity.end != 100 ||
                     rangedPrice.start != 0 ||
-                    rangedPrice.end != 1000||
-                    onlyAvailable)
+                    rangedPrice.end != 1000 ||
+                    onlyAvailable ||
+                    selectedLicense != null)
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: Chip(

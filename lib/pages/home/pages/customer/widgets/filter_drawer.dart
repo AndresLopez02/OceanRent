@@ -9,12 +9,14 @@ class FilterDrawer extends StatelessWidget {
   final List<String> categories;
   final List<String> ports;
   final bool onlyAvailable;
+  final String? selectedLicense;
   final VoidCallback onReset;
   final ValueChanged<String> onCategoryChanged;
   final ValueChanged<String> onPortChanged;
   final ValueChanged<RangeValues> onPriceChanged;
   final ValueChanged<RangeValues> onCapacityChanged;
   final ValueChanged<bool> onOnlyAvailableChanged;
+  final ValueChanged<String?> onLicenseChanged;
 
   const FilterDrawer({
     super.key,
@@ -31,6 +33,8 @@ class FilterDrawer extends StatelessWidget {
     required this.onPriceChanged,
     required this.onCapacityChanged,
     required this.onOnlyAvailableChanged,
+    required this.onLicenseChanged,
+    this.selectedLicense,
   });
 
   @override
@@ -46,13 +50,7 @@ class FilterDrawer extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Filtros',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.deepNavy,
-                      ),
+                    Text('Filtros',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.deepNavy)
                     ),
                     TextButton(
                       onPressed: onReset,
@@ -62,12 +60,7 @@ class FilterDrawer extends StatelessWidget {
                 ),
                 const Divider(),
                 const SizedBox(height: 16),
-                Text(
-                  'Categoría',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.deepNavy,
-                  ),
+                Text('Categoría',style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.deepNavy)
                 ),
                 const SizedBox(height: 8),
                 Wrap(
@@ -84,35 +77,19 @@ class FilterDrawer extends StatelessWidget {
                       selectedColor: AppTheme.oceanBlue.withValues(alpha: 0.2),
                       checkmarkColor: AppTheme.deepNavy,
                       labelStyle: TextStyle(
-                        color: isSelected
-                            ? AppTheme.deepNavy
-                            : Colors.grey.shade700,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.normal,
+                        color: isSelected? AppTheme.deepNavy : Colors.grey.shade700,
+                        fontWeight: isSelected? FontWeight.w600 : FontWeight.normal,
                       ),
-                      side: BorderSide(
-                        color: isSelected
-                            ? AppTheme.deepNavy
-                            : Colors.grey.shade300,
-                      ),
+                      side: BorderSide(color: isSelected? AppTheme.deepNavy: Colors.grey.shade300)
                     );
                   }).toList(),
                 ),
-
                 const SizedBox(height: 24),
-                Text(
-                  'Ubicación',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.deepNavy,
-                  ),
+                Text('Ubicación', style: TextStyle(fontWeight: FontWeight.w600,color: AppTheme.deepNavy)
                 ),
                 const SizedBox(height: 8),
                 if (ports.isEmpty)
-                  Text(
-                    'No hay ubicaciones disponibles',
-                    style: TextStyle(color: Colors.grey.shade600),
+                  Text('No hay ubicaciones disponibles', style: TextStyle(color: Colors.grey.shade600),
                   )
                 else
                   Wrap(
@@ -120,14 +97,8 @@ class FilterDrawer extends StatelessWidget {
                     runSpacing: 8,
                     children: ports.map((port) {
                       final isSelected = selectedPorts.contains(port);
-
                       return FilterChip(
-                        avatar: Icon(
-                          Icons.location_on_outlined,
-                          size: 18,
-                          color: isSelected
-                              ? AppTheme.deepNavy
-                              : Colors.grey.shade600,
+                        avatar: Icon(Icons.location_on_outlined, size: 18, color: isSelected? AppTheme.deepNavy : Colors.grey.shade600,
                         ),
                         label: Text(port),
                         selected: isSelected,
@@ -137,18 +108,10 @@ class FilterDrawer extends StatelessWidget {
                         ),
                         checkmarkColor: AppTheme.deepNavy,
                         labelStyle: TextStyle(
-                          color: isSelected
-                              ? AppTheme.deepNavy
-                              : Colors.grey.shade700,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.normal,
+                          color: isSelected? AppTheme.deepNavy : Colors.grey.shade700,
+                          fontWeight: isSelected? FontWeight.w600 : FontWeight.normal,
                         ),
-                        side: BorderSide(
-                          color: isSelected
-                              ? AppTheme.deepNavy
-                              : Colors.grey.shade300,
-                        ),
+                        side: BorderSide(color: isSelected? AppTheme.deepNavy : Colors.grey.shade300)
                       );
                     }).toList(),
                   ),
@@ -157,16 +120,9 @@ class FilterDrawer extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Precio por día (€)',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.deepNavy,
-                      ),
+                    Text('Precio por día (€)',style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.deepNavy)
                     ),
-                    Text(
-                      '${rangedPrice.start.toInt()}€ - ${rangedPrice.end.toInt()}€',
-                      style: TextStyle(color: AppTheme.deepNavy),
+                    Text('${rangedPrice.start.toInt()}€ - ${rangedPrice.end.toInt()}€', style: TextStyle(color: AppTheme.deepNavy)
                     ),
                   ],
                 ),
@@ -177,26 +133,16 @@ class FilterDrawer extends StatelessWidget {
                   divisions: 100,
                   activeColor: AppTheme.deepNavy,
                   inactiveColor: AppTheme.deepNavy.withValues(alpha: 0.2),
-                  labels: RangeLabels(
-                    '${rangedPrice.start.toInt()}€',
-                    '${rangedPrice.end.toInt()}€',
-                  ),
+                  labels: RangeLabels('${rangedPrice.start.toInt()}€', '${rangedPrice.end.toInt()}€'),
                   onChanged: onPriceChanged,
                 ),
                 const SizedBox(height: 24), 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Capacidad',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.deepNavy,
-                      ),
+                    Text('Capacidad', style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.deepNavy)
                     ),
-                    Text(
-                      '${rangedCapacity.start.toInt()} - ${rangedCapacity.end.toInt()} personas',
-                      style: TextStyle(color: AppTheme.deepNavy),
+                    Text('${rangedCapacity.start.toInt()} - ${rangedCapacity.end.toInt()} personas', style: TextStyle(color: AppTheme.deepNavy)
                     ),
                   ],
                 ),
@@ -207,40 +153,62 @@ class FilterDrawer extends StatelessWidget {
                   divisions: 25,
                   activeColor: AppTheme.deepNavy,
                   inactiveColor: AppTheme.deepNavy.withValues(alpha: 0.2),
-                  labels: RangeLabels(
-                    '${rangedCapacity.start.toInt()}',
-                    '${rangedCapacity.end.toInt()}',
-                  ),
+                  labels: RangeLabels('${rangedCapacity.start.toInt()}', '${rangedCapacity.end.toInt()}'),
                   onChanged: onCapacityChanged,
                 ),
-                 GestureDetector(
-                  onTap: () => onOnlyAvailableChanged(!onlyAvailable),
-                  child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                      AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 22,
-                      height: 22,
-                      decoration: BoxDecoration( 
-                        color: onlyAvailable? AppTheme.oceanBlue: Colors.transparent,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                        color: onlyAvailable? AppTheme.oceanBlue: AppTheme.deepNavy.withValues(alpha: 0.4),
-                        width: 2,
-                      ),
-                   ),
-                 child: onlyAvailable? const Icon(Icons.check,size: 14,color: Colors.white,) : null,
-                 ),
-
-               const SizedBox(width: 10),
-              Expanded(
-               child: Text('Mostrar solo barcos disponibles para su titulación',style: TextStyle(fontWeight: FontWeight.w600,color: AppTheme.deepNavy, fontSize: 13, ),
-             ),
-           ),
-         ],
-        ),
-      ),
+                const SizedBox(height: 24),
+                Text('Licencia requerida', style: TextStyle(fontWeight: FontWeight.w600,color: AppTheme.deepNavy)
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String?>(
+                  initialValue: selectedLicense,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 14,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: AppTheme.deepNavy),
+                    ),
+                  ),
+                  dropdownColor: Colors.white,
+                  style: TextStyle(color: AppTheme.deepNavy, fontSize: 14),
+                  selectedItemBuilder: (context) => [
+                    Text('Todas las licencias', overflow: TextOverflow.ellipsis),
+                    Text('Sin licencia', overflow: TextOverflow.ellipsis),
+                    Text('PBN', overflow: TextOverflow.ellipsis),
+                    Text('PER', overflow: TextOverflow.ellipsis),
+                  ],
+                  items: const [
+                    DropdownMenuItem(
+                      value: null,
+                      child: Text('Todas las licencias'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'none',
+                      child: Text('Sin licencia'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'pbn',
+                      child: Text('PBN — Patrón de Barco a Navegación'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'per',
+                      child: Text('PER — Patrón de Embarcaciones de Recreo'),
+                    ),
+                  ],
+                  onChanged: onLicenseChanged,
+                ),
               ],
             ),
           ),
