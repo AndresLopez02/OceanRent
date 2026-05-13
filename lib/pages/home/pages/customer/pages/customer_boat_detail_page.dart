@@ -181,7 +181,11 @@ class _CustomerBoatDetailPageState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(boat.name,style: AppTheme.headlineMedium.copyWith(color: AppTheme.deepNavy)
+                  Text(
+                    boat.name,
+                    style: AppTheme.headlineMedium.copyWith(
+                      color: AppTheme.deepNavy,
+                    ),
                   ),
                   const SizedBox(height: AppTheme.spacing12),
                   _BoatDetailInfoItem(
@@ -210,18 +214,30 @@ class _CustomerBoatDetailPageState
                     LicenseDetailSection(license: boat.requiredLicense),
                   ],
                   const SizedBox(height: AppTheme.spacing24),
-                  Text('Descripción',style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy)
+                  Text(
+                    'Descripción',
+                    style: AppTheme.titleMedium.copyWith(
+                      color: AppTheme.deepNavy,
+                    ),
                   ),
                   const SizedBox(height: AppTheme.spacing8),
                   Text(
-                    boat.description.isEmpty? 'Sin descripción disponible.' : boat.description,
-                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted, height: AppTheme.lineHeightInfo,
+                    boat.description.isEmpty
+                        ? 'Sin descripción disponible.'
+                        : boat.description,
+                    style: AppTheme.bodyMedium.copyWith(
+                      color: AppTheme.textMuted,
+                      height: AppTheme.lineHeightInfo,
                     ),
                   ),
 
                   const SizedBox(height: AppTheme.spacing24),
 
-                  Text('Disponibilidad', style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy)
+                  Text(
+                    'Disponibilidad',
+                    style: AppTheme.titleMedium.copyWith(
+                      color: AppTheme.deepNavy,
+                    ),
                   ),
                   const SizedBox(height: AppTheme.spacing8),
 
@@ -380,6 +396,10 @@ class _CustomerBoatDetailPageState
                       outsideDaysVisible: false,
                     ),
                   ),
+
+                  const SizedBox(height: AppTheme.spacing24),
+
+                  const _BoatReviewsPreview(),
 
                   const SizedBox(height: AppTheme.spacing24),
 
@@ -626,6 +646,59 @@ class _SummaryRow extends StatelessWidget {
             style: AppTheme.bodySmall.copyWith(
               color: AppTheme.deepNavy,
               fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BoatReviewsPreview extends StatelessWidget {
+  const _BoatReviewsPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: AppTheme.compactCardPadding,
+      decoration: AppTheme.simpleCardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Reseñas',
+            style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy),
+          ),
+          const SizedBox(height: AppTheme.spacing10),
+          Row(
+            children: [
+              const Icon(Icons.star, color: AppTheme.sunsetGold),
+              const SizedBox(width: AppTheme.spacing6),
+              Text(
+                '4.8 · 12 reseñas',
+                style: AppTheme.bodyMedium.copyWith(
+                  color: AppTheme.deepNavy,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacing12),
+          Text(
+            '“Barco muy cómodo y experiencia muy recomendable.”',
+            style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted),
+          ),
+          const SizedBox(height: AppTheme.spacing8),
+          Text(
+            '“Todo correcto, buena comunicación y embarcación en buen estado.”',
+            style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted),
+          ),
+          const SizedBox(height: AppTheme.spacing12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {},
+              child: const Text('Ver todas las reseñas'),
             ),
           ),
         ],
