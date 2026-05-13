@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_boat_detail_page.dart';
+import 'package:ocean_rent/utils/boat_utils.dart';
+import 'package:ocean_rent/widgets/boat_image_placeholder.dart';
 
 class CustomerBoatCard extends StatelessWidget {
   final BoatModel boat;
@@ -41,10 +43,17 @@ class CustomerBoatCard extends StatelessWidget {
                       height: AppTheme.customerBoatImageHeight,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) =>
-                          _BoatImagePlaceholder(name: boat.name),
+                      errorBuilder: (_, _, _) => BoatImagePlaceholder(
+                        name: boat.name,
+                        height: AppTheme.customerBoatImageHeight,
+                        iconSize: AppTheme.emptyStateIconSize,
+                      ),
                     )
-                  : _BoatImagePlaceholder(name: boat.name),
+                  : BoatImagePlaceholder(
+                      name: boat.name,
+                      height: AppTheme.customerBoatImageHeight,
+                      iconSize: AppTheme.emptyStateIconSize,
+                    ),
             ),
             Padding(
               padding: AppTheme.compactCardPadding,
@@ -68,7 +77,7 @@ class CustomerBoatCard extends StatelessWidget {
                           children: [
                             _BoatInfoItem(
                               icon: Icons.directions_boat_outlined,
-                              label: _formatBoatCategory(boat.category),
+                              label: formatBoatCategory(boat.category),
                             ),
                             const SizedBox(height: AppTheme.spacing6),
                             _BoatInfoItem(
@@ -110,27 +119,6 @@ class CustomerBoatCard extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-String _formatBoatCategory(String category) {
-  final normalizedCategory = category.trim().toLowerCase();
-
-  switch (normalizedCategory) {
-    case 'lancha':
-      return 'Lancha';
-    case 'semirigida':
-      return 'Semirrígida';
-    case 'velero':
-      return 'Velero';
-    case 'yate':
-      return 'Yate';
-    case 'catamaran':
-      return 'Catamarán';
-    case 'jetski':
-      return 'Jet Ski';
-    default:
-      return category.trim().isEmpty ? 'Sin categoría' : category.trim();
   }
 }
 
@@ -202,40 +190,6 @@ class _LicenseBadge extends StatelessWidget {
             _licenseLabel(license),
             style: AppTheme.bodySmall.copyWith(
               color: AppTheme.sunsetGold,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BoatImagePlaceholder extends StatelessWidget {
-  final String name;
-
-  const _BoatImagePlaceholder({required this.name});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: AppTheme.customerBoatImageHeight,
-      width: double.infinity,
-      color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.directions_boat_filled_outlined,
-            size: AppTheme.emptyStateIconSize,
-            color: AppTheme.deepNavy,
-          ),
-          const SizedBox(height: AppTheme.spacing8),
-          Text(
-            name,
-            textAlign: TextAlign.center,
-            style: AppTheme.bodyLarge.copyWith(
-              color: AppTheme.deepNavy,
               fontWeight: FontWeight.w600,
             ),
           ),

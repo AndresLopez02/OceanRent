@@ -5,6 +5,7 @@ import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/user_model.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/user_providers.dart';
+import 'package:ocean_rent/widgets/profile_widgets.dart';
 
 // Helpers y widgets anidados
 
@@ -40,15 +41,6 @@ LicenseStatus _statusFromString(String s) => switch (s.toLowerCase()) {
         label: 'Sin verificar',
       ),
     };
-
-// Decoración de los campos de texto
-
-InputDecoration _fieldDeco({
-  required String label,
-  required IconData icon,
-  bool readOnly = false,
-}) =>
-    AppTheme.inputDecoration(labelText: label, icon: icon, readOnly: readOnly);
 
 String _formatBirthDate(DateTime? birthDate) {
   if (birthDate == null) return 'No indicada';
@@ -259,7 +251,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
             children: [
               _AvatarSection(profile: _profile!),
               const SizedBox(height: AppTheme.spacing32),
-              const _SectionLabel('Datos Personales'),
+              const ProfileSectionLabel('Datos Personales'),
               const SizedBox(height: AppTheme.spacing16),
               _PersonalDataCard(
                 nameCtrl: _nameCtrl,
@@ -268,7 +260,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
                 birthDateCtrl: _birthDateCtrl,
               ),
               const SizedBox(height: AppTheme.spacing28),
-              const _SectionLabel('Titulación Náutica'),
+              const ProfileSectionLabel('Titulación Náutica'),
               const SizedBox(height: AppTheme.spacing16),
               _NauticalCard(
                 licenseStatus: _licenseStatus,
@@ -280,7 +272,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
                 onPickDocument: _pickDocument,
               ),
               const SizedBox(height: AppTheme.spacing36),
-              _SaveButton(isSaving: _isSaving, onPressed: _saveProfile),
+              ProfileSaveButton(isSaving: _isSaving, onPressed: _saveProfile),
               const SizedBox(height: AppTheme.spacing24),
             ],
           ),
@@ -300,7 +292,11 @@ class _AvatarSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initials = '${profile.name[0]}${profile.surname[0]}'.toUpperCase();
+    final initials = (profile.name.isNotEmpty && profile.surname.isNotEmpty)
+        ? '${profile.name[0]}${profile.surname[0]}'.toUpperCase()
+        : profile.name.isNotEmpty
+        ? profile.name[0].toUpperCase()
+        : '?';
     return Center(
       child: Column(
         children: [
@@ -355,34 +351,6 @@ class _AvatarSection extends StatelessWidget {
   }
 }
 
-// Section label
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) =>
-      Text(text, style: AppTheme.sectionLabelStyle);
-}
-
-// Contenedor de sección
-
-class _ProfileCard extends StatelessWidget {
-  const _ProfileCard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: AppTheme.cardPadding,
-    decoration: AppTheme.cardDecoration(),
-    child: child,
-  );
-}
-
 // Datos personales
 
 class _PersonalDataCard extends StatelessWidget {
@@ -399,24 +367,24 @@ class _PersonalDataCard extends StatelessWidget {
       (v == null || v.trim().isEmpty) ? 'Campo requerido' : null;
 
   @override
-  Widget build(BuildContext context) => _ProfileCard(
+  Widget build(BuildContext context) => ProfileCard(
     child: Column(
       children: [
-        _ProfileField(
+        ProfileField(
           controller: nameCtrl,
           label: 'Nombre',
           icon: Icons.person_outline_rounded,
           validator: _required,
         ),
         const SizedBox(height: AppTheme.spacing20),
-        _ProfileField(
+        ProfileField(
           controller: surnameCtrl,
           label: 'Apellidos',
           icon: Icons.badge_outlined,
           validator: _required,
         ),
         const SizedBox(height: AppTheme.spacing20),
-        _ProfileField(
+        ProfileField(
           controller: emailCtrl,
           label: 'Correo Electrónico',
           icon: Icons.mail_outline_rounded,
@@ -429,7 +397,7 @@ class _PersonalDataCard extends StatelessWidget {
           },
         ),
         const SizedBox(height: AppTheme.spacing20),
-        _ProfileField(
+        ProfileField(
           controller: birthDateCtrl,
           label: 'Fecha de nacimiento',
           icon: Icons.cake_outlined,
@@ -437,36 +405,6 @@ class _PersonalDataCard extends StatelessWidget {
         ),
       ],
     ),
-  );
-}
-
-// Campo de texto
-
-class _ProfileField extends StatelessWidget {
-  const _ProfileField({
-    required this.controller,
-    required this.label,
-    required this.icon,
-    this.keyboardType = TextInputType.text,
-    this.readOnly = false,
-    this.validator,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final IconData icon;
-  final TextInputType keyboardType;
-  final bool readOnly;
-  final String? Function(String?)? validator;
-
-  @override
-  Widget build(BuildContext context) => TextFormField(
-    controller: controller,
-    keyboardType: keyboardType,
-    readOnly: readOnly,
-    validator: validator,
-    style: readOnly ? AppTheme.readOnlyFieldTextStyle : AppTheme.fieldTextStyle,
-    decoration: _fieldDeco(label: label, icon: icon, readOnly: readOnly),
   );
 }
 
@@ -500,7 +438,7 @@ class _NauticalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cfg = _statusCfg(licenseStatus);
-    return _ProfileCard(
+    return ProfileCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -549,8 +487,8 @@ class _NauticalCard extends StatelessWidget {
           DropdownButtonFormField<String>(
             initialValue: licenseType,
             isExpanded: true,
-            decoration: _fieldDeco(
-              label: 'Tipo de titulación',
+            decoration: AppTheme.inputDecoration(
+              labelText: 'Tipo de titulación',
               icon: Icons.anchor_rounded,
             ),
             style: AppTheme.fieldTextStyle,
@@ -744,45 +682,6 @@ class _DocumentUpload extends StatelessWidget {
       ],
     );
   }
-}
-
-// Botón guardar cambios
-
-class _SaveButton extends StatelessWidget {
-  const _SaveButton({required this.isSaving, required this.onPressed});
-
-  final bool isSaving;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-    width: double.infinity,
-    height: AppTheme.buttonHeight,
-    child: ElevatedButton(
-      onPressed: isSaving ? null : onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppTheme.oceanBlue,
-        disabledBackgroundColor: AppTheme.oceanBlue.withValues(
-          alpha: AppTheme.alphaDisabled,
-        ),
-        foregroundColor: AppTheme.white,
-        elevation: 0,
-        shape: const RoundedRectangleBorder(
-          borderRadius: AppTheme.borderRadiusButton,
-        ),
-      ),
-      child: isSaving
-          ? const SizedBox(
-              width: AppTheme.loadingSize,
-              height: AppTheme.loadingSize,
-              child: CircularProgressIndicator(
-                strokeWidth: AppTheme.progressStrokeWidth,
-                color: AppTheme.white,
-              ),
-            )
-          : Text('Guardar cambios', style: AppTheme.buttonTextStyle),
-    ),
-  );
 }
 
 // Info del banner

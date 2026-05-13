@@ -5,6 +5,7 @@ import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/pages/home/pages/customer/widgets/license_detail_section.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/booking_providers.dart';
+import 'package:ocean_rent/utils/boat_utils.dart';
 import 'package:ocean_rent/widgets/app_navigator.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -186,7 +187,7 @@ class _CustomerBoatDetailPageState
                   const SizedBox(height: AppTheme.spacing12),
                   _BoatDetailInfoItem(
                     icon: Icons.directions_boat_outlined,
-                    label: _formatBoatCategory(boat.category),
+                    label: formatBoatCategory(boat.category),
                   ),
                   const SizedBox(height: AppTheme.spacing12),
                   _BoatDetailInfoItem(
@@ -447,27 +448,6 @@ class _CustomerBoatDetailPageState
         ),
       ),
     );
-  }
-}
-
-String _formatBoatCategory(String category) {
-  final normalizedCategory = category.trim().toLowerCase();
-
-  switch (normalizedCategory) {
-    case 'lancha':
-      return 'Lancha';
-    case 'semirigida':
-      return 'Semirrígida';
-    case 'velero':
-      return 'Velero';
-    case 'yate':
-      return 'Yate';
-    case 'catamaran':
-      return 'Catamarán';
-    case 'jetski':
-      return 'Jet Ski';
-    default:
-      return category.trim().isEmpty ? 'Sin categoría' : category.trim();
   }
 }
 

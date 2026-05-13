@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/models/booking_model.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_bookings_page.dart';
+import 'package:ocean_rent/utils/boat_utils.dart';
+import 'package:ocean_rent/widgets/boat_image_placeholder.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_calendar_page.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_profile_screen.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/boat_form_page.dart';
@@ -72,6 +75,7 @@ class AdminHomePage extends ConsumerWidget {
   }
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
+    await Hive.box<BoatModel>('boats').clear();
     await ref.read(authNotifierProvider).signOut();
 
     if (context.mounted) {
@@ -638,11 +642,9 @@ class _BoatAdminCard extends StatelessWidget {
                     height: AppTheme.imageHeight,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) {
-                      return _BoatImagePlaceholder(name: boat.name);
-                    },
+                    errorBuilder: (_, _, _) => BoatImagePlaceholder(name: boat.name),
                   )
-                : _BoatImagePlaceholder(name: boat.name),
+                : BoatImagePlaceholder(name: boat.name),
           ),
           Padding(
             padding: AppTheme.compactCardPadding,
@@ -664,7 +666,7 @@ class _BoatAdminCard extends StatelessWidget {
                   children: [
                     _InfoChip(
                       icon: Icons.directions_boat_outlined,
-                      label: _formatCategory(boat.category),
+                      label: formatBoatCategory(boat.category),
                     ),
                     _InfoChip(
                       icon: Icons.people_alt_outlined,
@@ -742,58 +744,6 @@ class _BoatAdminCard extends StatelessWidget {
     );
   }
 
-  String _formatCategory(String value) {
-    switch (value.trim().toLowerCase()) {
-      case 'lancha':
-        return 'Lancha';
-      case 'semirigida':
-        return 'Semirrígida';
-      case 'velero':
-        return 'Velero';
-      case 'yate':
-        return 'Yate';
-      case 'catamaran':
-        return 'Catamarán';
-      case 'jetski':
-        return 'Jet Ski';
-      default:
-        return value.isEmpty ? 'Sin categoría' : value;
-    }
-  }
-}
-
-class _BoatImagePlaceholder extends StatelessWidget {
-  final String name;
-
-  const _BoatImagePlaceholder({required this.name});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: AppTheme.imageHeight,
-      width: double.infinity,
-      color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.directions_boat_filled_outlined,
-            size: AppTheme.placeholderIconSize,
-            color: AppTheme.deepNavy,
-          ),
-          const SizedBox(height: AppTheme.spacing10),
-          Text(
-            name,
-            textAlign: TextAlign.center,
-            style: AppTheme.bodyLarge.copyWith(
-              color: AppTheme.deepNavy,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _InfoChip extends StatelessWidget {

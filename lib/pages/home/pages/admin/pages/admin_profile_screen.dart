@@ -4,22 +4,7 @@ import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/user_model.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/user_providers.dart';
-
-// Decoración de campos de texto
-
-InputDecoration _fieldDeco({
-  required String label,
-  required IconData icon,
-  bool readOnly = false,
-}) {
-  return AppTheme.inputDecoration(
-    labelText: label,
-    icon: icon,
-    readOnly: readOnly,
-  ).copyWith(
-    errorStyle: AppTheme.helperTextStyle.copyWith(color: AppTheme.error),
-  );
-}
+import 'package:ocean_rent/widgets/profile_widgets.dart';
 
 // Screen principal
 
@@ -195,7 +180,12 @@ class _AdminProfileScreenState extends ConsumerState<AdminProfileScreen>
               children: [
                 _AvatarSection(profile: _profile!),
                 const SizedBox(height: AppTheme.spacing32),
-                const _SectionLabel('Datos Personales'),
+                ProfileSectionLabel(
+                  'Datos Personales',
+                  color: AppTheme.deepNavy.withValues(
+                    alpha: AppTheme.alphaDisabled,
+                  ),
+                ),
                 const SizedBox(height: AppTheme.spacing16),
                 _PersonalDataCard(
                   nameCtrl: _nameCtrl,
@@ -203,7 +193,7 @@ class _AdminProfileScreenState extends ConsumerState<AdminProfileScreen>
                   emailCtrl: _emailCtrl,
                 ),
                 const SizedBox(height: AppTheme.spacing36),
-                _SaveButton(isSaving: _isSaving, onPressed: _saveProfile),
+                ProfileSaveButton(isSaving: _isSaving, onPressed: _saveProfile),
                 const SizedBox(height: AppTheme.spacing24),
               ],
             ),
@@ -262,7 +252,11 @@ class _AvatarSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initials = '${profile.name[0]}${profile.surname[0]}'.toUpperCase();
+    final initials = (profile.name.isNotEmpty && profile.surname.isNotEmpty)
+        ? '${profile.name[0]}${profile.surname[0]}'.toUpperCase()
+        : profile.name.isNotEmpty
+        ? profile.name[0].toUpperCase()
+        : '?';
 
     return Center(
       child: Column(
@@ -334,42 +328,6 @@ class _AvatarSection extends StatelessWidget {
   }
 }
 
-// Section label
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: AppTheme.sectionLabelStyle.copyWith(
-        color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaDisabled),
-      ),
-    );
-  }
-}
-
-// Card contenedor
-
-class _ProfileCard extends StatelessWidget {
-  const _ProfileCard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: AppTheme.cardPadding,
-      decoration: AppTheme.cardDecoration(color: AppTheme.surface),
-      child: child,
-    );
-  }
-}
-
 // Datos personales
 
 class _PersonalDataCard extends StatelessWidget {
@@ -389,24 +347,24 @@ class _PersonalDataCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _ProfileCard(
+    return ProfileCard(
       child: Column(
         children: [
-          _ProfileField(
+          ProfileField(
             controller: nameCtrl,
             label: 'Nombre',
             icon: Icons.person_outline_rounded,
             validator: _required,
           ),
           const SizedBox(height: AppTheme.spacing20),
-          _ProfileField(
+          ProfileField(
             controller: surnameCtrl,
             label: 'Apellidos',
             icon: Icons.badge_outlined,
             validator: _required,
           ),
           const SizedBox(height: AppTheme.spacing20),
-          _ProfileField(
+          ProfileField(
             controller: emailCtrl,
             label: 'Correo Electrónico',
             icon: Icons.mail_outline_rounded,
@@ -424,79 +382,3 @@ class _PersonalDataCard extends StatelessWidget {
   }
 }
 
-// Campo de texto
-
-class _ProfileField extends StatelessWidget {
-  const _ProfileField({
-    required this.controller,
-    required this.label,
-    required this.icon,
-    this.keyboardType = TextInputType.text,
-    this.readOnly = false,
-    this.validator,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final IconData icon;
-  final TextInputType keyboardType;
-  final bool readOnly;
-  final String? Function(String?)? validator;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      readOnly: readOnly,
-      validator: validator,
-      style: AppTheme.fieldTextStyle.copyWith(
-        color: readOnly
-            ? AppTheme.deepNavy.withValues(alpha: AppTheme.alphaDisabled)
-            : AppTheme.deepNavy,
-      ),
-      decoration: _fieldDeco(label: label, icon: icon, readOnly: readOnly),
-    );
-  }
-}
-
-// Botón guardar
-
-class _SaveButton extends StatelessWidget {
-  const _SaveButton({required this.isSaving, required this.onPressed});
-
-  final bool isSaving;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: AppTheme.buttonHeight,
-      child: ElevatedButton(
-        onPressed: isSaving ? null : onPressed,
-        style: AppTheme.accentButtonStyle.copyWith(
-          backgroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.disabled)) {
-              return AppTheme.oceanBlue.withValues(alpha: AppTheme.alphaDisabled);
-            }
-            return AppTheme.oceanBlue;
-          }),
-        ),
-        child: isSaving
-            ? const SizedBox(
-                width: AppTheme.loadingSize,
-                height: AppTheme.loadingSize,
-                child: CircularProgressIndicator(
-                  strokeWidth: AppTheme.progressStrokeWidth,
-                  color: AppTheme.white,
-                ),
-              )
-            : Text(
-                'Guardar cambios',
-                style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.white),
-              ),
-      ),
-    );
-  }
-}
