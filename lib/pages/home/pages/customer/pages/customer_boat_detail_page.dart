@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
+import 'package:ocean_rent/pages/home/pages/customer/widgets/licence_comparer.dart';
 import 'package:ocean_rent/pages/home/pages/customer/widgets/license_detail_section.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/booking_providers.dart';
@@ -158,7 +159,12 @@ class _CustomerBoatDetailPageState
     final user = ref.watch(authNotifierProvider).currentUser;
     final isAnonymous = user == null;
     final maxCrew = boat.capacity <= 0 ? 1 : boat.capacity;
-    final canReserve = _rangeStart != null && !bookingState.isLoading;
+    final hasLicense = LicenseComparer.canDriveBoat(
+      nauticalLicense: user?.nauticalLicense,
+      requiredLicense: boat.requiredLicense,
+    );
+    final canReserve =
+        _rangeStart != null && !bookingState.isLoading && hasLicense;
 
     return Scaffold(
       appBar: AppBar(title: Text(boat.name)),
@@ -453,7 +459,9 @@ class _CustomerBoatDetailPageState
                           : Text(
                               isAnonymous
                                   ? 'Inicia sesión para reservar'
-                                  : 'Reservar',
+                                  : !hasLicense
+                                      ? 'Licencia requerida'
+                                      : 'Reservar',
                               style: AppTheme.buttonTextStyle.copyWith(
                                 color: AppTheme.pearlWhite,
                               ),
