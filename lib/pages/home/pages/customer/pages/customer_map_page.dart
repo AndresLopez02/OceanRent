@@ -234,7 +234,7 @@ class _CustomerMapPageState extends ConsumerState<CustomerMapPage> {
                   interactionOptions: const InteractionOptions(
                     flags: InteractiveFlag.all,
                   ),
-                  onTap: (_, __) => _dismissPopup(),
+                  onTap: (_, _) => _dismissPopup(),
                 ),
                 children: [
                   TileLayer(
@@ -455,7 +455,7 @@ class _BoatGroupSheet extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: boats.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
+            separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (_, index) {
               final boat = boats[index];
               final isSelected = boat.id == selectedBoatId;
@@ -580,7 +580,7 @@ class _BoatPopup extends StatelessWidget {
                       width: 100,
                       height: 100,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _imagePlaceholder(),
+                      errorBuilder: (_, _, _) => _imagePlaceholder(),
                     )
                   : _imagePlaceholder(),
             ),

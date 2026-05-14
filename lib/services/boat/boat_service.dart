@@ -41,7 +41,7 @@ class BoatService {
       'port_name': portName.trim(),
       'deposit_amount': depositAmount,
       'required_license': requiredLicense,
-      if (location != null) 'location': location, //
+      'location': ?location, //
     });
   }
 
