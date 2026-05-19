@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
-import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/boat_list_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_bookings_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_map_page.dart';
@@ -24,7 +22,6 @@ class CustomerHomePage extends ConsumerStatefulWidget {
 
 class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
-    await Hive.box<BoatModel>('boats').clear();
     await ref.read(authNotifierProvider).signOut();
     ref.invalidate(bookingsStreamProvider);
     ref.invalidate(userBookingsStreamProvider);
