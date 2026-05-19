@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/models/booking_model.dart';
+import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/repository/booking_repository.dart';
 
 final bookingRepositoryProvider = Provider<BookingRepository>((ref) {
@@ -13,15 +14,29 @@ final bookingNotifierProvider = ChangeNotifierProvider<BookingNotifier>((ref) {
   return BookingNotifier(repository);
 });
 
-final bookingsStreamProvider = StreamProvider<List<BookingModel>>((ref) {
+final bookingsStreamProvider = StreamProvider.autoDispose<List<BookingModel>>((ref) {
+  final authState = ref.watch(authStateChangesProvider);
   final repository = ref.watch(bookingRepositoryProvider);
-  return repository.watchBookings();
+  if (!authState.hasValue || authState.value == null) {
+    return const Stream.empty();
+  }
+  return repository.watchBookings().handleError(
+    (error, _) {},
+    test: (e) => e.toString().contains('permission-denied'),
+  );
 });
 
 final userBookingsStreamProvider =
-    StreamProvider.family<List<BookingModel>, String>((ref, userId) {
+    StreamProvider.autoDispose.family<List<BookingModel>, String>((ref, userId) {
+      final authState = ref.watch(authStateChangesProvider);
       final repository = ref.watch(bookingRepositoryProvider);
-      return repository.watchBookingsByUser(userId);
+      if (!authState.hasValue || authState.value == null) {
+        return const Stream.empty();
+      }
+      return repository.watchBookingsByUser(userId).handleError(
+        (error, _) {},
+        test: (e) => e.toString().contains('permission-denied'),
+      );
     });
 
 class BookingNotifier extends ChangeNotifier {
