@@ -8,6 +8,7 @@ import 'package:ocean_rent/pages/home/pages/customer/pages/customer_map_page.dar
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_profile_screen.dart';
 import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
+import 'package:ocean_rent/providers/booking_providers.dart';
 import 'package:ocean_rent/widgets/app_navigator.dart';
 import 'package:ocean_rent/widgets/dialog_confirmacion.dart';
 
@@ -25,6 +26,8 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
     await Hive.box<BoatModel>('boats').clear();
     await ref.read(authNotifierProvider).signOut();
+    ref.invalidate(bookingsStreamProvider);
+    ref.invalidate(userBookingsStreamProvider);
 
     if (!context.mounted) return;
 

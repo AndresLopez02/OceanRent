@@ -6,8 +6,18 @@ import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/boat_providers.dart';
 import 'package:ocean_rent/providers/booking_providers.dart';
 
-class CustomerBookingsPage extends ConsumerWidget {
+enum BookingStatusFilter { all, pending, confirmed, cancelled }
+
+class CustomerBookingsPage extends ConsumerStatefulWidget {
   const CustomerBookingsPage({super.key});
+
+  @override
+  ConsumerState<CustomerBookingsPage> createState() =>
+      _CustomerBookingsPageState();
+}
+
+class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
+  BookingStatusFilter _selectedFilter = BookingStatusFilter.all;
 
   Future<void> _cancelBooking(
     BuildContext context,
@@ -63,8 +73,40 @@ class CustomerBookingsPage extends ConsumerWidget {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  List<BookingModel> _filterBookings(List<BookingModel> bookings) {
+    switch (_selectedFilter) {
+      case BookingStatusFilter.pending:
+        return bookings
+            .where((booking) => booking.status == BookingModel.statusPending)
+            .toList();
+      case BookingStatusFilter.confirmed:
+        return bookings
+            .where((booking) => booking.status == BookingModel.statusConfirmed)
+            .toList();
+      case BookingStatusFilter.cancelled:
+        return bookings
+            .where((booking) => booking.status == BookingModel.statusCancelled)
+            .toList();
+      case BookingStatusFilter.all:
+        return bookings;
+    }
+  }
+
+  String _emptyMessageByFilter() {
+    switch (_selectedFilter) {
+      case BookingStatusFilter.pending:
+        return 'No tienes reservas pendientes.';
+      case BookingStatusFilter.confirmed:
+        return 'No tienes reservas confirmadas.';
+      case BookingStatusFilter.cancelled:
+        return 'No tienes reservas canceladas.';
+      case BookingStatusFilter.all:
+        return 'Todavía no tienes reservas.';
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final user = ref.watch(authNotifierProvider).currentUser;
 
     if (user == null) {
@@ -106,41 +148,232 @@ class CustomerBookingsPage extends ConsumerWidget {
         ),
       ),
       data: (bookings) {
-        if (bookings.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: AppTheme.screenPadding,
-              child: Text(
-                'Todavía no tienes reservas.',
-                textAlign: TextAlign.center,
-                style: AppTheme.bodyLarge.copyWith(
+        final filteredBookings = _filterBookings(bookings);
+
+        final pendingCount = bookings
+            .where((booking) => booking.status == BookingModel.statusPending)
+            .length;
+
+        final confirmedCount = bookings
+            .where((booking) => booking.status == BookingModel.statusConfirmed)
+            .length;
+
+        final cancelledCount = bookings
+            .where((booking) => booking.status == BookingModel.statusCancelled)
+            .length;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _BookingsFilterHeader(
+              selectedFilter: _selectedFilter,
+              totalCount: bookings.length,
+              pendingCount: pendingCount,
+              confirmedCount: confirmedCount,
+              cancelledCount: cancelledCount,
+              onFilterSelected: (filter) {
+                setState(() {
+                  _selectedFilter = filter;
+                });
+              },
+            ),
+            Expanded(
+              child: filteredBookings.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: AppTheme.screenPadding,
+                        child: Text(
+                          _emptyMessageByFilter(),
+                          textAlign: TextAlign.center,
+                          style: AppTheme.bodyLarge.copyWith(
+                            color: AppTheme.deepNavy,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: AppTheme.listPadding,
+                      itemCount: filteredBookings.length,
+                      separatorBuilder: (_, _) =>
+                          const SizedBox(height: AppTheme.spacing12),
+                      itemBuilder: (context, index) {
+                        final booking = filteredBookings[index];
+                        final boatName =
+                            boatNames[booking.boatId] ?? booking.boatId;
+
+                        return _CustomerBookingCard(
+                          booking: booking,
+                          boatName: boatName,
+                          onCancel:
+                              booking.status == BookingModel.statusCancelled
+                              ? null
+                              : () => _cancelBooking(context, ref, booking),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _BookingsFilterHeader extends StatelessWidget {
+  final BookingStatusFilter selectedFilter;
+  final int totalCount;
+  final int pendingCount;
+  final int confirmedCount;
+  final int cancelledCount;
+  final ValueChanged<BookingStatusFilter> onFilterSelected;
+
+  const _BookingsFilterHeader({
+    required this.selectedFilter,
+    required this.totalCount,
+    required this.pendingCount,
+    required this.confirmedCount,
+    required this.cancelledCount,
+    required this.onFilterSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        AppTheme.spacing20,
+        AppTheme.spacing18,
+        AppTheme.spacing20,
+        AppTheme.spacing8,
+      ),
+      color: AppTheme.background,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Mis reservas',
+            style: AppTheme.headlineSmall.copyWith(
+              color: AppTheme.deepNavy,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacing12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _BookingFilterChip(
+                  label: 'Todas',
+                  count: totalCount,
+                  selected: selectedFilter == BookingStatusFilter.all,
                   color: AppTheme.deepNavy,
-                  fontWeight: FontWeight.w700,
+                  onTap: () => onFilterSelected(BookingStatusFilter.all),
+                ),
+                const SizedBox(width: AppTheme.spacing8),
+                _BookingFilterChip(
+                  label: 'Pendientes',
+                  count: pendingCount,
+                  selected: selectedFilter == BookingStatusFilter.pending,
+                  color: AppTheme.sunsetGold,
+                  onTap: () => onFilterSelected(BookingStatusFilter.pending),
+                ),
+                const SizedBox(width: AppTheme.spacing8),
+                _BookingFilterChip(
+                  label: 'Confirmadas',
+                  count: confirmedCount,
+                  selected: selectedFilter == BookingStatusFilter.confirmed,
+                  color: AppTheme.oceanBlue,
+                  onTap: () => onFilterSelected(BookingStatusFilter.confirmed),
+                ),
+                const SizedBox(width: AppTheme.spacing8),
+                _BookingFilterChip(
+                  label: 'Canceladas',
+                  count: cancelledCount,
+                  selected: selectedFilter == BookingStatusFilter.cancelled,
+                  color: AppTheme.alertRed,
+                  onTap: () => onFilterSelected(BookingStatusFilter.cancelled),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BookingFilterChip extends StatelessWidget {
+  final String label;
+  final int count;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _BookingFilterChip({
+    required this.label,
+    required this.count,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final backgroundColor = selected
+        ? color.withValues(alpha: AppTheme.alphaLight)
+        : AppTheme.surface;
+
+    final borderColor = selected
+        ? color
+        : AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft);
+
+    final textColor = selected ? color : AppTheme.textMuted;
+
+    return InkWell(
+      borderRadius: AppTheme.borderRadiusPill,
+      onTap: onTap,
+      child: Container(
+        padding: AppTheme.chipPadding,
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: AppTheme.borderRadiusPill,
+          border: Border.all(color: borderColor),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: AppTheme.labelMedium.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(width: AppTheme.spacing6),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacing6,
+                vertical: AppTheme.spacing4,
+              ),
+              decoration: BoxDecoration(
+                color: selected
+                    ? color
+                    : AppTheme.deepNavy.withValues(
+                        alpha: AppTheme.alphaUltraSoft,
+                      ),
+                borderRadius: AppTheme.borderRadiusPill,
+              ),
+              child: Text(
+                '$count',
+                style: AppTheme.labelSmall.copyWith(
+                  color: selected ? AppTheme.white : AppTheme.deepNavy,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ),
-          );
-        }
-
-        return ListView.separated(
-          padding: AppTheme.listPadding,
-          itemCount: bookings.length,
-          separatorBuilder: (_, _) =>
-              const SizedBox(height: AppTheme.spacing12),
-          itemBuilder: (context, index) {
-            final booking = bookings[index];
-            final boatName = boatNames[booking.boatId] ?? booking.boatId;
-
-            return _CustomerBookingCard(
-              booking: booking,
-              boatName: boatName,
-              onCancel: booking.status == BookingModel.statusCancelled
-                  ? null
-                  : () => _cancelBooking(context, ref, booking),
-            );
-          },
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
@@ -195,7 +428,10 @@ class _CustomerBookingCard extends StatelessWidget {
           _InfoRow(label: 'Inicio', value: _formatDate(booking.startDate)),
           _InfoRow(label: 'Fin', value: _formatDate(booking.endDate)),
           _InfoRow(label: 'Tripulantes', value: '${booking.crewCount}'),
-          _InfoRow(label: 'Estado fianza', value: booking.depositStatus),
+          _InfoRow(
+            label: 'Estado fianza',
+            value: _formatDepositStatus(booking.depositStatus),
+          ),
           if (onCancel != null) ...[
             const SizedBox(height: AppTheme.spacing14),
             SizedBox(
@@ -226,7 +462,7 @@ class _StatusBadge extends StatelessWidget {
       padding: AppTheme.licenseStatusBadgePadding,
       decoration: AppTheme.badgeDecoration(color: color),
       child: Text(
-        status,
+        _formatBookingStatus(status),
         style: AppTheme.labelSmall.copyWith(
           color: color,
           fontWeight: FontWeight.w800,
@@ -276,6 +512,32 @@ Color _statusColor(String status) {
     case BookingModel.statusPending:
     default:
       return AppTheme.sunsetGold;
+  }
+}
+
+String _formatBookingStatus(String status) {
+  switch (status) {
+    case BookingModel.statusConfirmed:
+      return 'confirmada';
+    case BookingModel.statusCancelled:
+      return 'cancelada';
+    case BookingModel.statusPending:
+      return 'pendiente';
+    default:
+      return status;
+  }
+}
+
+String _formatDepositStatus(String status) {
+  switch (status) {
+    case BookingModel.depositStatusHeld:
+      return 'retenida';
+    case BookingModel.depositStatusReleased:
+      return 'liberada';
+    case BookingModel.depositStatusCaptured:
+      return 'cobrada';
+    default:
+      return status;
   }
 }
 

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
+import 'package:ocean_rent/pages/home/pages/customer/widgets/licence_comparer.dart';
 import 'package:ocean_rent/pages/home/pages/customer/widgets/license_detail_section.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/booking_providers.dart';
 import 'package:ocean_rent/widgets/app_navigator.dart';
 import 'package:ocean_rent/utils/boat_utils.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:ocean_rent/pages/home/pages/customer/pages/customer_boat_reviews_page.dart';
 
 // Pantalla de detalle para el cliente.
 // Recibe el barco seleccionado desde el listado y muestra su información completa.
@@ -159,7 +161,12 @@ class _CustomerBoatDetailPageState
     final user = ref.watch(authNotifierProvider).currentUser;
     final isAnonymous = user == null;
     final maxCrew = boat.capacity <= 0 ? 1 : boat.capacity;
-    final canReserve = _rangeStart != null && !bookingState.isLoading;
+    final hasLicense = LicenseComparer.canDriveBoat(
+      nauticalLicense: user?.nauticalLicense,
+      requiredLicense: boat.requiredLicense,
+    );
+    final canReserve =
+        _rangeStart != null && !bookingState.isLoading && hasLicense;
 
     return Scaffold(
       appBar: AppBar(title: Text(boat.name)),
@@ -182,7 +189,11 @@ class _CustomerBoatDetailPageState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(boat.name,style: AppTheme.headlineMedium.copyWith(color: AppTheme.deepNavy)
+                  Text(
+                    boat.name,
+                    style: AppTheme.headlineMedium.copyWith(
+                      color: AppTheme.deepNavy,
+                    ),
                   ),
                   const SizedBox(height: AppTheme.spacing12),
                   _BoatDetailInfoItem(
@@ -209,7 +220,11 @@ class _CustomerBoatDetailPageState
                     LicenseDetailSection(license: boat.requiredLicense),
                   ],
                   const SizedBox(height: AppTheme.spacing24),
-                  Text('Descripción',style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy)
+                  Text(
+                    'Descripción',
+                    style: AppTheme.titleMedium.copyWith(
+                      color: AppTheme.deepNavy,
+                    ),
                   ),
                   const SizedBox(height: AppTheme.spacing8),
                   Text(
@@ -350,6 +365,11 @@ class _CustomerBoatDetailPageState
                     ),
                   ),
                   const SizedBox(height: AppTheme.spacing24),
+
+                  _BoatReviewsPreview(boat: boat),
+
+                  const SizedBox(height: AppTheme.spacing24),
+
                   _CrewSelector(
                     crewCount: _crewCount,
                     maxCrew: maxCrew,
@@ -553,6 +573,68 @@ class _SummaryRow extends StatelessWidget {
             ),
           ),
           Text(value,style: AppTheme.bodySmall.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w700)
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BoatReviewsPreview extends StatelessWidget {
+  final BoatModel boat;
+
+  const _BoatReviewsPreview({required this.boat});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: AppTheme.compactCardPadding,
+      decoration: AppTheme.simpleCardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Reseñas',
+            style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy),
+          ),
+          const SizedBox(height: AppTheme.spacing10),
+          Row(
+            children: [
+              const Icon(Icons.star, color: AppTheme.sunsetGold),
+              const SizedBox(width: AppTheme.spacing6),
+              Text(
+                '4.8 · 12 reseñas',
+                style: AppTheme.bodyMedium.copyWith(
+                  color: AppTheme.deepNavy,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacing12),
+          Text(
+            '“Barco muy cómodo y experiencia muy recomendable.”',
+            style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted),
+          ),
+          const SizedBox(height: AppTheme.spacing8),
+          Text(
+            '“Todo correcto, buena comunicación y embarcación en buen estado.”',
+            style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted),
+          ),
+          const SizedBox(height: AppTheme.spacing12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CustomerBoatReviewsPage(boat: boat),
+                  ),
+                );
+              },
+              child: const Text('Ver todas las reseñas'),
+            ),
           ),
         ],
       ),
