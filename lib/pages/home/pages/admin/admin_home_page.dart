@@ -73,6 +73,8 @@ class AdminHomePage extends ConsumerWidget {
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
     await ref.read(authNotifierProvider).signOut();
+    ref.invalidate(bookingsStreamProvider);
+    ref.invalidate(userBookingsStreamProvider);
 
     if (context.mounted) {
       Navigator.of(context).pushAndRemoveUntil(
