@@ -18,4 +18,6 @@ class BoatCacheService {
       }
     });
   }
+
+  Future<void> clearCache() => box.clear();
 }

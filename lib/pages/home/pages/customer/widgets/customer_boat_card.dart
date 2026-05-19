@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_boat_detail_page.dart';
+import 'package:ocean_rent/utils/boat_utils.dart';
+import 'package:ocean_rent/widgets/boat_image_placeholder.dart';
 
 class CustomerBoatCard extends StatelessWidget {
   final BoatModel boat;
@@ -12,7 +14,6 @@ class CustomerBoatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: AppTheme.borderRadiusCard,
-      // Al pulsar la tarjeta se abre la pantalla de detalle del barco.
       onTap: () {
         Navigator.push(
           context,
@@ -25,9 +26,7 @@ class CustomerBoatCard extends StatelessWidget {
         decoration: AppTheme.cardDecoration(
           color: AppTheme.surface,
           radius: AppTheme.radiusCard,
-          border: Border.all(
-            color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft),
-          ),
+          border: Border.all(color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft)),
           boxShadow: AppTheme.softShadow(),
         ),
         child: Column(
@@ -41,22 +40,24 @@ class CustomerBoatCard extends StatelessWidget {
                       height: AppTheme.customerBoatImageHeight,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) =>
-                          _BoatImagePlaceholder(name: boat.name),
+                      errorBuilder: (_, _, _) => BoatImagePlaceholder(
+                        name: boat.name,
+                        height: AppTheme.customerBoatImageHeight,
+                        iconSize: AppTheme.emptyStateIconSize,
+                      ),
                     )
-                  : _BoatImagePlaceholder(name: boat.name),
+                  : BoatImagePlaceholder(
+                      name: boat.name,
+                      height: AppTheme.customerBoatImageHeight,
+                      iconSize: AppTheme.emptyStateIconSize,
+                    ),
             ),
             Padding(
               padding: AppTheme.compactCardPadding,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    boat.name,
-                    style: AppTheme.titleLarge.copyWith(
-                      color: AppTheme.deepNavy,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  Text(boat.name,style: AppTheme.titleLarge.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w700)
                   ),
                   const SizedBox(height: AppTheme.spacing10),
                   Row(
@@ -68,14 +69,12 @@ class CustomerBoatCard extends StatelessWidget {
                           children: [
                             _BoatInfoItem(
                               icon: Icons.directions_boat_outlined,
-                              label: _formatBoatCategory(boat.category),
+                              label: formatBoatCategory(boat.category),
                             ),
                             const SizedBox(height: AppTheme.spacing6),
                             _BoatInfoItem(
                               icon: Icons.location_on_outlined,
-                              label: boat.portName.trim().isEmpty
-                                  ? 'Sin ubicación'
-                                  : boat.portName.trim(),
+                              label: boat.portName.trim().isEmpty? 'Sin ubicación' : boat.portName.trim(),
                             ),
                             const SizedBox(height: AppTheme.spacing6),
                             _BoatInfoItem(
@@ -92,10 +91,7 @@ class CustomerBoatCard extends StatelessWidget {
                       const SizedBox(width: AppTheme.spacing10),
                       Text(
                         '${boat.pricePerDay.toStringAsFixed(0)} €/día',
-                        style: AppTheme.titleMedium.copyWith(
-                          color: AppTheme.deepNavy,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w700)
                       ),
                     ],
                   ),
@@ -113,33 +109,10 @@ class CustomerBoatCard extends StatelessWidget {
   }
 }
 
-String _formatBoatCategory(String category) {
-  final normalizedCategory = category.trim().toLowerCase();
-
-  switch (normalizedCategory) {
-    case 'lancha':
-      return 'Lancha';
-    case 'semirigida':
-      return 'Semirrígida';
-    case 'velero':
-      return 'Velero';
-    case 'yate':
-      return 'Yate';
-    case 'catamaran':
-      return 'Catamarán';
-    case 'jetski':
-      return 'Jet Ski';
-    default:
-      return category.trim().isEmpty ? 'Sin categoría' : category.trim();
-  }
-}
-
 class _BoatInfoItem extends StatelessWidget {
   final IconData icon;
   final String label;
-
   const _BoatInfoItem({required this.icon, required this.label});
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -185,9 +158,7 @@ class _LicenseBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.sunsetGold.withValues(alpha: AppTheme.alphaLight),
         borderRadius: BorderRadius.circular(AppTheme.spacing6),
-        border: Border.all(
-          color: AppTheme.sunsetGold.withValues(alpha: AppTheme.alphaOverlay),
-        ),
+        border: Border.all(color: AppTheme.sunsetGold.withValues(alpha: AppTheme.alphaOverlay))
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -198,46 +169,7 @@ class _LicenseBadge extends StatelessWidget {
             color: AppTheme.sunsetGold,
           ),
           const SizedBox(width: AppTheme.spacing4),
-          Text(
-            _licenseLabel(license),
-            style: AppTheme.bodySmall.copyWith(
-              color: AppTheme.sunsetGold,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BoatImagePlaceholder extends StatelessWidget {
-  final String name;
-
-  const _BoatImagePlaceholder({required this.name});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: AppTheme.customerBoatImageHeight,
-      width: double.infinity,
-      color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.directions_boat_filled_outlined,
-            size: AppTheme.emptyStateIconSize,
-            color: AppTheme.deepNavy,
-          ),
-          const SizedBox(height: AppTheme.spacing8),
-          Text(
-            name,
-            textAlign: TextAlign.center,
-            style: AppTheme.bodyLarge.copyWith(
-              color: AppTheme.deepNavy,
-              fontWeight: FontWeight.w600,
-            ),
+          Text( _licenseLabel(license), style: AppTheme.bodySmall.copyWith(color: AppTheme.sunsetGold,fontWeight: FontWeight.w600),
           ),
         ],
       ),

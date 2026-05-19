@@ -36,19 +36,14 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
     }
      loadCurrentUser();
   }
-   Future<void> loadCurrentUser() async {
+  Future<void> loadCurrentUser() async {
     final uid = ref.read(authNotifierProvider).currentUser?.uid;
-
     if (uid == null) return;
 
-    final user = await ref
-        .read(userRepositoryProvider)
-        .getUser(uid);
+    final user = await ref.read(userRepositoryProvider).getUser(uid);
 
     if (!mounted) return;
-    setState(() {
-      currentUser = user;
-    });
+    setState(() => currentUser = user);
   }
 
   final List<String> categories = [
@@ -105,13 +100,6 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final ports =
-        Hive.box<BoatModel>('boats').values
-            .map((boat) => boat.portName.trim())
-            .where((port) => port.isNotEmpty)
-            .toSet()
-            .toList()
-          ..sort();
     final activeFiltersCount =
         selectedCategories.length +
         selectedPorts.length +
@@ -119,116 +107,108 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
         (rangedCapacity.start != 1 || rangedCapacity.end != 100 ? 1 : 0) +
         (onlyAvailable ? 1 : 0) +
         (selectedLicense != null ? 1 : 0);
-    return Scaffold(
-      drawer: FilterDrawer(
-        selectedCategory: selectedCategories,
-        selectedPorts: selectedPorts,
-        rangedPrice: rangedPrice,
-        rangedCapacity: rangedCapacity,
-        categories: categories,
-        ports: ports,
-        onlyAvailable: onlyAvailable,
-        onReset: _resetFilters,
-        onCategoryChanged: (value) => setState(() {
-          selectedCategories.contains(value)
-              ? selectedCategories.remove(value)
-              : selectedCategories.add(value);
-        }),
-        onPortChanged: (value) => setState(() {
-          selectedPorts.contains(value)
-              ? selectedPorts.remove(value)
-              : selectedPorts.add(value);
-        }),
-        onPriceChanged: (values) => setState(() => rangedPrice = values),
-        onCapacityChanged: (values) => setState(() => rangedCapacity = values),
-      
-        onOnlyAvailableChanged: (value) => setState(() => onlyAvailable = value),
-        selectedLicense: selectedLicense,
-        onLicenseChanged: (value) => setState(() => selectedLicense = value),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Row(
-              children: [
-                Builder(
-                  builder: (context) => OutlinedButton.icon(
-                    onPressed: () => Scaffold.of(context).openDrawer(),
-                    icon: const Icon(Icons.tune),
-                    label: Text(
-                      activeFiltersCount == 0
-                          ? 'Filtros'
-                          : 'Filtros ($activeFiltersCount)',
+
+    return ValueListenableBuilder(
+      valueListenable: Hive.box<BoatModel>('boats').listenable(),
+      builder: (context, box, _) {
+        final boats = box.values.toList();
+        final filteredBoats = filterBoats(boats);
+
+        // Puertos derivados del caché de Hive: solo se recalculan cuando cambia la caja
+        final ports = boats
+            .map((boat) => boat.portName.trim())
+            .where((port) => port.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
+
+        return Scaffold(
+          drawer: FilterDrawer(
+            selectedCategory: selectedCategories,
+            selectedPorts: selectedPorts,
+            rangedPrice: rangedPrice,
+            rangedCapacity: rangedCapacity,
+            categories: categories,
+            ports: ports,
+            onlyAvailable: onlyAvailable,
+            onReset: _resetFilters,
+            onCategoryChanged: (value) => setState(() {
+              selectedCategories.contains(value)
+                  ? selectedCategories.remove(value)
+                  : selectedCategories.add(value);
+            }),
+            onPortChanged: (value) => setState(() {
+              selectedPorts.contains(value)
+                  ? selectedPorts.remove(value)
+                  : selectedPorts.add(value);
+            }),
+            onPriceChanged: (values) => setState(() => rangedPrice = values),
+            onCapacityChanged: (values) =>
+                setState(() => rangedCapacity = values),
+            onOnlyAvailableChanged: (value) =>
+                setState(() => onlyAvailable = value),
+            selectedLicense: selectedLicense,
+            onLicenseChanged: (value) => setState(() => selectedLicense = value),
+          ),
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Row(
+                  children: [
+                    Builder(
+                      builder: (context) => OutlinedButton.icon(
+                        onPressed: () => Scaffold.of(context).openDrawer(),
+                        icon: const Icon(Icons.tune),
+                        label: Text(
+                          activeFiltersCount == 0
+                              ? 'Filtros'
+                              : 'Filtros ($activeFiltersCount)',
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.deepNavy,
+                          side: BorderSide(color: AppTheme.deepNavy),
+                        ),
+                      ),
                     ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.deepNavy,
-                      side: BorderSide(color: AppTheme.deepNavy),
-                    ),
-                  ),
+                    if (activeFiltersCount > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Chip(
+                          label: const Text('Filtros activos'),
+                          backgroundColor: AppTheme.oceanBlue.withValues(
+                            alpha: 0.15,
+                          ),
+                          deleteIcon: const Icon(Icons.close, size: 16),
+                          onDeleted: _resetFilters,
+                        ),
+                      ),
+                  ],
                 ),
-                if (selectedCategories.isNotEmpty ||
-                    selectedPorts.isNotEmpty ||
-                    rangedCapacity.start != 1 ||
-                    rangedCapacity.end != 100 ||
-                    rangedPrice.start != 0 ||
-                    rangedPrice.end != 1000 ||
-                    onlyAvailable ||
-                    selectedLicense != null)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Chip(
-                      label: const Text('Filtros activos'),
-                      backgroundColor: AppTheme.oceanBlue.withValues(
-                        alpha: 0.15,
+              ),
+              Expanded(
+                child: boats.isEmpty
+                    ? Center(
+                        child: Text('No hay barcos disponibles',style: textTheme.bodyLarge?.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w600)
+                        ),
+                      )
+                    : filteredBoats.isEmpty
+                    ? Center(
+                        child: Text('No hay barcos con esa disposición',style: textTheme.bodyLarge?.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w600),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: filteredBoats.length,
+                        itemBuilder: (context, index) {
+                          return CustomerBoatCard(boat: filteredBoats[index]);
+                        },
                       ),
-                      deleteIcon: const Icon(Icons.close, size: 16),
-                      onDeleted: _resetFilters,
-                    ),
-                  ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Expanded(
-            child: ValueListenableBuilder(
-              valueListenable: Hive.box<BoatModel>('boats').listenable(),
-              builder: (context, box, _) {
-                final boats = box.values.toList();
-                final filteredBoats = filterBoats(boats);
-                if (boats.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No hay barcos disponibles',
-                      style: textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.deepNavy,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  );
-                }
-                if (filteredBoats.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No hay barcos con esa disposición',
-                      style: textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.deepNavy,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  );
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filteredBoats.length,
-                  itemBuilder: (context, index) {
-                    return CustomerBoatCard(boat: filteredBoats[index]);
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

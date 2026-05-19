@@ -9,6 +9,9 @@ class UserService {
 
   Future<UserModel> getUser(String uid) async {
     final doc = await _firestore.collection('users').doc(uid).get();
+    if (!doc.exists || doc.data() == null) {
+      throw Exception('Usuario no encontrado: $uid');
+    }
     return UserModel.fromMap(doc.data()!, uid);
   }
 
