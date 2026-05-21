@@ -103,9 +103,10 @@ class _AdminBookingsPageState extends ConsumerState<AdminBookingsPage> {
 
     if (confirm != true) return;
 
+    // El admin usa cancelBookingAsAdmin, sin límite de antelación.
     final success = await ref
         .read(bookingNotifierProvider)
-        .cancelBooking(booking.id);
+        .cancelBookingAsAdmin(booking.id);
 
     if (!context.mounted) return;
 
