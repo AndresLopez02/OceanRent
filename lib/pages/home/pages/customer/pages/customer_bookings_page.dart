@@ -19,6 +19,17 @@ class CustomerBookingsPage extends ConsumerStatefulWidget {
 class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
   BookingStatusFilter _selectedFilter = BookingStatusFilter.all;
 
+  static const int _cancellationMinHours = 24;
+
+  bool _canCancelBooking(BookingModel booking) {
+    if (booking.status == BookingModel.statusCancelled) return false;
+
+    final hoursUntilStart =
+        booking.startDate.difference(DateTime.now()).inHours;
+
+    return hoursUntilStart >= _cancellationMinHours;
+  }
+
   Future<void> _cancelBooking(
     BuildContext context,
     WidgetRef ref,
@@ -201,14 +212,17 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
                         final booking = filteredBookings[index];
                         final boatName =
                             boatNames[booking.boatId] ?? booking.boatId;
+                        final canCancel = _canCancelBooking(booking);
 
                         return _CustomerBookingCard(
                           booking: booking,
                           boatName: boatName,
-                          onCancel:
-                              booking.status == BookingModel.statusCancelled
-                              ? null
-                              : () => _cancelBooking(context, ref, booking),
+                          onCancel: canCancel
+                              ? () => _cancelBooking(context, ref, booking)
+                              : null,
+                          showCancellationNotice:
+                              booking.status != BookingModel.statusCancelled &&
+                              !canCancel,
                         );
                       },
                     ),
@@ -382,11 +396,13 @@ class _CustomerBookingCard extends StatelessWidget {
   final BookingModel booking;
   final String boatName;
   final VoidCallback? onCancel;
+  final bool showCancellationNotice;
 
   const _CustomerBookingCard({
     required this.booking,
     required this.boatName,
     required this.onCancel,
+    required this.showCancellationNotice,
   });
 
   @override
@@ -441,6 +457,29 @@ class _CustomerBookingCard extends StatelessWidget {
                 style: AppTheme.destructiveButtonStyle,
                 icon: const Icon(Icons.cancel_outlined),
                 label: const Text('Cancelar reserva'),
+              ),
+            ),
+          ],
+          if (showCancellationNotice) ...[
+            const SizedBox(height: AppTheme.spacing12),
+            Container(
+              padding: AppTheme.infoBannerPadding,
+              decoration: AppTheme.infoBannerDecoration(AppTheme.sunsetGold),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.info_outline,
+                    size: AppTheme.iconSizeMedium,
+                    color: AppTheme.sunsetGold,
+                  ),
+                  const SizedBox(width: AppTheme.spacing8),
+                  Expanded(
+                    child: Text(
+                      'Esta reserva ya no se puede cancelar (menos de 24h para el inicio).',
+                      style: AppTheme.infoBannerTextStyle(AppTheme.sunsetGold),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

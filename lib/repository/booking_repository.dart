@@ -11,6 +11,8 @@ class BookingRepository {
     BookingModel.statusConfirmed,
   ];
 
+  static const int _cancellationMinHours = 24;
+
   CollectionReference<Map<String, dynamic>> get _bookingsCollection =>
       _firestore.collection('bookings');
 
@@ -178,6 +180,9 @@ class BookingRepository {
     });
   }
 
+  /// Cancela una reserva como cliente.
+  /// Lanza una excepción si quedan menos de [_cancellationMinHours] horas
+  /// para el inicio de la reserva.
   Future<void> cancelBooking(String bookingId) async {
     final bookingRef = _bookingsCollection.doc(bookingId);
 
@@ -194,22 +199,62 @@ class BookingRepository {
         return;
       }
 
-      final selectedDates = _datesInRange(booking.startDate, booking.endDate);
+      final hoursUntilStart =
+          booking.startDate.difference(DateTime.now()).inHours;
 
-      transaction.update(bookingRef, {
-        'status': BookingModel.statusCancelled,
-        'deposit_status': BookingModel.depositStatusReleased,
-        'updated_at': FieldValue.serverTimestamp(),
-      });
-
-      for (final date in selectedDates) {
-        final lockRef = _bookingDateLocksCollection.doc(
-          _lockId(booking.boatId, date),
+      if (hoursUntilStart < _cancellationMinHours) {
+        throw Exception(
+          'No se puede cancelar una reserva con menos de $_cancellationMinHours horas de antelación.',
         );
-
-        transaction.delete(lockRef);
       }
+
+      await _performCancellation(transaction, bookingRef, booking);
     });
+  }
+
+  /// Cancela una reserva como administrador, sin límite de antelación.
+  Future<void> cancelBookingAsAdmin(String bookingId) async {
+    final bookingRef = _bookingsCollection.doc(bookingId);
+
+    await _firestore.runTransaction((transaction) async {
+      final bookingSnapshot = await transaction.get(bookingRef);
+
+      if (!bookingSnapshot.exists) {
+        throw Exception('La reserva no existe.');
+      }
+
+      final booking = BookingModel.fromFirestore(bookingSnapshot);
+
+      if (booking.status == BookingModel.statusCancelled) {
+        return;
+      }
+
+      await _performCancellation(transaction, bookingRef, booking);
+    });
+  }
+
+  /// Lógica común de cancelación: actualiza el estado en Firestore
+  /// y elimina los locks de fechas asociados.
+  Future<void> _performCancellation(
+    Transaction transaction,
+    DocumentReference<Map<String, dynamic>> bookingRef,
+    BookingModel booking,
+  ) async {
+    final selectedDates = _datesInRange(booking.startDate, booking.endDate);
+
+    transaction.update(bookingRef, {
+      'status': BookingModel.statusCancelled,
+      'deposit_status': BookingModel.depositStatusReleased,
+      'updated_at': FieldValue.serverTimestamp(),
+    });
+
+    for (final date in selectedDates) {
+      final lockRef = _bookingDateLocksCollection.doc(
+        _lockId(booking.boatId, date),
+      );
+
+      transaction.delete(lockRef);
+    }
   }
 
   Future<bool> isBoatAvailable({
@@ -390,3 +435,4 @@ class BookingRepository {
     return '$year$month$day';
   }
 }
+

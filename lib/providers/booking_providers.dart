@@ -139,6 +139,22 @@ class BookingNotifier extends ChangeNotifier {
     }
   }
 
+ // Cancelacion por parte del admin, sin restricciones de tiempo
+  Future<bool> cancelBookingAsAdmin(String bookingId) async {
+    _setLoading(true);
+    _errorMessage = null;
+
+    try {
+      await _bookingRepository.cancelBookingAsAdmin(bookingId);
+      return true;
+    } catch (e) {
+      _errorMessage = _cleanErrorMessage(e);
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<bool> isBoatAvailable({
     required String boatId,
     required DateTime startDate,
