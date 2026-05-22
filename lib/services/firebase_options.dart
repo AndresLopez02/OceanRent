@@ -64,7 +64,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '145195283796',
     projectId: 'rentboat2-7e150',
     storageBucket: 'rentboat2-7e150.firebasestorage.app',
-    iosClientId: '145195283796-fj81bui5ma3e0em1vjto3135pm0c4shu.apps.googleusercontent.com',
+    iosClientId:
+        '145195283796-fj81bui5ma3e0em1vjto3135pm0c4shu.apps.googleusercontent.com',
     iosBundleId: 'es.zaitec.oceanRent',
   );
 
@@ -74,7 +75,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '145195283796',
     projectId: 'rentboat2-7e150',
     storageBucket: 'rentboat2-7e150.firebasestorage.app',
-    iosClientId: '145195283796-fj81bui5ma3e0em1vjto3135pm0c4shu.apps.googleusercontent.com',
+    iosClientId:
+        '145195283796-fj81bui5ma3e0em1vjto3135pm0c4shu.apps.googleusercontent.com',
     iosBundleId: 'es.zaitec.oceanRent',
   );
 

@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
+import 'package:ocean_rent/pages/home/pages/customer/pages/customer_boat_reviews_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer/widgets/licence_comparer.dart';
 import 'package:ocean_rent/pages/home/pages/customer/widgets/license_detail_section.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/booking_providers.dart';
-import 'package:ocean_rent/widgets/app_navigator.dart';
 import 'package:ocean_rent/utils/boat_utils.dart';
+import 'package:ocean_rent/widgets/app_navigator.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:ocean_rent/pages/home/pages/customer/pages/customer_boat_reviews_page.dart';
 
 // Pantalla de detalle para el cliente.
 // Recibe el barco seleccionado desde el listado y muestra su información completa.
@@ -41,6 +41,10 @@ class _CustomerBoatDetailPageState
 
   Future<void> _handleBooking() async {
     final user = ref.read(authNotifierProvider).currentUser;
+    if (!widget.boat.isAvailable) {
+      _showSnackBar('Este barco no está disponible actualmente.');
+      return;
+    }
 
     if (user == null) {
       AppNavigator.goToLogin(context);
@@ -166,10 +170,34 @@ class _CustomerBoatDetailPageState
       requiredLicense: boat.requiredLicense,
     );
     final canReserve =
-        _rangeStart != null && !bookingState.isLoading && hasLicense;
+        !bookingState.isLoading &&
+        boat.isAvailable &&
+        (isAnonymous || (hasLicense && _rangeStart != null));
+    final bookingButtonText = !boat.isAvailable
+        ? 'Barco no disponible'
+        : isAnonymous
+        ? 'Inicia sesión para reservar'
+        : !hasLicense
+        ? 'Licencia insuficiente'
+        : _rangeStart == null
+        ? 'Selecciona fechas'
+        : 'Reservar ahora';
 
     return Scaffold(
-      appBar: AppBar(title: Text(boat.name)),
+      appBar: AppBar(
+        title: Text(
+          boat.name.isEmpty ? 'Detalle del barco' : boat.name.toUpperCase(),
+        ),
+      ),
+      bottomNavigationBar: _BookingBottomBar(
+        isLoading: bookingState.isLoading,
+        canReserve: canReserve,
+        buttonText: bookingButtonText,
+        pricePerDay: boat.pricePerDay,
+        selectedDays: _selectedDaysCount(),
+        totalAmount: _totalRentalAmount(),
+        onPressed: _handleBooking,
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,12 +241,44 @@ class _CustomerBoatDetailPageState
                   const SizedBox(height: AppTheme.spacing12),
                   _BoatDetailInfoItem(
                     icon: Icons.anchor_outlined,
-                    label: boat.portName.isEmpty? 'Puerto no indicado' : boat.portName,
+                    label: boat.portName.isEmpty
+                        ? 'Puerto no indicado'
+                        : boat.portName,
                   ),
                   if (boat.requiredLicense.toLowerCase() != 'none') ...[
                     const SizedBox(height: AppTheme.spacing16),
                     LicenseDetailSection(license: boat.requiredLicense),
                   ],
+
+                  if (!boat.isAvailable) ...[
+                    const SizedBox(height: AppTheme.spacing16),
+                    const _BoatNoticeBanner(
+                      icon: Icons.block_rounded,
+                      title: 'Barco no disponible',
+                      message:
+                          'Este barco está desactivado actualmente y no permite nuevas reservas.',
+                      color: AppTheme.alertRed,
+                    ),
+                  ] else if (!isAnonymous && !hasLicense) ...[
+                    const SizedBox(height: AppTheme.spacing16),
+                    const _BoatNoticeBanner(
+                      icon: Icons.badge_outlined,
+                      title: 'Licencia insuficiente',
+                      message:
+                          'Tu titulación actual no permite reservar este tipo de embarcación.',
+                      color: AppTheme.sunsetGold,
+                    ),
+                  ] else if (isAnonymous) ...[
+                    const SizedBox(height: AppTheme.spacing16),
+                    const _BoatNoticeBanner(
+                      icon: Icons.login_rounded,
+                      title: 'Inicia sesión para reservar',
+                      message:
+                          'Puedes revisar la información del barco, pero necesitas iniciar sesión para completar la reserva.',
+                      color: AppTheme.oceanBlue,
+                    ),
+                  ],
+
                   const SizedBox(height: AppTheme.spacing24),
                   Text(
                     'Descripción',
@@ -228,25 +288,42 @@ class _CustomerBoatDetailPageState
                   ),
                   const SizedBox(height: AppTheme.spacing8),
                   Text(
-                    boat.description.isEmpty? 'Sin descripción disponible.' : boat.description,
-                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted, height: AppTheme.lineHeightInfo)
+                    boat.description.isEmpty
+                        ? 'Sin descripción disponible.'
+                        : boat.description,
+                    style: AppTheme.bodyMedium.copyWith(
+                      color: AppTheme.textMuted,
+                      height: AppTheme.lineHeightInfo,
+                    ),
                   ),
                   const SizedBox(height: AppTheme.spacing24),
-                  Text('Disponibilidad', style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy)
+                  Text(
+                    'Disponibilidad',
+                    style: AppTheme.titleMedium.copyWith(
+                      color: AppTheme.deepNavy,
+                    ),
                   ),
                   const SizedBox(height: AppTheme.spacing8),
                   if (bookingState.isLoading)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: AppTheme.spacing12),
+                      padding: const EdgeInsets.only(
+                        bottom: AppTheme.spacing12,
+                      ),
                       child: Row(
                         children: [
                           const SizedBox(
                             width: AppTheme.loadingSize,
                             height: AppTheme.loadingSize,
-                            child: CircularProgressIndicator(strokeWidth: AppTheme.progressStrokeWidth)
+                            child: CircularProgressIndicator(
+                              strokeWidth: AppTheme.progressStrokeWidth,
+                            ),
                           ),
                           const SizedBox(width: AppTheme.spacing10),
-                          Text('Cargando disponibilidad...',style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted)
+                          Text(
+                            'Cargando disponibilidad...',
+                            style: AppTheme.bodySmall.copyWith(
+                              color: AppTheme.textMuted,
+                            ),
                           ),
                         ],
                       ),
@@ -320,7 +397,11 @@ class _CustomerBoatDetailPageState
                             color: AppTheme.backgroundDim,
                             shape: BoxShape.circle,
                           ),
-                          child: Text('${day.day}',style: const TextStyle(color: AppTheme.textSecondary),
+                          child: Text(
+                            '${day.day}',
+                            style: const TextStyle(
+                              color: AppTheme.textSecondary,
+                            ),
                           ),
                         );
                       },
@@ -329,7 +410,9 @@ class _CustomerBoatDetailPageState
                     daysOfWeekStyle: AppTheme.calendarDaysOfWeekStyle,
                     calendarStyle: CalendarStyle(
                       todayDecoration: BoxDecoration(
-                        color: AppTheme.oceanBlue.withValues(alpha: AppTheme.alphaOverlay),
+                        color: AppTheme.oceanBlue.withValues(
+                          alpha: AppTheme.alphaOverlay,
+                        ),
                         shape: BoxShape.circle,
                       ),
                       todayTextStyle: const TextStyle(color: AppTheme.deepNavy),
@@ -337,12 +420,16 @@ class _CustomerBoatDetailPageState
                         color: AppTheme.oceanBlue,
                         shape: BoxShape.circle,
                       ),
-                      selectedTextStyle: const TextStyle(color: AppTheme.pearlWhite),
+                      selectedTextStyle: const TextStyle(
+                        color: AppTheme.pearlWhite,
+                      ),
                       disabledDecoration: const BoxDecoration(
                         color: AppTheme.backgroundDim,
                         shape: BoxShape.circle,
                       ),
-                      disabledTextStyle: const TextStyle(color: AppTheme.textSecondary),
+                      disabledTextStyle: const TextStyle(
+                        color: AppTheme.textSecondary,
+                      ),
                       rangeStartDecoration: const BoxDecoration(
                         color: AppTheme.oceanBlue,
                         shape: BoxShape.circle,
@@ -352,15 +439,23 @@ class _CustomerBoatDetailPageState
                         shape: BoxShape.circle,
                       ),
                       withinRangeDecoration: BoxDecoration(
-                        color: AppTheme.sunsetGold.withValues(alpha: AppTheme.alphaMedium),
+                        color: AppTheme.sunsetGold.withValues(
+                          alpha: AppTheme.alphaMedium,
+                        ),
                         shape: BoxShape.circle,
                       ),
                       defaultDecoration: const BoxDecoration(
                         shape: BoxShape.circle,
                       ),
-                      defaultTextStyle: const TextStyle(color: AppTheme.deepNavy),
-                      weekendDecoration: const BoxDecoration(shape: BoxShape.circle),
-                      weekendTextStyle: const TextStyle(color: AppTheme.oceanBlue),
+                      defaultTextStyle: const TextStyle(
+                        color: AppTheme.deepNavy,
+                      ),
+                      weekendDecoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                      ),
+                      weekendTextStyle: const TextStyle(
+                        color: AppTheme.oceanBlue,
+                      ),
                       outsideDaysVisible: false,
                     ),
                   ),
@@ -401,27 +496,6 @@ class _CustomerBoatDetailPageState
                   ],
 
                   const SizedBox(height: AppTheme.spacing24),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: AppTheme.buttonHeight,
-                    child: ElevatedButton(
-                      onPressed: canReserve ? _handleBooking : null,
-                      style: AppTheme.accentButtonStyle,
-                      child: bookingState.isLoading
-                          ? const SizedBox(
-                              width: AppTheme.loadingSize,
-                              height: AppTheme.loadingSize,
-                              child: CircularProgressIndicator(
-                                strokeWidth: AppTheme.progressStrokeWidth,
-                                color: AppTheme.pearlWhite,
-                              ),
-                            )
-                          : Text(isAnonymous? 'Inicia sesión para reservar' : 'Reservar',
-                              style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.pearlWhite)
-                            ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -487,10 +561,14 @@ class _CrewSelector extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Tripulantes',style: AppTheme.titleSmall.copyWith(color: AppTheme.deepNavy)
+                Text(
+                  'Tripulantes',
+                  style: AppTheme.titleSmall.copyWith(color: AppTheme.deepNavy),
                 ),
                 const SizedBox(height: AppTheme.spacing4),
-                Text('Máximo permitido: $maxCrew',style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted)
+                Text(
+                  'Máximo permitido: $maxCrew',
+                  style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted),
                 ),
               ],
             ),
@@ -498,14 +576,16 @@ class _CrewSelector extends StatelessWidget {
           IconButton(
             onPressed: onDecrease,
             icon: const Icon(Icons.remove_circle_outline),
-            color: AppTheme.deepNavy
+            color: AppTheme.deepNavy,
           ),
-          Text('$crewCount',style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy)
+          Text(
+            '$crewCount',
+            style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy),
           ),
           IconButton(
             onPressed: onIncrease,
             icon: const Icon(Icons.add_circle_outline),
-            color: AppTheme.oceanBlue
+            color: AppTheme.oceanBlue,
           ),
         ],
       ),
@@ -536,7 +616,9 @@ class _BookingSummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Resumen de la reserva', style: AppTheme.titleSmall.copyWith(color: AppTheme.deepNavy),
+          Text(
+            'Resumen de la reserva',
+            style: AppTheme.titleSmall.copyWith(color: AppTheme.deepNavy),
           ),
           const SizedBox(height: AppTheme.spacing10),
           _SummaryRow(label: 'Inicio', value: startDate),
@@ -569,10 +651,17 @@ class _SummaryRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(label, style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted)
+            child: Text(
+              label,
+              style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted),
             ),
           ),
-          Text(value,style: AppTheme.bodySmall.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w700)
+          Text(
+            value,
+            style: AppTheme.bodySmall.copyWith(
+              color: AppTheme.deepNavy,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
@@ -587,6 +676,11 @@ class _BoatReviewsPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasReviews = boat.ratingCount > 0;
+    final ratingText = hasReviews
+        ? '${boat.ratingAvg.toStringAsFixed(1)} · ${boat.ratingCount} reseña${boat.ratingCount == 1 ? '' : 's'}'
+        : 'Sin reseñas todavía';
+
     return Container(
       padding: AppTheme.compactCardPadding,
       decoration: AppTheme.simpleCardDecoration(),
@@ -603,7 +697,7 @@ class _BoatReviewsPreview extends StatelessWidget {
               const Icon(Icons.star, color: AppTheme.sunsetGold),
               const SizedBox(width: AppTheme.spacing6),
               Text(
-                '4.8 · 12 reseñas',
+                ratingText,
                 style: AppTheme.bodyMedium.copyWith(
                   color: AppTheme.deepNavy,
                   fontWeight: FontWeight.w700,
@@ -613,12 +707,9 @@ class _BoatReviewsPreview extends StatelessWidget {
           ),
           const SizedBox(height: AppTheme.spacing12),
           Text(
-            '“Barco muy cómodo y experiencia muy recomendable.”',
-            style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted),
-          ),
-          const SizedBox(height: AppTheme.spacing8),
-          Text(
-            '“Todo correcto, buena comunicación y embarcación en buen estado.”',
+            hasReviews
+                ? 'Consulta las valoraciones reales de otros clientes.'
+                : 'Este barco todavía no tiene valoraciones de clientes.',
             style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted),
           ),
           const SizedBox(height: AppTheme.spacing12),
@@ -633,10 +724,144 @@ class _BoatReviewsPreview extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text('Ver todas las reseñas'),
+              child: Text(
+                hasReviews ? 'Ver reseñas' : 'Ver sección de reseñas',
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BoatNoticeBanner extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+  final Color color;
+
+  const _BoatNoticeBanner({
+    required this.icon,
+    required this.title,
+    required this.message,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: AppTheme.compactCardPadding,
+      decoration: AppTheme.infoBannerDecoration(color),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: AppTheme.iconSizeLarge),
+          const SizedBox(width: AppTheme.spacing12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTheme.titleSmall.copyWith(color: AppTheme.deepNavy),
+                ),
+                const SizedBox(height: AppTheme.spacing4),
+                Text(
+                  message,
+                  style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BookingBottomBar extends StatelessWidget {
+  final bool isLoading;
+  final bool canReserve;
+  final String buttonText;
+  final double pricePerDay;
+  final int selectedDays;
+  final double totalAmount;
+  final VoidCallback onPressed;
+
+  const _BookingBottomBar({
+    required this.isLoading,
+    required this.canReserve,
+    required this.buttonText,
+    required this.pricePerDay,
+    required this.selectedDays,
+    required this.totalAmount,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasSelectedDays = selectedDays > 0;
+
+    return SafeArea(
+      child: Container(
+        padding: AppTheme.detailBottomButtonPadding,
+        decoration: BoxDecoration(
+          color: AppTheme.white,
+          boxShadow: AppTheme.softShadow(alpha: AppTheme.alphaSoft),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    hasSelectedDays
+                        ? '${totalAmount.toStringAsFixed(2)} €'
+                        : '${pricePerDay.toStringAsFixed(0)} €/día',
+                    style: AppTheme.titleMedium.copyWith(
+                      color: AppTheme.deepNavy,
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacing2),
+                  Text(
+                    hasSelectedDays
+                        ? '$selectedDays día${selectedDays == 1 ? '' : 's'} seleccionados'
+                        : 'Selecciona fechas para calcular total',
+                    style: AppTheme.bodySmall.copyWith(
+                      color: AppTheme.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppTheme.spacing12),
+            SizedBox(
+              height: AppTheme.buttonHeight,
+              child: ElevatedButton(
+                onPressed: canReserve ? onPressed : null,
+                style: AppTheme.accentButtonStyle,
+                child: isLoading
+                    ? const SizedBox(
+                        width: AppTheme.loadingSize,
+                        height: AppTheme.loadingSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: AppTheme.progressStrokeWidth,
+                          color: AppTheme.pearlWhite,
+                        ),
+                      )
+                    : Text(
+                        buttonText,
+                        style: AppTheme.buttonTextStyle.copyWith(
+                          color: AppTheme.pearlWhite,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -658,10 +883,12 @@ class _DetailImagePlaceholder extends StatelessWidget {
           Icon(
             Icons.directions_boat_filled_outlined,
             size: AppTheme.detailPlaceholderIconSize,
-            color: AppTheme.deepNavy
+            color: AppTheme.deepNavy,
           ),
           const SizedBox(height: AppTheme.spacing8),
-          Text('Imagen no disponible',style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy)
+          Text(
+            'Imagen no disponible',
+            style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy),
           ),
         ],
       ),

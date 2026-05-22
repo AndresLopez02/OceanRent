@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ocean_rent/models/booking_model.dart';
+import 'package:ocean_rent/models/maintenance_block_model.dart';
 
 class BookingRepository {
   BookingRepository(this._firestore);
@@ -199,8 +200,9 @@ class BookingRepository {
         return;
       }
 
-      final hoursUntilStart =
-          booking.startDate.difference(DateTime.now()).inHours;
+      final hoursUntilStart = booking.startDate
+          .difference(DateTime.now())
+          .inHours;
 
       if (hoursUntilStart < _cancellationMinHours) {
         throw Exception(
@@ -255,6 +257,90 @@ class BookingRepository {
 
       transaction.delete(lockRef);
     }
+  }
+
+  Future<void> createMaintenanceBlock({
+    required String boatId,
+    required String createdBy,
+    required DateTime startDate,
+    required DateTime endDate,
+    required String reason,
+  }) async {
+    final normalizedStartDate = _startOfDay(startDate);
+    final normalizedEndDate = _startOfDay(endDate);
+
+    if (boatId.trim().isEmpty) {
+      throw Exception('Selecciona un barco para bloquear fechas.');
+    }
+
+    if (createdBy.trim().isEmpty) {
+      throw Exception('No se pudo identificar al administrador.');
+    }
+
+    if (normalizedEndDate.isBefore(normalizedStartDate)) {
+      throw Exception('La fecha final no puede ser anterior a la inicial.');
+    }
+
+    final hasBookingOverlap = await _hasActiveBookingOverlap(
+      boatId: boatId,
+      startDate: normalizedStartDate,
+      endDate: normalizedEndDate,
+    );
+
+    if (hasBookingOverlap) {
+      throw Exception(
+        'No puedes bloquear fechas que ya tienen reservas activas.',
+      );
+    }
+
+    final hasMaintenanceOverlap = await _hasMaintenanceOverlap(
+      boatId: boatId,
+      startDate: normalizedStartDate,
+      endDate: normalizedEndDate,
+    );
+
+    if (hasMaintenanceOverlap) {
+      throw Exception(
+        'Ya existe un bloqueo de mantenimiento en ese rango de fechas.',
+      );
+    }
+
+    final maintenanceRef = _maintenanceBlocksCollection.doc();
+
+    await maintenanceRef.set({
+      'id': maintenanceRef.id,
+      'boat_id': boatId,
+      'start_date': Timestamp.fromDate(normalizedStartDate),
+      'end_date': Timestamp.fromDate(normalizedEndDate),
+      'reason': reason.trim().isEmpty ? 'Mantenimiento' : reason.trim(),
+      'created_by': createdBy,
+      'created_at': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Stream<List<MaintenanceBlockModel>> watchMaintenanceBlocksByBoat(
+    String boatId,
+  ) {
+    return _maintenanceBlocksCollection
+        .where('boat_id', isEqualTo: boatId)
+        .snapshots()
+        .map((snapshot) {
+          final blocks = snapshot.docs
+              .map(MaintenanceBlockModel.fromFirestore)
+              .toList();
+
+          blocks.sort((a, b) => a.startDate.compareTo(b.startDate));
+
+          return blocks;
+        });
+  }
+
+  Future<void> deleteMaintenanceBlock(String blockId) async {
+    if (blockId.trim().isEmpty) {
+      throw Exception('No se pudo identificar el bloqueo.');
+    }
+
+    await _maintenanceBlocksCollection.doc(blockId).delete();
   }
 
   Future<bool> isBoatAvailable({
@@ -435,4 +521,3 @@ class BookingRepository {
     return '$year$month$day';
   }
 }
-

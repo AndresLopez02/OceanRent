@@ -35,7 +35,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
   final _latController = TextEditingController();
   final _lngController = TextEditingController();
 
-  //  Ubicaciones fijas de la app 
+  //  Ubicaciones fijas de la app
   static const Map<String, ({double lat, double lng})> _knownPorts = {
     'marbella': (lat: 36.5061, lng: -4.8889),
     'malaga': (lat: 36.7167, lng: -4.4167),
@@ -53,7 +53,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
 
   static const List<(String, String)> _licenseTypes = [
     ('none', 'Sin licencia'),
-    ('pbn', 'Patrón de Barco a Navegación (PBN)'),
+    ('pnb', 'Patrón Navegación de Barcos (PNB)'),
     ('per', 'Patrón de Embarcaciones de Recreo (PER)'),
   ];
 
@@ -64,6 +64,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
   File? _selectedImage;
   String imageUrlCloud = 'noURL';
   bool _coordsAutoFilled = false;
+  bool _isAvailable = true;
 
   bool get isEditing => widget.boat != null;
 
@@ -83,6 +84,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
       _imageUrlController.text = boat.imageUrl;
       _portNameController.text = boat.portName;
       _selectedLicense = _normalizeLicense(boat.requiredLicense);
+      _isAvailable = boat.isAvailable;
       if (boat.locationLat != null) {
         _latController.text = boat.locationLat.toString();
         _coordsAutoFilled = true;
@@ -291,6 +293,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
           portName: portName,
           depositAmount: deposit,
           requiredLicense: _selectedLicense,
+          isAvailable: _isAvailable,
           location: location,
         );
       } else {
@@ -304,6 +307,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
           portName: portName,
           depositAmount: deposit,
           requiredLicense: _selectedLicense,
+          isAvailable: _isAvailable,
           location: location,
         );
       }
@@ -432,18 +436,17 @@ class _BoatFormPageState extends State<BoatFormPage> {
                         value: type,
                         child: Text(
                           _boatTypeLabel(type),
-                          style: AppTheme.bodyMedium
-                              .copyWith(color: AppTheme.deepNavy),
+                          style: AppTheme.bodyMedium.copyWith(
+                            color: AppTheme.deepNavy,
+                          ),
                         ),
                       ),
                     )
                     .toList(),
-                onChanged: (value) =>
-                    setState(() => _selectedBoatType = value),
-                validator: (value) =>
-                    (value == null || value.trim().isEmpty)
-                        ? 'Campo obligatorio'
-                        : null,
+                onChanged: (value) => setState(() => _selectedBoatType = value),
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? 'Campo obligatorio'
+                    : null,
               ),
               const SizedBox(height: AppTheme.spacing12),
               BoatFormField(
@@ -455,7 +458,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
               ),
               const SizedBox(height: AppTheme.spacing12),
 
-              // Puerto con badge de autocompletado 
+              // Puerto con badge de autocompletado
               Stack(
                 children: [
                   BoatFormField(
@@ -504,15 +507,16 @@ class _BoatFormPageState extends State<BoatFormPage> {
                     ),
                 ],
               ),
-              // FIN campo puerto 
 
+              // FIN campo puerto
               const SizedBox(height: AppTheme.spacing12),
               BoatFormField(
                 controller: _priceController,
                 label: 'Precio por día (€)',
                 icon: Icons.euro_outlined,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 validator: _validatePrice,
               ),
               const SizedBox(height: AppTheme.spacing12),
@@ -520,8 +524,9 @@ class _BoatFormPageState extends State<BoatFormPage> {
                 controller: _depositController,
                 label: 'Fianza (€)',
                 icon: Icons.lock_outline,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 validator: _validateDeposit,
               ),
               const SizedBox(height: AppTheme.spacing12),
@@ -541,8 +546,9 @@ class _BoatFormPageState extends State<BoatFormPage> {
                         value: entry.$1,
                         child: Text(
                           entry.$2,
-                          style: AppTheme.bodyMedium
-                              .copyWith(color: AppTheme.deepNavy),
+                          style: AppTheme.bodyMedium.copyWith(
+                            color: AppTheme.deepNavy,
+                          ),
                         ),
                       ),
                     )
@@ -552,6 +558,48 @@ class _BoatFormPageState extends State<BoatFormPage> {
                 },
               ),
               const SizedBox(height: AppTheme.spacing12),
+              Container(
+                padding: AppTheme.compactCardPadding,
+                decoration: AppTheme.simpleCardDecoration(),
+                child: SwitchListTile.adaptive(
+                  contentPadding: EdgeInsets.zero,
+                  value: _isAvailable,
+                  activeThumbColor: AppTheme.oceanBlue,
+                  activeTrackColor: AppTheme.oceanBlue.withValues(
+                    alpha: AppTheme.alphaOverlayLight,
+                  ),
+                  title: Text(
+                    'Barco activo en catálogo',
+                    style: AppTheme.titleSmall.copyWith(
+                      color: AppTheme.deepNavy,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  subtitle: Text(
+                    _isAvailable
+                        ? 'Los clientes podrán ver y reservar este barco.'
+                        : 'El barco aparecerá como no disponible y no permitirá reservas.',
+                    style: AppTheme.bodySmall.copyWith(
+                      color: AppTheme.textMuted,
+                      height: AppTheme.lineHeightRegular,
+                    ),
+                  ),
+                  secondary: Icon(
+                    _isAvailable
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    color: _isAvailable
+                        ? AppTheme.oceanBlue
+                        : AppTheme.alertRed,
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _isAvailable = value;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacing12),
               BoatFormField(
                 controller: _descriptionController,
                 label: 'Descripción',
@@ -559,7 +607,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
                 maxLines: 4,
               ),
 
-              // Coordenadas (readonly si fueron autocompletadas) 
+              // Coordenadas (readonly si fueron autocompletadas)
               const SizedBox(height: AppTheme.spacing20),
               Row(
                 children: [
@@ -643,8 +691,8 @@ class _BoatFormPageState extends State<BoatFormPage> {
                       : AppTheme.textSecondary,
                 ),
               ),
-              // Fin campos coordenadas ─────────────────────────────────────────
 
+              // Fin campos coordenadas ─────────────────────────────────────────
               const SizedBox(height: AppTheme.spacing24),
               SizedBox(
                 height: AppTheme.buttonHeight,
@@ -653,8 +701,9 @@ class _BoatFormPageState extends State<BoatFormPage> {
                   style: AppTheme.fullWidthPrimaryButtonStyle,
                   child: Text(
                     _isSaving ? 'Guardando...' : 'Guardar',
-                    style: AppTheme.buttonTextStyle
-                        .copyWith(color: AppTheme.pearlWhite),
+                    style: AppTheme.buttonTextStyle.copyWith(
+                      color: AppTheme.pearlWhite,
+                    ),
                   ),
                 ),
               ),
@@ -673,8 +722,9 @@ class _BoatFormPageState extends State<BoatFormPage> {
                     style: AppTheme.outlinedButtonStyle,
                     child: Text(
                       'Volver al panel',
-                      style: AppTheme.buttonTextStyle
-                          .copyWith(color: AppTheme.deepNavy),
+                      style: AppTheme.buttonTextStyle.copyWith(
+                        color: AppTheme.deepNavy,
+                      ),
                     ),
                   ),
                 ),

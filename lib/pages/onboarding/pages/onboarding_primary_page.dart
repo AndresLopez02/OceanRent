@@ -3,30 +3,30 @@ import 'package:flutter/services.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/services/onboarding/onboarding_pref_service.dart';
 import 'package:ocean_rent/widgets/app_navigator.dart';
- 
+
 class OnboardingPrimaryPage extends StatefulWidget {
   final VoidCallback onNext;
- 
+
   const OnboardingPrimaryPage({super.key, required this.onNext});
- 
+
   @override
   State<OnboardingPrimaryPage> createState() => _OnboardingPrimaryPageState();
 }
- 
+
 class _OnboardingPrimaryPageState extends State<OnboardingPrimaryPage> {
   bool _doNotShowAgain = false;
   final _prefService = OnboardingPrefService();
- 
+
   Future<void> _handleExplore() async {
     if (_doNotShowAgain) await _prefService.markSkip();
     if (!mounted) return;
     AppNavigator.goToExploreBoats(context);
   }
- 
+
   Future<void> _handleNext() async {
     widget.onNext();
   }
- 
+
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -47,12 +47,21 @@ class _OnboardingPrimaryPageState extends State<OnboardingPrimaryPage> {
                 const SizedBox(height: 34),
                 const _BoatIllustration(),
                 const SizedBox(height: 40),
-                Text('El mar te espera', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.pearlWhite),
+                Text(
+                  'El mar te espera',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(color: AppTheme.pearlWhite),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Alquila tu barco perfecto \n ahora mismo', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.pearlWhite.withValues(alpha: 0.6)),
-                ), 
+                  'Alquila tu barco perfecto \n ahora mismo',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppTheme.pearlWhite.withValues(alpha: 0.6),
+                  ),
+                ),
                 const SizedBox(height: 180),
                 GestureDetector(
                   onTap: () =>
@@ -65,17 +74,32 @@ class _OnboardingPrimaryPageState extends State<OnboardingPrimaryPage> {
                         width: 22,
                         height: 22,
                         decoration: BoxDecoration(
-                          color: _doNotShowAgain? AppTheme.oceanBlue : Colors.transparent,
+                          color: _doNotShowAgain
+                              ? AppTheme.oceanBlue
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: _doNotShowAgain? AppTheme.oceanBlue : AppTheme.pearlWhite.withValues(alpha: 0.5),
+                            color: _doNotShowAgain
+                                ? AppTheme.oceanBlue
+                                : AppTheme.pearlWhite.withValues(alpha: 0.5),
                             width: 2,
                           ),
                         ),
-                        child: _doNotShowAgain? const Icon(Icons.check, size: 14, color: Colors.white) : null
+                        child: _doNotShowAgain
+                            ? const Icon(
+                                Icons.check,
+                                size: 14,
+                                color: Colors.white,
+                              )
+                            : null,
                       ),
                       const SizedBox(width: 10),
-                      Text('No mostrar esta pantalla de nuevo',style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.pearlWhite.withValues(alpha: 0.75),fontSize: 13,),
+                      Text(
+                        'No mostrar esta pantalla de nuevo',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppTheme.pearlWhite.withValues(alpha: 0.75),
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),
@@ -90,9 +114,15 @@ class _OnboardingPrimaryPageState extends State<OnboardingPrimaryPage> {
                       backgroundColor: AppTheme.oceanBlue,
                       foregroundColor: AppTheme.pearlWhite,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                    child: Text('Explorar Barcos', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.pearlWhite)
+                    child: Text(
+                      'Explorar Barcos',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppTheme.pearlWhite,
+                      ),
                     ),
                   ),
                 ),
@@ -106,17 +136,29 @@ class _OnboardingPrimaryPageState extends State<OnboardingPrimaryPage> {
                       backgroundColor: AppTheme.pearlWhite,
                       foregroundColor: AppTheme.deepNavy,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                    child: Text('Ya tengo una cuenta', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.deepNavy))
-                  )
+                    child: Text(
+                      'Ya tengo una cuenta',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppTheme.deepNavy,
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: _handleExplore,
-                  child: Text('Saltar Introducción', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.pearlWhite))
+                  child: Text(
+                    'Saltar Introducción',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppTheme.pearlWhite,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 16)
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -125,9 +167,10 @@ class _OnboardingPrimaryPageState extends State<OnboardingPrimaryPage> {
     );
   }
 }
+
 class _BoatIllustration extends StatelessWidget {
   const _BoatIllustration();
- 
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -137,7 +180,7 @@ class _BoatIllustration extends StatelessWidget {
     );
   }
 }
- 
+
 class _BoatIllustrationPainter extends CustomPainter {
   static const Color _boatPurple = Color(0xFF514964);
   static const Color _boatDark = Color(0xFF28334F);
@@ -268,6 +311,7 @@ class _BoatIllustrationPainter extends CustomPainter {
       wavePaint,
     );
   }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

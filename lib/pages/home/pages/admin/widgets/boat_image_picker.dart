@@ -69,7 +69,10 @@ class BoatImagePicker extends StatelessWidget {
                       color: AppTheme.white,
                     ),
                   )
-                : const Icon(Icons.image_outlined, size: AppTheme.iconSizeLarge),
+                : const Icon(
+                    Icons.image_outlined,
+                    size: AppTheme.iconSizeLarge,
+                  ),
             label: Text(
               isPickingImage ? 'Seleccionando...' : 'Seleccionar imagen',
               style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.white),
@@ -114,7 +117,9 @@ class _Placeholder extends StatelessWidget {
         child: Icon(
           Icons.image_outlined,
           size: AppTheme.imagePickerIconSize,
-          color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaTextSecondary),
+          color: AppTheme.deepNavy.withValues(
+            alpha: AppTheme.alphaTextSecondary,
+          ),
         ),
       ),
     );

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/booking_model.dart';
+import 'package:ocean_rent/pages/home/pages/customer/pages/customer_review_form_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/boat_providers.dart';
 import 'package:ocean_rent/providers/booking_providers.dart';
+import 'package:ocean_rent/providers/review_providers.dart';
 
 enum BookingStatusFilter { all, pending, confirmed, cancelled }
 
@@ -24,10 +26,36 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
   bool _canCancelBooking(BookingModel booking) {
     if (booking.status == BookingModel.statusCancelled) return false;
 
-    final hoursUntilStart =
-        booking.startDate.difference(DateTime.now()).inHours;
+    final hoursUntilStart = booking.startDate
+        .difference(DateTime.now())
+        .inHours;
 
     return hoursUntilStart >= _cancellationMinHours;
+  }
+
+  bool _canReviewBooking(BookingModel booking) {
+    final bookingFinished = booking.endDate.isBefore(DateTime.now());
+
+    return booking.status == BookingModel.statusConfirmed && bookingFinished;
+  }
+
+  Future<void> _openReviewPage({
+    required BookingModel booking,
+    required String userId,
+  }) async {
+    final created = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            CustomerReviewFormPage(booking: booking, userId: userId),
+      ),
+    );
+
+    if (!mounted || created != true) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Reseña publicada correctamente.')),
+    );
   }
 
   Future<void> _cancelBooking(
@@ -116,6 +144,51 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
     }
   }
 
+  Widget _buildBookingList({
+    required List<BookingModel> filteredBookings,
+    required Map<String, String> boatNames,
+    required String userId,
+  }) {
+    return SliverPadding(
+      padding: AppTheme.listPadding,
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
+          if (index.isOdd) {
+            return const SizedBox(height: AppTheme.spacing12);
+          }
+
+          final bookingIndex = index ~/ 2;
+          final booking = filteredBookings[bookingIndex];
+          final boatName = boatNames[booking.boatId] ?? booking.boatId;
+          final canCancel = _canCancelBooking(booking);
+          final canReview = _canReviewBooking(booking);
+          final isUpcoming = booking.startDate.isAfter(DateTime.now());
+          final reviewAsync = ref.watch(reviewByBookingProvider(booking.id));
+          final hasReview = reviewAsync.maybeWhen(
+            data: (review) => review != null,
+            orElse: () => false,
+          );
+
+          return _CustomerBookingCard(
+            booking: booking,
+            boatName: boatName,
+            onCancel: canCancel
+                ? () => _cancelBooking(context, ref, booking)
+                : null,
+            onReview: canReview && !hasReview
+                ? () => _openReviewPage(booking: booking, userId: userId)
+                : null,
+            hasReview: hasReview,
+            showCancellationNotice:
+                booking.status != BookingModel.statusCancelled &&
+                !canCancel &&
+                isUpcoming,
+          );
+        }, childCount: filteredBookings.length * 2 - 1),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authNotifierProvider).currentUser;
@@ -173,60 +246,45 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
             .where((booking) => booking.status == BookingModel.statusCancelled)
             .length;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _BookingsFilterHeader(
-              selectedFilter: _selectedFilter,
-              totalCount: bookings.length,
-              pendingCount: pendingCount,
-              confirmedCount: confirmedCount,
-              cancelledCount: cancelledCount,
-              onFilterSelected: (filter) {
-                setState(() {
-                  _selectedFilter = filter;
-                });
-              },
+        return CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: _BookingsFilterHeader(
+                selectedFilter: _selectedFilter,
+                totalCount: bookings.length,
+                pendingCount: pendingCount,
+                confirmedCount: confirmedCount,
+                cancelledCount: cancelledCount,
+                onFilterSelected: (filter) {
+                  setState(() {
+                    _selectedFilter = filter;
+                  });
+                },
+              ),
             ),
-            Expanded(
-              child: filteredBookings.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: AppTheme.screenPadding,
-                        child: Text(
-                          _emptyMessageByFilter(),
-                          textAlign: TextAlign.center,
-                          style: AppTheme.bodyLarge.copyWith(
-                            color: AppTheme.deepNavy,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+            if (filteredBookings.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Padding(
+                    padding: AppTheme.screenPadding,
+                    child: Text(
+                      _emptyMessageByFilter(),
+                      textAlign: TextAlign.center,
+                      style: AppTheme.bodyLarge.copyWith(
+                        color: AppTheme.deepNavy,
+                        fontWeight: FontWeight.w700,
                       ),
-                    )
-                  : ListView.separated(
-                      padding: AppTheme.listPadding,
-                      itemCount: filteredBookings.length,
-                      separatorBuilder: (_, _) =>
-                          const SizedBox(height: AppTheme.spacing12),
-                      itemBuilder: (context, index) {
-                        final booking = filteredBookings[index];
-                        final boatName =
-                            boatNames[booking.boatId] ?? booking.boatId;
-                        final canCancel = _canCancelBooking(booking);
-
-                        return _CustomerBookingCard(
-                          booking: booking,
-                          boatName: boatName,
-                          onCancel: canCancel
-                              ? () => _cancelBooking(context, ref, booking)
-                              : null,
-                          showCancellationNotice:
-                              booking.status != BookingModel.statusCancelled &&
-                              !canCancel,
-                        );
-                      },
                     ),
-            ),
+                  ),
+                ),
+              )
+            else
+              _buildBookingList(
+                filteredBookings: filteredBookings,
+                boatNames: boatNames,
+                userId: user.uid,
+              ),
           ],
         );
       },
@@ -396,13 +454,17 @@ class _CustomerBookingCard extends StatelessWidget {
   final BookingModel booking;
   final String boatName;
   final VoidCallback? onCancel;
+  final VoidCallback? onReview;
   final bool showCancellationNotice;
+  final bool hasReview;
 
   const _CustomerBookingCard({
     required this.booking,
     required this.boatName,
     required this.onCancel,
+    required this.onReview,
     required this.showCancellationNotice,
+    required this.hasReview,
   });
 
   @override
@@ -457,6 +519,41 @@ class _CustomerBookingCard extends StatelessWidget {
                 style: AppTheme.destructiveButtonStyle,
                 icon: const Icon(Icons.cancel_outlined),
                 label: const Text('Cancelar reserva'),
+              ),
+            ),
+          ],
+          if (onReview != null) ...[
+            const SizedBox(height: AppTheme.spacing14),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onReview,
+                style: AppTheme.fullWidthPrimaryButtonStyle,
+                icon: const Icon(Icons.star_rounded),
+                label: const Text('Valorar experiencia'),
+              ),
+            ),
+          ],
+          if (hasReview) ...[
+            const SizedBox(height: AppTheme.spacing12),
+            Container(
+              padding: AppTheme.infoBannerPadding,
+              decoration: AppTheme.infoBannerDecoration(AppTheme.oceanBlue),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle_outline,
+                    size: AppTheme.iconSizeMedium,
+                    color: AppTheme.oceanBlue,
+                  ),
+                  const SizedBox(width: AppTheme.spacing8),
+                  Expanded(
+                    child: Text(
+                      'Reseña enviada para esta reserva.',
+                      style: AppTheme.infoBannerTextStyle(AppTheme.oceanBlue),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

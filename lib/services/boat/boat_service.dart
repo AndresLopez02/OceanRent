@@ -29,6 +29,7 @@ class BoatService {
     required String portName,
     required double depositAmount,
     required String requiredLicense,
+    required bool isAvailable,
     GeoPoint? location, // NUEVO
   }) async {
     await _boatsCollection.add({
@@ -41,7 +42,9 @@ class BoatService {
       'port_name': portName.trim(),
       'deposit_amount': depositAmount,
       'required_license': requiredLicense,
-      'location': ?location, //
+      'is_available': isAvailable,
+      'location': location,
+      // Guardamos la ubicación aunque sea null para eliminarla si el usuario decide quitarla
     });
   }
 
@@ -56,6 +59,7 @@ class BoatService {
     required String portName,
     required double depositAmount,
     required String requiredLicense,
+    required bool isAvailable,
     GeoPoint? location, // NUEVO
   }) async {
     await _boatsCollection.doc(id).update({
@@ -68,7 +72,9 @@ class BoatService {
       'port_name': portName.trim(),
       'deposit_amount': depositAmount,
       'required_license': requiredLicense,
-      'location': location, // Guardamos la ubicación aunque sea null para eliminarla si el usuario decide quitarla
+      'is_available': isAvailable,
+      'location': location,
+      // Guardamos la ubicación aunque sea null para eliminarla si el usuario decide quitarla
     });
   }
 
@@ -76,4 +82,3 @@ class BoatService {
     await _boatsCollection.doc(id).delete();
   }
 }
-

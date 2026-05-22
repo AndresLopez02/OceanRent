@@ -7,6 +7,7 @@ class ReviewModel {
   final String userId;
   final int rating;
   final String comment;
+  final String adminReply;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -17,6 +18,7 @@ class ReviewModel {
     required this.userId,
     required this.rating,
     required this.comment,
+    this.adminReply = '',
     this.createdAt,
     this.updatedAt,
   });
@@ -31,6 +33,7 @@ class ReviewModel {
       userId: data['user_id'] ?? '',
       rating: data['rating'] ?? 0,
       comment: data['comment'] ?? '',
+      adminReply: data['admin_reply'] ?? '',
       createdAt: _nullableDateFromTimestamp(data['created_at']),
       updatedAt: _nullableDateFromTimestamp(data['updated_at']),
     );
@@ -38,11 +41,13 @@ class ReviewModel {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'boat_id': boatId,
       'booking_id': bookingId,
       'user_id': userId,
       'rating': rating,
       'comment': comment,
+      'admin_reply': adminReply,
       'created_at': createdAt != null
           ? Timestamp.fromDate(createdAt!)
           : FieldValue.serverTimestamp(),
@@ -59,6 +64,7 @@ class ReviewModel {
     String? userId,
     int? rating,
     String? comment,
+    String? adminReply,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -69,6 +75,7 @@ class ReviewModel {
       userId: userId ?? this.userId,
       rating: rating ?? this.rating,
       comment: comment ?? this.comment,
+      adminReply: adminReply ?? this.adminReply,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

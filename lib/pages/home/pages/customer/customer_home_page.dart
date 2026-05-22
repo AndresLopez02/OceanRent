@@ -51,7 +51,7 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
     final List<Widget> pages = [
       BoatListPage(categoriasIniciales: widget.initialCategories),
       // Mapa implementado en el proyecto
-      const CustomerMapPage(), 
+      const CustomerMapPage(),
       const Center(child: Text('Chat')),
       // Posible implementación de un chat para hablar con el admin del barco
       const CustomerBookingsPage(),

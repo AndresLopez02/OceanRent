@@ -8,9 +8,9 @@ final imagePickerServiceProvider = Provider<ImagePickerService>((ref) {
 
 final selectedImagesProvider =
     StateNotifierProvider<SelectedImagesNotifier, List<XFile>>((ref) {
-  final imagePickerService = ref.read(imagePickerServiceProvider);
-  return SelectedImagesNotifier(imagePickerService);
-});
+      final imagePickerService = ref.read(imagePickerServiceProvider);
+      return SelectedImagesNotifier(imagePickerService);
+    });
 
 // Controla la lista de imágenes seleccionadas.
 class SelectedImagesNotifier extends StateNotifier<List<XFile>> {

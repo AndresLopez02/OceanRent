@@ -214,7 +214,9 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
         ),
         backgroundColor: error ? AppTheme.alertRed : AppTheme.oceanBlue,
         behavior: SnackBarBehavior.floating,
-        shape: const RoundedRectangleBorder(borderRadius: AppTheme.borderRadiusInput),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppTheme.borderRadiusInput,
+        ),
         margin: AppTheme.listPadding,
       ),
     );
@@ -231,7 +233,9 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
     }
     if (_profile == null) {
       return Center(
-        child: Text('No se pudo cargar el perfil',style: AppTheme.bodyMedium.copyWith(color: AppTheme.deepNavy)
+        child: Text(
+          'No se pudo cargar el perfil',
+          style: AppTheme.bodyMedium.copyWith(color: AppTheme.deepNavy),
         ),
       );
     }
@@ -303,7 +307,12 @@ class _AvatarSection extends StatelessWidget {
                 height: AppTheme.avatarSize,
                 decoration: AppTheme.profileAvatarDecoration(),
                 child: Center(
-                  child: Text(initials, style: AppTheme.headlineLarge.copyWith(color: AppTheme.white,fontSize: AppTheme.fontSize30)
+                  child: Text(
+                    initials,
+                    style: AppTheme.headlineLarge.copyWith(
+                      color: AppTheme.white,
+                      fontSize: AppTheme.fontSize30,
+                    ),
                   ),
                 ),
               ),
@@ -316,14 +325,19 @@ class _AvatarSection extends StatelessWidget {
                   decoration: AppTheme.profileCameraDecoration(),
                   child: Icon(
                     Icons.camera_alt_rounded,
-                    size: AppTheme.iconSizeSmall,color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaDisabled)
+                    size: AppTheme.iconSizeSmall,
+                    color: AppTheme.deepNavy.withValues(
+                      alpha: AppTheme.alphaDisabled,
+                    ),
                   ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppTheme.spacing12),
-          Text( '${profile.name} ${profile.surname}', style: AppTheme.titleMedium
+          Text(
+            '${profile.name} ${profile.surname}',
+            style: AppTheme.titleMedium,
           ),
           const SizedBox(height: AppTheme.spacing4),
           Container(
@@ -430,7 +444,12 @@ class _NauticalCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text('Estado de verificación', style: AppTheme.bodySmall.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w600)
+              Text(
+                'Estado de verificación',
+                style: AppTheme.bodySmall.copyWith(
+                  color: AppTheme.deepNavy,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const Spacer(),
               AnimatedContainer(
@@ -470,22 +489,27 @@ class _NauticalCard extends StatelessWidget {
             style: AppTheme.fieldTextStyle,
             dropdownColor: AppTheme.white,
             borderRadius: AppTheme.borderRadiusInput,
-            items: _licenseTypes.map(
+            items: _licenseTypes
+                .map(
                   (t) => DropdownMenuItem(
                     value: t.$1,
                     child: Text(
                       t.$2,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTheme.bodySmall.copyWith(color: AppTheme.deepNavy)
+                      style: AppTheme.bodySmall.copyWith(
+                        color: AppTheme.deepNavy,
+                      ),
                     ),
                   ),
-                ).toList(),
+                )
+                .toList(),
             onChanged: (v) {
               if (v != null) onTypeChanged(v);
             },
           ),
           const SizedBox(height: AppTheme.spacing20),
-          Divider( color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaMedium)
+          Divider(
+            color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaMedium),
           ),
           const SizedBox(height: AppTheme.spacing16),
           _DocumentUpload(
@@ -527,10 +551,17 @@ class _DocumentUpload extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Documento acreditativo',style: AppTheme.bodySmall.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w600)
+        Text(
+          'Documento acreditativo',
+          style: AppTheme.bodySmall.copyWith(
+            color: AppTheme.deepNavy,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: AppTheme.spacing4),
-        Text('Sube tu titulación en formato PDF, JPG o PNG (máx. 10 MB)',style: AppTheme.helperTextStyle
+        Text(
+          'Sube tu titulación en formato PDF, JPG o PNG (máx. 10 MB)',
+          style: AppTheme.helperTextStyle,
         ),
         const SizedBox(height: AppTheme.spacing14),
         GestureDetector(
@@ -552,7 +583,9 @@ class _DocumentUpload extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: AppTheme.spacing10),
-                      Text('Subiendo documento...', style: AppTheme.helperTextStyle,
+                      Text(
+                        'Subiendo documento...',
+                        style: AppTheme.helperTextStyle,
                       ),
                     ],
                   )
@@ -560,19 +593,35 @@ class _DocumentUpload extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        hasFile? Icons.insert_drive_file_rounded : Icons.upload_file_rounded,
-                        color: hasFile? AppTheme.oceanBlue : AppTheme.deepNavy.withValues(alpha: AppTheme.alphaDisabled),
+                        hasFile
+                            ? Icons.insert_drive_file_rounded
+                            : Icons.upload_file_rounded,
+                        color: hasFile
+                            ? AppTheme.oceanBlue
+                            : AppTheme.deepNavy.withValues(
+                                alpha: AppTheme.alphaDisabled,
+                              ),
                         size: AppTheme.iconSizeXl,
                       ),
                       const SizedBox(width: AppTheme.spacing10),
                       Flexible(
                         child: Text(
                           pickedFileName ??
-                              ((profile.nauticalLicense?.documentUrl.isNotEmpty ??false)? 'Documento subido' : 'Seleccionar documento'),
+                              ((profile
+                                          .nauticalLicense
+                                          ?.documentUrl
+                                          .isNotEmpty ??
+                                      false)
+                                  ? 'Documento subido'
+                                  : 'Seleccionar documento'),
                           style: AppTheme.helperTextStyle.copyWith(
                             fontWeight: FontWeight.w500,
                             fontSize: AppTheme.fontSize13,
-                            color: hasFile? AppTheme.oceanBlue: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaDisabled)
+                            color: hasFile
+                                ? AppTheme.oceanBlue
+                                : AppTheme.deepNavy.withValues(
+                                    alpha: AppTheme.alphaDisabled,
+                                  ),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -582,10 +631,18 @@ class _DocumentUpload extends StatelessWidget {
                         Container(
                           padding: AppTheme.browseBadgePadding,
                           decoration: BoxDecoration(
-                            color: AppTheme.oceanBlue.withValues(alpha: AppTheme.alphaMedium),
-                            borderRadius: BorderRadius.circular(AppTheme.radiusXs),
+                            color: AppTheme.oceanBlue.withValues(
+                              alpha: AppTheme.alphaMedium,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radiusXs,
+                            ),
                           ),
-                          child: Text('Examinar',style: AppTheme.badgeTextStyle.copyWith(fontSize: AppTheme.fontSize11)
+                          child: Text(
+                            'Examinar',
+                            style: AppTheme.badgeTextStyle.copyWith(
+                              fontSize: AppTheme.fontSize11,
+                            ),
                           ),
                         ),
                       ],

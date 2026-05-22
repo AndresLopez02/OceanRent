@@ -37,180 +37,270 @@ class FilterDrawer extends StatelessWidget {
     this.selectedLicense,
   });
 
+  String _formatCategory(String category) {
+    if (category.isEmpty) return category;
+
+    if (category == 'todos') {
+      return 'Todos';
+    }
+
+    if (category == 'jetski') {
+      return 'Jet ski';
+    }
+
+    return category[0].toUpperCase() + category.substring(1);
+  }
+
+  TextStyle _sectionTitleStyle(BuildContext context) {
+    return Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: AppTheme.deepNavy,
+          fontWeight: FontWeight.w700,
+        ) ??
+        AppTheme.titleSmall;
+  }
+
+  TextStyle _rangeValueStyle(BuildContext context) {
+    return Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: AppTheme.deepNavy,
+          fontWeight: FontWeight.w600,
+        ) ??
+        AppTheme.bodySmall.copyWith(
+          color: AppTheme.deepNavy,
+          fontWeight: FontWeight.w600,
+        );
+  }
+
+  Widget _sectionSpacing() {
+    return const SizedBox(height: AppTheme.spacing24);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Drawer(
+      backgroundColor: AppTheme.pearlWhite,
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Filtros',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.deepNavy)
+        child: SingleChildScrollView(
+          padding: AppTheme.compactCardPadding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Filtros',
+                    style: textTheme.titleLarge?.copyWith(
+                      color: AppTheme.deepNavy,
+                      fontWeight: FontWeight.w800,
                     ),
-                    TextButton(
-                      onPressed: onReset,
-                      child: const Text('Limpiar'),
+                  ),
+                  TextButton.icon(
+                    onPressed: onReset,
+                    icon: const Icon(Icons.restart_alt_rounded),
+                    label: const Text('Limpiar'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppTheme.spacing8),
+              const Divider(),
+              const SizedBox(height: AppTheme.spacing16),
+
+              Text('Categoría', style: _sectionTitleStyle(context)),
+              const SizedBox(height: AppTheme.spacing8),
+              Wrap(
+                spacing: AppTheme.spacing8,
+                runSpacing: AppTheme.spacing8,
+                children: categories.map((category) {
+                  final isSelected = selectedCategory.contains(category);
+
+                  return FilterChip(
+                    label: Text(_formatCategory(category)),
+                    selected: isSelected,
+                    onSelected: (_) => onCategoryChanged(category),
+                    selectedColor: AppTheme.oceanBlue.withValues(
+                      alpha: AppTheme.alphaOverlayLight,
                     ),
-                  ],
-                ),
-                const Divider(),
-                const SizedBox(height: 16),
-                Text('Categoría',style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.deepNavy)
-                ),
-                const SizedBox(height: 8),
+                    checkmarkColor: AppTheme.deepNavy,
+                    labelStyle: AppTheme.labelMedium.copyWith(
+                      color: isSelected
+                          ? AppTheme.deepNavy
+                          : AppTheme.textSecondary,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w600,
+                    ),
+                    side: BorderSide(
+                      color: isSelected
+                          ? AppTheme.deepNavy
+                          : AppTheme.dividerStrong,
+                    ),
+                  );
+                }).toList(),
+              ),
+
+              _sectionSpacing(),
+
+              Text('Ubicación', style: _sectionTitleStyle(context)),
+              const SizedBox(height: AppTheme.spacing8),
+              if (ports.isEmpty)
+                Text(
+                  'No hay ubicaciones disponibles',
+                  style: AppTheme.bodySmall,
+                )
+              else
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: categories.map((category) {
-                    final isSelected = selectedCategory.contains(category);
+                  spacing: AppTheme.spacing8,
+                  runSpacing: AppTheme.spacing8,
+                  children: ports.map((port) {
+                    final isSelected = selectedPorts.contains(port);
+
                     return FilterChip(
-                      label: Text(
-                        category[0].toUpperCase() + category.substring(1),
+                      avatar: Icon(
+                        Icons.location_on_outlined,
+                        size: AppTheme.iconSizeSmall,
+                        color: isSelected
+                            ? AppTheme.deepNavy
+                            : AppTheme.textSecondary,
                       ),
+                      label: Text(port),
                       selected: isSelected,
-                      onSelected: (_) => onCategoryChanged(category),
-                      selectedColor: AppTheme.oceanBlue.withValues(alpha: 0.2),
-                      checkmarkColor: AppTheme.deepNavy,
-                      labelStyle: TextStyle(
-                        color: isSelected? AppTheme.deepNavy : Colors.grey.shade700,
-                        fontWeight: isSelected? FontWeight.w600 : FontWeight.normal,
+                      onSelected: (_) => onPortChanged(port),
+                      selectedColor: AppTheme.oceanBlue.withValues(
+                        alpha: AppTheme.alphaOverlayLight,
                       ),
-                      side: BorderSide(color: isSelected? AppTheme.deepNavy: Colors.grey.shade300)
+                      checkmarkColor: AppTheme.deepNavy,
+                      labelStyle: AppTheme.labelMedium.copyWith(
+                        color: isSelected
+                            ? AppTheme.deepNavy
+                            : AppTheme.textSecondary,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w600,
+                      ),
+                      side: BorderSide(
+                        color: isSelected
+                            ? AppTheme.deepNavy
+                            : AppTheme.dividerStrong,
+                      ),
                     );
                   }).toList(),
                 ),
-                const SizedBox(height: 24),
-                Text('Ubicación', style: TextStyle(fontWeight: FontWeight.w600,color: AppTheme.deepNavy)
-                ),
-                const SizedBox(height: 8),
-                if (ports.isEmpty)
-                  Text('No hay ubicaciones disponibles', style: TextStyle(color: Colors.grey.shade600),
-                  )
-                else
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: ports.map((port) {
-                      final isSelected = selectedPorts.contains(port);
-                      return FilterChip(
-                        avatar: Icon(Icons.location_on_outlined, size: 18, color: isSelected? AppTheme.deepNavy : Colors.grey.shade600,
-                        ),
-                        label: Text(port),
-                        selected: isSelected,
-                        onSelected: (_) => onPortChanged(port),
-                        selectedColor: AppTheme.oceanBlue.withValues(
-                          alpha: 0.2,
-                        ),
-                        checkmarkColor: AppTheme.deepNavy,
-                        labelStyle: TextStyle(
-                          color: isSelected? AppTheme.deepNavy : Colors.grey.shade700,
-                          fontWeight: isSelected? FontWeight.w600 : FontWeight.normal,
-                        ),
-                        side: BorderSide(color: isSelected? AppTheme.deepNavy : Colors.grey.shade300)
-                      );
-                    }).toList(),
-                  ),
 
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Precio por día (€)',style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.deepNavy)
-                    ),
-                    Text('${rangedPrice.start.toInt()}€ - ${rangedPrice.end.toInt()}€', style: TextStyle(color: AppTheme.deepNavy)
-                    ),
-                  ],
+              _sectionSpacing(),
+
+              SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  'Solo disponibles',
+                  style: _sectionTitleStyle(context),
                 ),
-                RangeSlider(
-                  values: rangedPrice,
-                  min: 0,
-                  max: 1000,
-                  divisions: 100,
-                  activeColor: AppTheme.deepNavy,
-                  inactiveColor: AppTheme.deepNavy.withValues(alpha: 0.2),
-                  labels: RangeLabels('${rangedPrice.start.toInt()}€', '${rangedPrice.end.toInt()}€'),
-                  onChanged: onPriceChanged,
+                subtitle: Text(
+                  'Oculta barcos que no estén activos en el catálogo',
+                  style: AppTheme.bodySmall,
                 ),
-                const SizedBox(height: 24), 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Capacidad', style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.deepNavy)
-                    ),
-                    Text('${rangedCapacity.start.toInt()} - ${rangedCapacity.end.toInt()} personas', style: TextStyle(color: AppTheme.deepNavy)
-                    ),
-                  ],
+                value: onlyAvailable,
+                activeThumbColor: AppTheme.oceanBlue,
+                activeTrackColor: AppTheme.oceanBlue.withValues(
+                  alpha: AppTheme.alphaOverlayLight,
                 ),
-                RangeSlider(
-                  values: rangedCapacity,
-                  min: 1,
-                  max: 100,
-                  divisions: 25,
-                  activeColor: AppTheme.deepNavy,
-                  inactiveColor: AppTheme.deepNavy.withValues(alpha: 0.2),
-                  labels: RangeLabels('${rangedCapacity.start.toInt()}', '${rangedCapacity.end.toInt()}'),
-                  onChanged: onCapacityChanged,
-                ),
-                const SizedBox(height: 24),
-                Text('Licencia requerida', style: TextStyle(fontWeight: FontWeight.w600,color: AppTheme.deepNavy)
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String?>(
-                  initialValue: selectedLicense,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 14,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppTheme.deepNavy),
-                    ),
+                onChanged: onOnlyAvailableChanged,
+              ),
+
+              _sectionSpacing(),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Precio por día', style: _sectionTitleStyle(context)),
+                  Text(
+                    '${rangedPrice.start.toInt()}€ - ${rangedPrice.end.toInt()}€',
+                    style: _rangeValueStyle(context),
                   ),
-                  dropdownColor: Colors.white,
-                  style: TextStyle(color: AppTheme.deepNavy, fontSize: 14),
-                  selectedItemBuilder: (context) => [
-                    Text('Todas las licencias', overflow: TextOverflow.ellipsis),
-                    Text('Sin licencia', overflow: TextOverflow.ellipsis),
-                    Text('PBN', overflow: TextOverflow.ellipsis),
-                    Text('PER', overflow: TextOverflow.ellipsis),
-                  ],
-                  items: const [
-                    DropdownMenuItem(
-                      value: null,
-                      child: Text('Todas las licencias'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'none',
-                      child: Text('Sin licencia'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'pbn',
-                      child: Text('PBN — Patrón de Barco a Navegación'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'per',
-                      child: Text('PER — Patrón de Embarcaciones de Recreo'),
-                    ),
-                  ],
-                  onChanged: onLicenseChanged,
+                ],
+              ),
+              RangeSlider(
+                values: rangedPrice,
+                min: 0,
+                max: 1000,
+                divisions: 100,
+                activeColor: AppTheme.deepNavy,
+                inactiveColor: AppTheme.deepNavy.withValues(
+                  alpha: AppTheme.alphaOverlayLight,
                 ),
-              ],
-            ),
+                labels: RangeLabels(
+                  '${rangedPrice.start.toInt()}€',
+                  '${rangedPrice.end.toInt()}€',
+                ),
+                onChanged: onPriceChanged,
+              ),
+
+              _sectionSpacing(),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Capacidad', style: _sectionTitleStyle(context)),
+                  Text(
+                    '${rangedCapacity.start.toInt()} - ${rangedCapacity.end.toInt()} personas',
+                    style: _rangeValueStyle(context),
+                  ),
+                ],
+              ),
+              RangeSlider(
+                values: rangedCapacity,
+                min: 1,
+                max: 100,
+                divisions: 25,
+                activeColor: AppTheme.deepNavy,
+                inactiveColor: AppTheme.deepNavy.withValues(
+                  alpha: AppTheme.alphaOverlayLight,
+                ),
+                labels: RangeLabels(
+                  '${rangedCapacity.start.toInt()}',
+                  '${rangedCapacity.end.toInt()}',
+                ),
+                onChanged: onCapacityChanged,
+              ),
+
+              _sectionSpacing(),
+
+              Text('Licencia requerida', style: _sectionTitleStyle(context)),
+              const SizedBox(height: AppTheme.spacing8),
+              DropdownButtonFormField<String?>(
+                initialValue: selectedLicense,
+                isExpanded: true,
+                decoration: AppTheme.inputDecoration(
+                  labelText: 'Tipo de licencia',
+                  icon: Icons.badge_outlined,
+                ),
+                dropdownColor: AppTheme.white,
+                style: AppTheme.bodySmall.copyWith(color: AppTheme.deepNavy),
+                selectedItemBuilder: (context) => const [
+                  Text('Todas las licencias', overflow: TextOverflow.ellipsis),
+                  Text('Sin licencia', overflow: TextOverflow.ellipsis),
+                  Text('PNB', overflow: TextOverflow.ellipsis),
+                  Text('PER', overflow: TextOverflow.ellipsis),
+                ],
+                items: const [
+                  DropdownMenuItem(
+                    value: null,
+                    child: Text('Todas las licencias'),
+                  ),
+                  DropdownMenuItem(value: 'none', child: Text('Sin licencia')),
+                  DropdownMenuItem(
+                    value: 'pnb',
+                    child: Text('PNB — Patrón de Navegación Básica'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'per',
+                    child: Text('PER — Patrón de Embarcaciones de Recreo'),
+                  ),
+                ],
+                onChanged: onLicenseChanged,
+              ),
+            ],
           ),
         ),
       ),

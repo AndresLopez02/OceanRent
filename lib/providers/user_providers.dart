@@ -6,7 +6,7 @@ import 'package:ocean_rent/services/user/user_service.dart';
 final userServiceProvider = Provider<UserService>((ref) => UserService());
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
-  final userService    = ref.watch(userServiceProvider);
+  final userService = ref.watch(userServiceProvider);
   final storageService = ref.watch(firebaseStorageServiceProvider);
   return UserRepository(userService, storageService);
 });

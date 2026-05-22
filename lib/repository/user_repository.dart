@@ -9,32 +9,28 @@ class UserRepository {
   final UserService _userService;
   final FirebaseStorageService _storageService;
 
-  Future<UserModel> getUser(String uid) =>
-      _userService.getUser(uid);
+  Future<UserModel> getUser(String uid) => _userService.getUser(uid);
 
   Future<void> updateProfile({
     required String uid,
     required String name,
     required String surname,
-  }) =>
-      _userService.updateProfile(uid: uid, name: name, surname: surname);
+  }) => _userService.updateProfile(uid: uid, name: name, surname: surname);
 
   Future<String> uploadLicenseDocument({
     required String uid,
     required XFile file,
-  }) =>
-      _storageService.uploadLicenseDocument(uid: uid, file: file);
+  }) => _storageService.uploadLicenseDocument(uid: uid, file: file);
 
   Future<void> updateNauticalLicense({
     required String uid,
     required String type,
     required String documentUrl,
     required String status,
-  }) =>
-      _userService.updateNauticalLicense(
-        uid: uid,
-        type: type,
-        documentUrl: documentUrl,
-        status: status,
-      );
+  }) => _userService.updateNauticalLicense(
+    uid: uid,
+    type: type,
+    documentUrl: documentUrl,
+    status: status,
+  );
 }

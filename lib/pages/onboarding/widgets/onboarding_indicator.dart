@@ -6,7 +6,7 @@ class OnboardingIndicator extends StatelessWidget {
   final int totalPages;
 
   const OnboardingIndicator({
-    super.key, 
+    super.key,
     required this.currentPage,
     required this.totalPages,
   });
@@ -15,18 +15,16 @@ class OnboardingIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children:List.generate(totalPages, (index) {
+      children: List.generate(totalPages, (index) {
         final isActive = index == currentPage;
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: isActive ? 28 : 9,            
+          width: isActive ? 28 : 9,
           height: 9,
           decoration: BoxDecoration(
-            color: isActive
-                ? AppTheme.oceanBlue
-                : Colors.grey,
-            borderRadius: BorderRadius.circular(20)
+            color: isActive ? AppTheme.oceanBlue : Colors.grey,
+            borderRadius: BorderRadius.circular(20),
           ),
         );
       }),
