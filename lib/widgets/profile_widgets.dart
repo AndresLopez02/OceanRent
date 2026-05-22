@@ -58,13 +58,14 @@ class ProfileField extends StatelessWidget {
     readOnly: readOnly,
     validator: validator,
     style: readOnly ? AppTheme.readOnlyFieldTextStyle : AppTheme.fieldTextStyle,
-    decoration: AppTheme.inputDecoration(
-      labelText: label,
-      icon: icon,
-      readOnly: readOnly,
-    ).copyWith(
-      errorStyle: AppTheme.helperTextStyle.copyWith(color: AppTheme.error),
-    ),
+    decoration:
+        AppTheme.inputDecoration(
+          labelText: label,
+          icon: icon,
+          readOnly: readOnly,
+        ).copyWith(
+          errorStyle: AppTheme.helperTextStyle.copyWith(color: AppTheme.error),
+        ),
   );
 }
 

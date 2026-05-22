@@ -5,9 +5,7 @@ class ImagePickerService {
 
   // Abre la galería y devuelve varias imágenes seleccionadas.
   Future<List<XFile>> pickMultipleImages() async {
-    final List<XFile> images = await _picker.pickMultiImage(
-      imageQuality: 85,
-    );
+    final List<XFile> images = await _picker.pickMultiImage(imageQuality: 85);
 
     return images;
   }

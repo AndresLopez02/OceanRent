@@ -8,12 +8,16 @@ class AppNavigator {
       context,
     ).push(MaterialPageRoute(builder: (_) => const LoginPage()));
   }
-  static void goToExploreBoats(BuildContext context, {List<String> categories = const []}) {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (_) => CustomerHomePage(initialCategories: categories)),
-  );
-}
-}
 
+  static void goToExploreBoats(
+    BuildContext context, {
+    List<String> categories = const [],
+  }) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CustomerHomePage(initialCategories: categories),
+      ),
+    );
+  }
+}

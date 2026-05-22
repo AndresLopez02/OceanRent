@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
+import 'package:ocean_rent/pages/home/pages/customer/pages/customer_boat_detail_page.dart';
 import 'package:ocean_rent/providers/boat_providers.dart';
 
 // Utilidades de categoría
@@ -87,14 +88,11 @@ class _CustomerMapPageState extends ConsumerState<CustomerMapPage> {
   /// Devuelve un mapa clave→lista donde la clave es "lat,lng" redondeada
   /// a [_groupPrecision] decimales. Cada lista contiene todos los barcos
   /// que comparten (aproximadamente) la misma ubicación.
-  Map<String, List<BoatModel>> _groupBoatsByLocation(
-      List<BoatModel> boats) {
+  Map<String, List<BoatModel>> _groupBoatsByLocation(List<BoatModel> boats) {
     final Map<String, List<BoatModel>> groups = {};
     for (final boat in boats) {
-      final lat =
-          boat.location!.latitude.toStringAsFixed(_groupPrecision);
-      final lng =
-          boat.location!.longitude.toStringAsFixed(_groupPrecision);
+      final lat = boat.location!.latitude.toStringAsFixed(_groupPrecision);
+      final lng = boat.location!.longitude.toStringAsFixed(_groupPrecision);
       final key = '$lat,$lng';
       groups.putIfAbsent(key, () => []).add(boat);
     }
@@ -105,7 +103,7 @@ class _CustomerMapPageState extends ConsumerState<CustomerMapPage> {
 
   // Genera la lista de [Marker] desplazando en abanico los barcos que
   // comparten la misma ubicación para que todos sus pines sean visibles.
-  
+
   // El radio de dispersión (~0.0002° ≈ 20 m) es lo suficientemente pequeño
   // para parecer "en el mismo puerto" pero lo suficientemente grande para
   // que los círculos de 34 px no se solapen a zoom 9-12.
@@ -138,10 +136,7 @@ class _CustomerMapPageState extends ConsumerState<CustomerMapPage> {
             height: 44,
             child: GestureDetector(
               onTap: () => _onPinTapped(boat, group),
-              child: _BoatPin(
-                category: boat.category,
-                isSelected: isSelected,
-              ),
+              child: _BoatPin(category: boat.category, isSelected: isSelected),
             ),
           ),
         );
@@ -151,7 +146,7 @@ class _CustomerMapPageState extends ConsumerState<CustomerMapPage> {
     return markers;
   }
 
-  // Handlers de interacción 
+  // Handlers de interacción
 
   // Toque sobre un pin:
   // - Si es el único barco en esa ubicación → muestra el popup individual.
@@ -169,17 +164,13 @@ class _CustomerMapPageState extends ConsumerState<CustomerMapPage> {
 
     if (boat.location != null) {
       _mapController.move(
-        LatLng(
-          boat.location!.latitude + 0.01,
-          boat.location!.longitude,
-        ),
+        LatLng(boat.location!.latitude + 0.01, boat.location!.longitude),
         _mapController.camera.zoom,
       );
     }
   }
 
-  void _showBoatGroup(
-      BoatModel tappedBoat, List<BoatModel> group) {
+  void _showBoatGroup(BoatModel tappedBoat, List<BoatModel> group) {
     // Resalta el pin tocado mientras el sheet está abierto
     setState(() => _selectedBoat = tappedBoat);
 
@@ -200,6 +191,13 @@ class _CustomerMapPageState extends ConsumerState<CustomerMapPage> {
 
   void _dismissPopup() => setState(() => _selectedBoat = null);
 
+  void _openBoatDetail(BoatModel boat) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => CustomerBoatDetailPage(boat: boat)),
+    );
+  }
+
   // Build que integra todo: mapa, pins, popups, controles y leyenda
 
   @override
@@ -210,10 +208,9 @@ class _CustomerMapPageState extends ConsumerState<CustomerMapPage> {
       onTap: _dismissPopup,
       child: Stack(
         children: [
-          // Mapa con pins de barcos 
+          // Mapa con pins de barcos
           boatsAsync.when(
-            loading: () =>
-                const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Center(
               child: Text(
                 'Error cargando barcos: $e',
@@ -221,8 +218,9 @@ class _CustomerMapPageState extends ConsumerState<CustomerMapPage> {
               ),
             ),
             data: (boats) {
-              final boatsWithLocation =
-                  boats.where((b) => b.location != null).toList();
+              final boatsWithLocation = boats
+                  .where((b) => b.location != null)
+                  .toList();
 
               return FlutterMap(
                 mapController: _mapController,
@@ -243,15 +241,13 @@ class _CustomerMapPageState extends ConsumerState<CustomerMapPage> {
                     userAgentPackageName: 'com.oceanrent.app',
                     maxZoom: 18,
                   ),
-                  MarkerLayer(
-                    markers: _buildMarkers(boatsWithLocation),
-                  ),
+                  MarkerLayer(markers: _buildMarkers(boatsWithLocation)),
                 ],
               );
             },
           ),
 
-          // Popup del barco seleccionado 
+          // Popup del barco seleccionado
           if (_selectedBoat != null)
             Positioned(
               top: AppTheme.spacing16,
@@ -262,18 +258,19 @@ class _CustomerMapPageState extends ConsumerState<CustomerMapPage> {
                 child: _BoatPopup(
                   boat: _selectedBoat!,
                   onClose: _dismissPopup,
+                  onViewDetail: () => _openBoatDetail(_selectedBoat!),
                 ),
               ),
             ),
 
-          // Controles de zoom 
+          // Controles de zoom
           Positioned(
             bottom: 80,
             right: AppTheme.spacing16,
             child: _ZoomControls(mapController: _mapController),
           ),
 
-          //  Leyenda de categorías 
+          //  Leyenda de categorías
           Positioned(
             bottom: AppTheme.spacing16,
             right: AppTheme.spacing16,
@@ -326,11 +323,7 @@ class _ZoomButton extends StatelessWidget {
           color: AppTheme.surface,
           radius: AppTheme.radiusSm,
         ),
-        child: Icon(
-          icon,
-          size: AppTheme.iconSizeLg,
-          color: AppTheme.deepNavy,
-        ),
+        child: Icon(icon, size: AppTheme.iconSizeLg, color: AppTheme.deepNavy),
       ),
     );
   }
@@ -464,8 +457,7 @@ class _BoatGroupSheet extends StatelessWidget {
                 onTap: () => onSelect(boat),
                 child: Container(
                   color: isSelected
-                      ? AppTheme.deepNavy.withValues(
-                          alpha: AppTheme.alphaChip)
+                      ? AppTheme.deepNavy.withValues(alpha: AppTheme.alphaChip)
                       : null,
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppTheme.spacing16,
@@ -516,8 +508,7 @@ class _BoatGroupSheet extends StatelessWidget {
                                   color: _pinColor(boat.category),
                                 ),
                                 _InfoChip(
-                                  label:
-                                      '${boat.pricePerDay.toInt()} €/día',
+                                  label: '${boat.pricePerDay.toInt()} €/día',
                                   color: AppTheme.sunsetGold,
                                 ),
                                 _InfoChip(
@@ -554,10 +545,15 @@ class _BoatGroupSheet extends StatelessWidget {
 // Popup con info del barco (individual)
 
 class _BoatPopup extends StatelessWidget {
-  const _BoatPopup({required this.boat, required this.onClose});
+  const _BoatPopup({
+    required this.boat,
+    required this.onClose,
+    required this.onViewDetail,
+  });
 
   final BoatModel boat;
   final VoidCallback onClose;
+  final VoidCallback onViewDetail;
 
   @override
   Widget build(BuildContext context) {
@@ -640,6 +636,24 @@ class _BoatPopup extends StatelessWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: AppTheme.spacing6),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: onViewDetail,
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        icon: const Icon(
+                          Icons.open_in_new_rounded,
+                          size: AppTheme.iconSizeSmall,
+                        ),
+                        label: const Text('Ver detalle'),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -709,15 +723,15 @@ class _InfoChip extends StatelessWidget {
         color: color.withValues(alpha: AppTheme.alphaChip),
         borderRadius: AppTheme.borderRadiusPill,
         border: Border.all(
-            color: color.withValues(alpha: AppTheme.alphaBorder)),
+          color: color.withValues(alpha: AppTheme.alphaBorder),
+        ),
       ),
       child: Text(
         label,
         style: TextStyle(
           fontSize: AppTheme.fontSize11,
           fontWeight: FontWeight.w600,
-          color:
-              color == Colors.white ? AppTheme.deepNavy : color,
+          color: color == Colors.white ? AppTheme.deepNavy : color,
         ),
       ),
     );
@@ -768,9 +782,7 @@ class _CategoryLegendState extends State<_CategoryLegend> {
                 Text('Leyenda', style: AppTheme.labelMedium),
                 const SizedBox(width: AppTheme.spacing6),
                 Icon(
-                  _expanded
-                      ? Icons.expand_less
-                      : Icons.expand_more,
+                  _expanded ? Icons.expand_less : Icons.expand_more,
                   size: AppTheme.iconSizeMd,
                   color: AppTheme.textSecondary,
                 ),
@@ -801,8 +813,7 @@ class _CategoryLegendState extends State<_CategoryLegend> {
                         ),
                       ),
                       const SizedBox(width: AppTheme.spacing8),
-                      Text(entry.$1,
-                          style: AppTheme.helperTextStyle),
+                      Text(entry.$1, style: AppTheme.helperTextStyle),
                     ],
                   ),
                 ),

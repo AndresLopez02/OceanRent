@@ -3,7 +3,7 @@ import 'package:ocean_rent/models/user_model.dart';
 
 class UserService {
   UserService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
@@ -39,4 +39,3 @@ class UserService {
     });
   }
 }
-

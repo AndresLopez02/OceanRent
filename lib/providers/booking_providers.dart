@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/models/booking_model.dart';
+import 'package:ocean_rent/models/maintenance_block_model.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/repository/booking_repository.dart';
 
@@ -14,29 +15,53 @@ final bookingNotifierProvider = ChangeNotifierProvider<BookingNotifier>((ref) {
   return BookingNotifier(repository);
 });
 
-final bookingsStreamProvider = StreamProvider.autoDispose<List<BookingModel>>((ref) {
+final bookingsStreamProvider = StreamProvider.autoDispose<List<BookingModel>>((
+  ref,
+) {
   final authState = ref.watch(authStateChangesProvider);
   final repository = ref.watch(bookingRepositoryProvider);
+
   if (!authState.hasValue || authState.value == null) {
     return const Stream.empty();
   }
+
   return repository.watchBookings().handleError(
     (error, _) {},
     test: (e) => e.toString().contains('permission-denied'),
   );
 });
 
-final userBookingsStreamProvider =
-    StreamProvider.autoDispose.family<List<BookingModel>, String>((ref, userId) {
+final userBookingsStreamProvider = StreamProvider.autoDispose
+    .family<List<BookingModel>, String>((ref, userId) {
       final authState = ref.watch(authStateChangesProvider);
       final repository = ref.watch(bookingRepositoryProvider);
+
       if (!authState.hasValue || authState.value == null) {
         return const Stream.empty();
       }
-      return repository.watchBookingsByUser(userId).handleError(
-        (error, _) {},
-        test: (e) => e.toString().contains('permission-denied'),
-      );
+
+      return repository
+          .watchBookingsByUser(userId)
+          .handleError(
+            (error, _) {},
+            test: (e) => e.toString().contains('permission-denied'),
+          );
+    });
+
+final maintenanceBlocksByBoatProvider = StreamProvider.autoDispose
+    .family<List<MaintenanceBlockModel>, String>((ref, boatId) {
+      final repository = ref.watch(bookingRepositoryProvider);
+
+      if (boatId.trim().isEmpty) {
+        return const Stream.empty();
+      }
+
+      return repository
+          .watchMaintenanceBlocksByBoat(boatId)
+          .handleError(
+            (error, _) {},
+            test: (e) => e.toString().contains('permission-denied'),
+          );
     });
 
 class BookingNotifier extends ChangeNotifier {
@@ -139,13 +164,62 @@ class BookingNotifier extends ChangeNotifier {
     }
   }
 
- // Cancelacion por parte del admin, sin restricciones de tiempo
+  // Cancelacion por parte del admin, sin restricciones de tiempo
   Future<bool> cancelBookingAsAdmin(String bookingId) async {
     _setLoading(true);
     _errorMessage = null;
 
     try {
       await _bookingRepository.cancelBookingAsAdmin(bookingId);
+      return true;
+    } catch (e) {
+      _errorMessage = _cleanErrorMessage(e);
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> createMaintenanceBlock({
+    required String boatId,
+    required String createdBy,
+    required DateTime startDate,
+    required DateTime endDate,
+    required String reason,
+  }) async {
+    _setLoading(true);
+    _errorMessage = null;
+
+    try {
+      await _bookingRepository.createMaintenanceBlock(
+        boatId: boatId,
+        createdBy: createdBy,
+        startDate: startDate,
+        endDate: endDate,
+        reason: reason,
+      );
+
+      _unavailableDates = await _bookingRepository.getUnavailableDates(boatId);
+
+      return true;
+    } catch (e) {
+      _errorMessage = _cleanErrorMessage(e);
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> deleteMaintenanceBlock({
+    required String blockId,
+    required String boatId,
+  }) async {
+    _setLoading(true);
+    _errorMessage = null;
+
+    try {
+      await _bookingRepository.deleteMaintenanceBlock(blockId);
+      _unavailableDates = await _bookingRepository.getUnavailableDates(boatId);
       return true;
     } catch (e) {
       _errorMessage = _cleanErrorMessage(e);

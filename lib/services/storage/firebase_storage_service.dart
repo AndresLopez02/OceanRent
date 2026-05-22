@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 class FirebaseStorageService {
   FirebaseStorageService({FirebaseStorage? firebaseStorage})
-      : _firebaseStorage = firebaseStorage ?? FirebaseStorage.instance;
+    : _firebaseStorage = firebaseStorage ?? FirebaseStorage.instance;
 
   final FirebaseStorage _firebaseStorage;
 

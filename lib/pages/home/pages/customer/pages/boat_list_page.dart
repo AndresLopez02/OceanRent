@@ -9,14 +9,13 @@ import 'package:ocean_rent/pages/home/pages/customer/widgets/filter_drawer.dart'
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/user_providers.dart';
 
-
 class BoatListPage extends ConsumerStatefulWidget {
   final List<String> categoriasIniciales;
 
   const BoatListPage({super.key, this.categoriasIniciales = const []});
 
   @override
- ConsumerState<BoatListPage> createState() => _BoatListPageState();
+  ConsumerState<BoatListPage> createState() => _BoatListPageState();
 }
 
 class _BoatListPageState extends ConsumerState<BoatListPage> {
@@ -34,8 +33,9 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
     if (widget.categoriasIniciales.isNotEmpty) {
       selectedCategories = List.from(widget.categoriasIniciales);
     }
-     loadCurrentUser();
+    loadCurrentUser();
   }
+
   Future<void> loadCurrentUser() async {
     final uid = ref.read(authNotifierProvider).currentUser?.uid;
     if (uid == null) return;
@@ -58,6 +58,10 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
 
   List<BoatModel> filterBoats(List<BoatModel> boats) {
     return boats.where((boat) {
+      if (onlyAvailable && !boat.isAvailable) {
+        return false;
+      }
+
       if (selectedCategories.isNotEmpty &&
           !selectedCategories.contains('todos') &&
           !selectedCategories.contains(boat.category)) {
@@ -78,10 +82,12 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
           boat.capacity > rangedCapacity.end) {
         return false;
       }
+
       if (selectedLicense != null &&
           boat.requiredLicense.toLowerCase() != selectedLicense) {
         return false;
       }
+
       return true;
     }).toList();
   }
@@ -97,9 +103,57 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
     });
   }
 
+  Widget _buildEmptyState({
+    required IconData icon,
+    required String title,
+    required String message,
+    VoidCallback? onReset,
+  }) {
+    return Center(
+      child: Padding(
+        padding: AppTheme.screenPadding,
+        child: Container(
+          padding: AppTheme.cardPadding,
+          decoration: AppTheme.cardDecoration(
+            color: AppTheme.white,
+            border: Border.all(
+              color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft),
+            ),
+            boxShadow: AppTheme.softShadow(alpha: AppTheme.alphaUltraSoft),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: AppTheme.iconSize3xl, color: AppTheme.oceanBlue),
+              const SizedBox(height: AppTheme.spacing16),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: AppTheme.titleMedium,
+              ),
+              const SizedBox(height: AppTheme.spacing8),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: AppTheme.bodySmall,
+              ),
+              if (onReset != null) ...[
+                const SizedBox(height: AppTheme.spacing20),
+                OutlinedButton.icon(
+                  onPressed: onReset,
+                  icon: const Icon(Icons.restart_alt_rounded),
+                  label: const Text('Limpiar filtros'),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final activeFiltersCount =
         selectedCategories.length +
         selectedPorts.length +
@@ -115,12 +169,13 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
         final filteredBoats = filterBoats(boats);
 
         // Puertos derivados del caché de Hive: solo se recalculan cuando cambia la caja
-        final ports = boats
-            .map((boat) => boat.portName.trim())
-            .where((port) => port.isNotEmpty)
-            .toSet()
-            .toList()
-          ..sort();
+        final ports =
+            boats
+                .map((boat) => boat.portName.trim())
+                .where((port) => port.isNotEmpty)
+                .toSet()
+                .toList()
+              ..sort();
 
         return Scaffold(
           drawer: FilterDrawer(
@@ -148,7 +203,8 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
             onOnlyAvailableChanged: (value) =>
                 setState(() => onlyAvailable = value),
             selectedLicense: selectedLicense,
-            onLicenseChanged: (value) => setState(() => selectedLicense = value),
+            onLicenseChanged: (value) =>
+                setState(() => selectedLicense = value),
           ),
           body: Column(
             children: [
@@ -188,17 +244,22 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
               ),
               Expanded(
                 child: boats.isEmpty
-                    ? Center(
-                        child: Text('No hay barcos disponibles',style: textTheme.bodyLarge?.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w600)
-                        ),
+                    ? _buildEmptyState(
+                        icon: Icons.directions_boat_filled_outlined,
+                        title: 'No hay barcos disponibles',
+                        message:
+                            'Todavía no se han cargado barcos en el catálogo de Ocean Rent.',
                       )
                     : filteredBoats.isEmpty
-                    ? Center(
-                        child: Text('No hay barcos con esa disposición',style: textTheme.bodyLarge?.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w600),
-                        ),
+                    ? _buildEmptyState(
+                        icon: Icons.filter_alt_off_rounded,
+                        title: 'No hay barcos con esos filtros',
+                        message:
+                            'Prueba a cambiar la categoría, el puerto, la licencia o el rango de precio.',
+                        onReset: _resetFilters,
                       )
                     : ListView.builder(
-                        padding: const EdgeInsets.all(16),
+                        padding: AppTheme.listPadding,
                         itemCount: filteredBoats.length,
                         itemBuilder: (context, index) {
                           return CustomerBoatCard(boat: filteredBoats[index]);

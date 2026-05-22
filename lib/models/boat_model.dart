@@ -75,7 +75,7 @@ class BoatModel {
       description: (map['description'] ?? '') as String,
       imageUrl: (map['imageUrl'] ?? '') as String,
       depositAmount: (map['deposit_amount'] ?? 0).toDouble(),
-      isAvailable: (map['is_available'] ?? false) as bool,
+      isAvailable: (map['is_available'] as bool?) ?? true,
       portName: (map['port_name'] ?? '') as String,
       ratingAvg: (map['rating_avg'] ?? 0).toDouble(),
       ratingCount: (map['rating_count'] ?? 0) as int,

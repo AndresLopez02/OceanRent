@@ -20,44 +20,72 @@ class CustomerBoatCard extends StatelessWidget {
           MaterialPageRoute(builder: (_) => CustomerBoatDetailPage(boat: boat)),
         );
       },
-
       child: Container(
         margin: AppTheme.cardBottomMargin,
         decoration: AppTheme.cardDecoration(
           color: AppTheme.surface,
           radius: AppTheme.radiusCard,
-          border: Border.all(color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft)),
+          border: Border.all(
+            color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft),
+          ),
           boxShadow: AppTheme.softShadow(),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: AppTheme.borderRadiusCardTop,
-              child: boat.imageUrl.isNotEmpty
-                  ? Image.network(
-                      boat.imageUrl,
-                      height: AppTheme.customerBoatImageHeight,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => BoatImagePlaceholder(
-                        name: boat.name,
-                        height: AppTheme.customerBoatImageHeight,
-                        iconSize: AppTheme.emptyStateIconSize,
-                      ),
-                    )
-                  : BoatImagePlaceholder(
-                      name: boat.name,
-                      height: AppTheme.customerBoatImageHeight,
-                      iconSize: AppTheme.emptyStateIconSize,
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: AppTheme.borderRadiusCardTop,
+                  child: boat.imageUrl.isNotEmpty
+                      ? Image.network(
+                          boat.imageUrl,
+                          height: AppTheme.customerBoatImageHeight,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => BoatImagePlaceholder(
+                            name: boat.name,
+                            height: AppTheme.customerBoatImageHeight,
+                            iconSize: AppTheme.emptyStateIconSize,
+                          ),
+                        )
+                      : BoatImagePlaceholder(
+                          name: boat.name,
+                          height: AppTheme.customerBoatImageHeight,
+                          iconSize: AppTheme.emptyStateIconSize,
+                        ),
+                ),
+                Positioned(
+                  top: AppTheme.spacing10,
+                  right: AppTheme.spacing10,
+                  child: _AvailabilityBadge(isAvailable: boat.isAvailable),
+                ),
+                if (boat.ratingCount > 0)
+                  Positioned(
+                    left: AppTheme.spacing10,
+                    bottom: AppTheme.spacing10,
+                    child: _RatingBadge(
+                      ratingAvg: boat.ratingAvg,
+                      ratingCount: boat.ratingCount,
                     ),
+                  ),
+              ],
             ),
             Padding(
               padding: AppTheme.compactCardPadding,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(boat.name,style: AppTheme.titleLarge.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w700)
+                  Text(
+                    boat.name.isEmpty
+                        ? 'BARCO SIN NOMBRE'
+                        : boat.name.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTheme.titleLarge.copyWith(
+                      color: AppTheme.deepNavy,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: AppTheme.spacing10),
                   Row(
@@ -74,7 +102,9 @@ class CustomerBoatCard extends StatelessWidget {
                             const SizedBox(height: AppTheme.spacing6),
                             _BoatInfoItem(
                               icon: Icons.location_on_outlined,
-                              label: boat.portName.trim().isEmpty? 'Sin ubicación' : boat.portName.trim(),
+                              label: boat.portName.trim().isEmpty
+                                  ? 'Sin ubicación'
+                                  : boat.portName.trim(),
                             ),
                             const SizedBox(height: AppTheme.spacing6),
                             _BoatInfoItem(
@@ -89,9 +119,22 @@ class CustomerBoatCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: AppTheme.spacing10),
-                      Text(
-                        '${boat.pricePerDay.toStringAsFixed(0)} €/día',
-                        style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w700)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTheme.spacing10,
+                          vertical: AppTheme.spacing6,
+                        ),
+                        decoration: AppTheme.badgeDecoration(
+                          color: AppTheme.sunsetGold,
+                          alpha: AppTheme.alphaLight,
+                        ),
+                        child: Text(
+                          '${boat.pricePerDay.toStringAsFixed(0)} €/día',
+                          style: AppTheme.labelMedium.copyWith(
+                            color: AppTheme.deepNavy,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -112,7 +155,9 @@ class CustomerBoatCard extends StatelessWidget {
 class _BoatInfoItem extends StatelessWidget {
   final IconData icon;
   final String label;
+
   const _BoatInfoItem({required this.icon, required this.label});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -139,8 +184,8 @@ class _LicenseBadge extends StatelessWidget {
 
   String _licenseLabel(String license) {
     switch (license.toLowerCase()) {
-      case 'pbn':
-        return 'Requiere licencia PBN';
+      case 'pnb':
+        return 'Requiere licencia PNB';
       case 'per':
         return 'Requiere licencia PER';
       default:
@@ -158,7 +203,9 @@ class _LicenseBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.sunsetGold.withValues(alpha: AppTheme.alphaLight),
         borderRadius: BorderRadius.circular(AppTheme.spacing6),
-        border: Border.all(color: AppTheme.sunsetGold.withValues(alpha: AppTheme.alphaOverlay))
+        border: Border.all(
+          color: AppTheme.sunsetGold.withValues(alpha: AppTheme.alphaOverlay),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -169,7 +216,92 @@ class _LicenseBadge extends StatelessWidget {
             color: AppTheme.sunsetGold,
           ),
           const SizedBox(width: AppTheme.spacing4),
-          Text( _licenseLabel(license), style: AppTheme.bodySmall.copyWith(color: AppTheme.sunsetGold,fontWeight: FontWeight.w600),
+          Text(
+            _licenseLabel(license),
+            style: AppTheme.bodySmall.copyWith(
+              color: AppTheme.sunsetGold,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AvailabilityBadge extends StatelessWidget {
+  final bool isAvailable;
+
+  const _AvailabilityBadge({required this.isAvailable});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isAvailable ? AppTheme.oceanBlue : AppTheme.alertRed;
+    final icon = isAvailable ? Icons.check_circle_outline : Icons.block_rounded;
+    final label = isAvailable ? 'Disponible' : 'No disponible';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spacing10,
+        vertical: AppTheme.spacing6,
+      ),
+      decoration: BoxDecoration(
+        color: AppTheme.white.withValues(alpha: AppTheme.alphaTextOnDark),
+        borderRadius: AppTheme.borderRadiusPill,
+        border: Border.all(
+          color: color.withValues(alpha: AppTheme.alphaBorderStrong),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: AppTheme.iconSizeMedium, color: color),
+          const SizedBox(width: AppTheme.spacing4),
+          Text(
+            label,
+            style: AppTheme.labelSmall.copyWith(
+              color: color,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RatingBadge extends StatelessWidget {
+  final double ratingAvg;
+  final int ratingCount;
+
+  const _RatingBadge({required this.ratingAvg, required this.ratingCount});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spacing10,
+        vertical: AppTheme.spacing6,
+      ),
+      decoration: BoxDecoration(
+        color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaTextMuted),
+        borderRadius: AppTheme.borderRadiusPill,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.star_rounded,
+            size: AppTheme.iconSizeMedium,
+            color: AppTheme.sunsetGold,
+          ),
+          const SizedBox(width: AppTheme.spacing4),
+          Text(
+            '${ratingAvg.toStringAsFixed(1)} ($ratingCount)',
+            style: AppTheme.labelSmall.copyWith(
+              color: AppTheme.white,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),

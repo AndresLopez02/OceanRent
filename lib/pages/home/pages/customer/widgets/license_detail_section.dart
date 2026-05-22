@@ -8,8 +8,8 @@ class LicenseDetailSection extends StatelessWidget {
 
   String _licenseFullLabel(String license) {
     switch (license.toLowerCase()) {
-      case 'pbn':
-        return 'Patrón de Barco a Navegación (PBN)';
+      case 'pnb':
+        return 'Patrón Navegación de Barcos (PNB)';
       case 'per':
         return 'Patrón de Embarcaciones de Recreo (PER)';
       default:

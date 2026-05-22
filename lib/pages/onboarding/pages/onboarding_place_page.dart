@@ -5,7 +5,7 @@ import 'package:ocean_rent/widgets/app_navigator.dart';
 
 class OnboardingPlacePage extends StatefulWidget {
   final Function(List<String>) onFinish;
-  
+
   const OnboardingPlacePage({super.key, required this.onFinish});
 
   @override
@@ -28,12 +28,17 @@ class _OnboardingPlacePageState extends State<OnboardingPlacePage> {
               Text(
                 '¿Dónde quieres navegar?',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.black)
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(color: Colors.black),
               ),
               const SizedBox(height: 12),
-              Text('Selecciona tu zona preferida',
+              Text(
+                'Selecciona tu zona preferida',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600)
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
               ),
               const SizedBox(height: 24),
               CustomCard(
@@ -41,9 +46,11 @@ class _OnboardingPlacePageState extends State<OnboardingPlacePage> {
                 description: 'Costa del Sol, Málaga',
                 isSelected: selected.contains('marbella'),
                 onTap: () => setState(() {
-                  selected.contains('marbella')? selected.remove('marbella') : selected.add('marbella');
+                  selected.contains('marbella')
+                      ? selected.remove('marbella')
+                      : selected.add('marbella');
                 }),
-                imagePath: 'assets/icons/playa.svg'
+                imagePath: 'assets/icons/playa.svg',
               ),
               const SizedBox(height: 8),
               CustomCard(
@@ -51,9 +58,11 @@ class _OnboardingPlacePageState extends State<OnboardingPlacePage> {
                 description: 'Capital de la Costa del Sol',
                 isSelected: selected.contains('malaga'),
                 onTap: () => setState(() {
-                  selected.contains('malaga')? selected.remove('malaga') : selected.add('malaga');
+                  selected.contains('malaga')
+                      ? selected.remove('malaga')
+                      : selected.add('malaga');
                 }),
-                imagePath: 'assets/icons/playa.svg'
+                imagePath: 'assets/icons/playa.svg',
               ),
               const SizedBox(height: 8),
               CustomCard(
@@ -61,9 +70,11 @@ class _OnboardingPlacePageState extends State<OnboardingPlacePage> {
                 description: 'Aguas tranquilas del Mediterráneo',
                 isSelected: selected.contains('cabo_canaveral'),
                 onTap: () => setState(() {
-                  selected.contains('cabo_canaveral')? selected.remove('cabo_canaveral') : selected.add('cabo_canaveral');
+                  selected.contains('cabo_canaveral')
+                      ? selected.remove('cabo_canaveral')
+                      : selected.add('cabo_canaveral');
                 }),
-                imagePath: 'assets/icons/playa.svg'
+                imagePath: 'assets/icons/playa.svg',
               ),
               const SizedBox(height: 224),
               SizedBox(
@@ -75,9 +86,15 @@ class _OnboardingPlacePageState extends State<OnboardingPlacePage> {
                     backgroundColor: AppTheme.oceanBlue,
                     foregroundColor: AppTheme.pearlWhite,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  child: Text('Explorar Barcos', style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: AppTheme.pearlWhite),
+                  child: Text(
+                    'Explorar Barcos',
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: AppTheme.pearlWhite,
+                    ),
                   ),
                 ),
               ),
@@ -90,16 +107,20 @@ class _OnboardingPlacePageState extends State<OnboardingPlacePage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: ElevatedButton(
-                    onPressed: () => AppNavigator.goToExploreBoats(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.pearlWhite,
-                      foregroundColor: AppTheme.deepNavy,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                  onPressed: () => AppNavigator.goToExploreBoats(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.pearlWhite,
+                    foregroundColor: AppTheme.deepNavy,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Text('Saltar', style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: AppTheme.deepNavy)
+                  child: Text(
+                    'Saltar',
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: AppTheme.deepNavy,
+                    ),
                   ),
                 ),
               ),

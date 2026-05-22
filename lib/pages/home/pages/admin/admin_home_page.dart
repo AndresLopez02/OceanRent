@@ -4,10 +4,9 @@ import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/models/booking_model.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_bookings_page.dart';
-import 'package:ocean_rent/utils/boat_utils.dart';
-import 'package:ocean_rent/widgets/boat_image_placeholder.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_calendar_page.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_profile_screen.dart';
+import 'package:ocean_rent/pages/home/pages/admin/pages/admin_reviews_page.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/boat_form_page.dart';
 import 'package:ocean_rent/pages/home/pages/admin/widgets/admin_empty_section.dart';
 import 'package:ocean_rent/pages/home/pages/admin/widgets/admin_quick_action_card.dart';
@@ -16,6 +15,8 @@ import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/boat_providers.dart';
 import 'package:ocean_rent/providers/booking_providers.dart';
+import 'package:ocean_rent/utils/boat_utils.dart';
+import 'package:ocean_rent/widgets/boat_image_placeholder.dart';
 
 class AdminHomePage extends ConsumerWidget {
   const AdminHomePage({super.key});
@@ -29,21 +30,33 @@ class AdminHomePage extends ConsumerWidget {
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: AppTheme.surface,
-        shape: const RoundedRectangleBorder(borderRadius: AppTheme.borderRadiusCard),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppTheme.borderRadiusCard,
+        ),
         title: Text('Eliminar barco', style: AppTheme.titleMedium),
         content: Text(
           '¿Seguro que quieres eliminar "${boat.name}"?',
-          style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted, height: AppTheme.lineHeightInfo)
+          style: AppTheme.bodySmall.copyWith(
+            color: AppTheme.textMuted,
+            height: AppTheme.lineHeightInfo,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancelar', style: AppTheme.labelMedium.copyWith(color: AppTheme.deepNavy)
+            child: Text(
+              'Cancelar',
+              style: AppTheme.labelMedium.copyWith(color: AppTheme.deepNavy),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Eliminar', style: AppTheme.labelMedium.copyWith(color: AppTheme.alertRed,fontWeight: FontWeight.w700)
+            child: Text(
+              'Eliminar',
+              style: AppTheme.labelMedium.copyWith(
+                color: AppTheme.alertRed,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -88,10 +101,13 @@ class AdminHomePage extends ConsumerWidget {
             tooltip: 'Perfil',
             onPressed: () {
               Navigator.of(context).push(
+                // Mantenimiento
                 MaterialPageRoute(builder: (_) => const AdminProfileScreen()),
               );
             },
-            icon: const Icon(Icons.person_outline, size: AppTheme.iconSizeLarge,
+            icon: const Icon(
+              Icons.person_outline,
+              size: AppTheme.iconSizeLarge,
             ),
           ),
           IconButton(
@@ -110,7 +126,9 @@ class AdminHomePage extends ConsumerWidget {
           ).push(MaterialPageRoute(builder: (_) => const BoatFormPage()));
         },
         icon: const Icon(Icons.add, size: AppTheme.iconSizeLarge),
-        label: Text('Nuevo Barco', style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.white)
+        label: Text(
+          'Nuevo Barco',
+          style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.white),
         ),
       ),
       body: boatsAsync.when(
@@ -126,7 +144,10 @@ class AdminHomePage extends ConsumerWidget {
             child: Text(
               'Error cargando el panel:\n$error',
               textAlign: TextAlign.center,
-              style: AppTheme.bodyLarge.copyWith(color: AppTheme.alertRed,fontWeight: FontWeight.w600)
+              style: AppTheme.bodyLarge.copyWith(
+                color: AppTheme.alertRed,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
@@ -144,7 +165,10 @@ class AdminHomePage extends ConsumerWidget {
                 child: Text(
                   'Error cargando reservas:\n$error',
                   textAlign: TextAlign.center,
-                  style: AppTheme.bodyLarge.copyWith(color: AppTheme.alertRed,fontWeight: FontWeight.w600)
+                  style: AppTheme.bodyLarge.copyWith(
+                    color: AppTheme.alertRed,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -292,26 +316,39 @@ class _AdminDashboard extends StatelessWidget {
         const SizedBox(height: AppTheme.spacing12),
         AdminQuickActionCard(
           title: 'Calendario',
-          subtitle: 'Ver disponibilidad y bloqueos.',
+          subtitle: 'Consultar disponibilidad de la flota.',
           icon: Icons.calendar_month_outlined,
           color: AppTheme.deepNavy,
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const AdminCalendarPage()),
+              MaterialPageRoute(
+                builder: (_) => const AdminCalendarPage(initialTabIndex: 0),
+              ),
             );
           },
         ),
         const SizedBox(height: AppTheme.spacing12),
         AdminQuickActionCard(
+          title: 'Reseñas',
+          subtitle: 'Gestionar reseñas de clientes.',
+          icon: Icons.rate_review_outlined,
+          color: AppTheme.oceanBlue,
+          onTap: () {
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const AdminReviewsPage()));
+          },
+        ),
+        const SizedBox(height: AppTheme.spacing12),
+        AdminQuickActionCard(
           title: 'Mantenimiento',
-          subtitle: 'Bloquear fechas por revisión o avería.',
+          subtitle: 'Bloquear fechas por revisión, avería o mantenimiento.',
           icon: Icons.build_outlined,
           color: AppTheme.sunsetGold,
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Mantenimiento se conectará en una próxima tarea.',
-                ),
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const AdminCalendarPage(initialTabIndex: 1),
               ),
             );
           },
@@ -348,7 +385,12 @@ class _AdminDashboard extends StatelessWidget {
             onPressed: onCreateBoat,
             style: AppTheme.compactTextButtonStyle,
             icon: const Icon(Icons.add, size: AppTheme.iconSizeLarge),
-            label: Text('Crear barco',style: AppTheme.labelMedium.copyWith(color: AppTheme.oceanBlue,fontWeight: FontWeight.w700)
+            label: Text(
+              'Crear barco',
+              style: AppTheme.labelMedium.copyWith(
+                color: AppTheme.oceanBlue,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
@@ -357,7 +399,8 @@ class _AdminDashboard extends StatelessWidget {
           AdminEmptySection(
             icon: Icons.directions_boat_filled_outlined,
             title: 'No hay barcos registrados',
-            message:'Crea el primer barco para empezar a completar el catálogo.',
+            message:
+                'Crea el primer barco para empezar a completar el catálogo.',
             buttonText: 'Crear barco',
             onPressed: onCreateBoat,
           )
@@ -404,13 +447,21 @@ class _AdminHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Panel del Admin',style: AppTheme.titleLarge.copyWith(color: AppTheme.white,fontSize: AppTheme.fontSize22,fontWeight: FontWeight.w800)
+                Text(
+                  'Panel del Admin',
+                  style: AppTheme.titleLarge.copyWith(
+                    color: AppTheme.white,
+                    fontSize: AppTheme.fontSize22,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 const SizedBox(height: AppTheme.spacing4),
                 Text(
                   'Control de reservas, calendario, flota y titulaciones.',
                   style: AppTheme.bodySmall.copyWith(
-                    color: AppTheme.white.withValues(alpha: AppTheme.alphaTextMuted),
+                    color: AppTheme.white.withValues(
+                      alpha: AppTheme.alphaTextMuted,
+                    ),
                     height: AppTheme.lineHeightRegular,
                   ),
                 ),
@@ -421,9 +472,20 @@ class _AdminHeader extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('$totalBoats',style: AppTheme.titleLarge.copyWith(color: AppTheme.sunsetGold,fontSize: AppTheme.fontSize26,fontWeight: FontWeight.w800)
+              Text(
+                '$totalBoats',
+                style: AppTheme.titleLarge.copyWith(
+                  color: AppTheme.sunsetGold,
+                  fontSize: AppTheme.fontSize26,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-              Text('barcos', style: AppTheme.bodySmall.copyWith(color: AppTheme.white.withValues(alpha: AppTheme.alphaTextOnDark)
+              Text(
+                'barcos',
+                style: AppTheme.bodySmall.copyWith(
+                  color: AppTheme.white.withValues(
+                    alpha: AppTheme.alphaTextOnDark,
+                  ),
                 ),
               ),
             ],
@@ -454,10 +516,20 @@ class _SectionTitle extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppTheme.headlineSmall.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w800)
+              Text(
+                title,
+                style: AppTheme.headlineSmall.copyWith(
+                  color: AppTheme.deepNavy,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: AppTheme.spacing4),
-              Text(subtitle, style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted,height: AppTheme.lineHeightSmall)
+              Text(
+                subtitle,
+                style: AppTheme.bodySmall.copyWith(
+                  color: AppTheme.textMuted,
+                  height: AppTheme.lineHeightSmall,
+                ),
               ),
             ],
           ),
@@ -516,7 +588,12 @@ class _RecentBookingCard extends StatelessWidget {
           Container(
             padding: AppTheme.licenseStatusBadgePadding,
             decoration: AppTheme.badgeDecoration(color: statusColor),
-            child: Text(booking.status,style: AppTheme.labelSmall.copyWith(color: statusColor,fontWeight: FontWeight.w800)
+            child: Text(
+              booking.status,
+              style: AppTheme.labelSmall.copyWith(
+                color: statusColor,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ],
@@ -579,7 +656,8 @@ class _BoatAdminCard extends StatelessWidget {
                     height: AppTheme.imageHeight,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => BoatImagePlaceholder(name: boat.name),
+                    errorBuilder: (_, _, _) =>
+                        BoatImagePlaceholder(name: boat.name),
                   )
                 : BoatImagePlaceholder(name: boat.name),
           ),
@@ -588,7 +666,13 @@ class _BoatAdminCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(boat.name,style: AppTheme.titleLarge.copyWith(color: AppTheme.deepNavy,fontSize: AppTheme.fontSize22,fontWeight: FontWeight.w800)
+                Text(
+                  boat.name,
+                  style: AppTheme.titleLarge.copyWith(
+                    color: AppTheme.deepNavy,
+                    fontSize: AppTheme.fontSize22,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 const SizedBox(height: AppTheme.spacing12),
                 Wrap(
@@ -616,7 +700,10 @@ class _BoatAdminCard extends StatelessWidget {
                       : boat.description,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted, height: AppTheme.lineHeightLarge)
+                  style: AppTheme.bodyMedium.copyWith(
+                    color: AppTheme.textMuted,
+                    height: AppTheme.lineHeightLarge,
+                  ),
                 ),
                 const SizedBox(height: AppTheme.spacing18),
                 Row(
@@ -625,14 +712,19 @@ class _BoatAdminCard extends StatelessWidget {
                       child: OutlinedButton.icon(
                         onPressed: onEdit,
                         style: AppTheme.outlinedButtonStyle.copyWith(
-                          minimumSize: const WidgetStatePropertyAll(Size.fromHeight(AppTheme.compactButtonHeight),
+                          minimumSize: const WidgetStatePropertyAll(
+                            Size.fromHeight(AppTheme.compactButtonHeight),
                           ),
                         ),
                         icon: const Icon(
                           Icons.edit_outlined,
                           size: AppTheme.iconSizeLarge,
                         ),
-                        label: Text('Editar',style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.deepNavy)
+                        label: Text(
+                          'Editar',
+                          style: AppTheme.buttonTextStyle.copyWith(
+                            color: AppTheme.deepNavy,
+                          ),
                         ),
                       ),
                     ),
@@ -645,9 +737,15 @@ class _BoatAdminCard extends StatelessWidget {
                             Size.fromHeight(AppTheme.compactButtonHeight),
                           ),
                         ),
-                        icon: const Icon(Icons.delete_outline,size: AppTheme.iconSizeLarge
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          size: AppTheme.iconSizeLarge,
                         ),
-                        label: Text('Eliminar',style: AppTheme.buttonTextStyle.copyWith(color: AppTheme.white)
+                        label: Text(
+                          'Eliminar',
+                          style: AppTheme.buttonTextStyle.copyWith(
+                            color: AppTheme.white,
+                          ),
                         ),
                       ),
                     ),
@@ -660,7 +758,6 @@ class _BoatAdminCard extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class _InfoChip extends StatelessWidget {
@@ -682,7 +779,12 @@ class _InfoChip extends StatelessWidget {
         children: [
           Icon(icon, size: AppTheme.iconSizeMedium, color: AppTheme.deepNavy),
           const SizedBox(width: AppTheme.spacing6),
-          Text(label,style: AppTheme.bodySmall.copyWith(color: AppTheme.deepNavy,fontWeight: FontWeight.w600)
+          Text(
+            label,
+            style: AppTheme.bodySmall.copyWith(
+              color: AppTheme.deepNavy,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
