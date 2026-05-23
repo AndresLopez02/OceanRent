@@ -63,6 +63,9 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
     WidgetRef ref,
     BookingModel booking,
   ) async {
+    final user = ref.read(authNotifierProvider).currentUser;
+    if (user == null) return;
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -98,7 +101,7 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
 
     final success = await ref
         .read(bookingNotifierProvider)
-        .cancelBooking(booking.id);
+        .cancelBooking(booking.id, user.uid);
 
     if (!context.mounted) return;
 

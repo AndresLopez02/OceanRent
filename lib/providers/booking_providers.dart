@@ -149,12 +149,12 @@ class BookingNotifier extends ChangeNotifier {
     }
   }
 
-  Future<bool> cancelBooking(String bookingId) async {
+  Future<bool> cancelBooking(String bookingId, String currentUserId) async {
     _setLoading(true);
     _errorMessage = null;
 
     try {
-      await _bookingRepository.cancelBooking(bookingId);
+      await _bookingRepository.cancelBooking(bookingId, currentUserId);
       return true;
     } catch (e) {
       _errorMessage = _cleanErrorMessage(e);

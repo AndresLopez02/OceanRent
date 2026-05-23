@@ -168,7 +168,7 @@ class BookingRepository {
         final lockRef = _bookingDateLocksCollection.doc(
           _lockId(booking.boatId, date),
         );
-
+ 
         transaction.set(lockRef, {
           'booking_id': booking.id,
           'boat_id': booking.boatId,
@@ -180,11 +180,7 @@ class BookingRepository {
       }
     });
   }
-
-  /// Cancela una reserva como cliente.
-  /// Lanza una excepción si quedan menos de [_cancellationMinHours] horas
-  /// para el inicio de la reserva.
-  Future<void> cancelBooking(String bookingId) async {
+  Future<void> cancelBooking(String bookingId, String currentUserId) async {
     final bookingRef = _bookingsCollection.doc(bookingId);
 
     await _firestore.runTransaction((transaction) async {
@@ -195,6 +191,10 @@ class BookingRepository {
       }
 
       final booking = BookingModel.fromFirestore(bookingSnapshot);
+
+      if (booking.userId != currentUserId) {
+        throw Exception('No tienes permiso para cancelar esta reserva.');
+      }
 
       if (booking.status == BookingModel.statusCancelled) {
         return;
