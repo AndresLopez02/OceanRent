@@ -33,6 +33,16 @@ service cloud.firestore {
     match /bookings/{bookingId} {
       allow read, write: if isAdmin();
       allow read: if isCustomer() && request.auth.uid == resource.data.userId;
+      allow update: if isCustomer()
+        && request.auth.uid == resource.data.userId
+        && request.resource.data.status == 'cancelada'
+        && (resource.data.status == 'pendiente' || resource.data.status == 'confirmada');
+    }
+
+    match /booking_date_locks/{lockId} {
+      allow read, write: if isAdmin();
+      allow delete: if isCustomer()
+        && get(/databases/$(database)/documents/bookings/$(resource.data.booking_id)).data.user_id == request.auth.uid;
     }
 
     match /maintenance_blocks/{maintenanceId} {
