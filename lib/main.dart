@@ -10,6 +10,7 @@ import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/pages/auth_gate/auth_gate_page.dart';
 import 'package:ocean_rent/services/boat/boat_cache_service.dart';
 import 'package:ocean_rent/services/firebase_options.dart';
+import 'package:ocean_rent/services/notification/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,7 @@ Future<void> main() async {
     debugPrint('Firebase inicializado correctamente');
     debugPrint('App Firebase: ${Firebase.app().name}');
   }
+  await NotificationService.instance.initialize();
 
   BoatCacheService().syncWithFirebase();
   runApp(const ProviderScope(child: MyApp()));
