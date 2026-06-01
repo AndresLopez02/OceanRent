@@ -13,7 +13,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
   debugPrint('Notificación recibida en segundo plano: ${message.messageId}');
 }
-// Asegúrate de registrar esta función en el método initialize() de NotificationService
+
 class NotificationService {
   NotificationService._();
 
