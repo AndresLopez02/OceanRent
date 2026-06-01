@@ -86,13 +86,37 @@ class NotificationService {
     }
 
     try {
-      await _firestore.collection('users').doc(user.uid).set({
+      final adminRef = _firestore.collection('admin').doc(user.uid);
+      final adminDoc = await adminRef.get();
+
+      if (adminDoc.exists) {
+        await adminRef.set({
+          'fcm_token': token,
+          'fcm_token_updated_at': FieldValue.serverTimestamp(),
+          'fcm_token_platform': kIsWeb ? 'web' : defaultTargetPlatform.name,
+        }, SetOptions(merge: true));
+
+        debugPrint('Token FCM guardado en admin/${user.uid}');
+        return;
+      }
+
+      final userRef = _firestore.collection('users').doc(user.uid);
+      final userDoc = await userRef.get();
+
+      if (!userDoc.exists) {
+        debugPrint(
+          'No existe perfil en admin ni users. Token FCM no guardado todavía.',
+        );
+        return;
+      }
+
+      await userRef.set({
         'fcm_token': token,
         'fcm_token_updated_at': FieldValue.serverTimestamp(),
         'fcm_token_platform': kIsWeb ? 'web' : defaultTargetPlatform.name,
       }, SetOptions(merge: true));
 
-      debugPrint('Token FCM guardado correctamente para ${user.uid}');
+      debugPrint('Token FCM guardado en users/${user.uid}');
     } on FirebaseException catch (error) {
       debugPrint(
         'Error de Firebase al guardar el token FCM: '

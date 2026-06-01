@@ -168,7 +168,7 @@ class BookingRepository {
         final lockRef = _bookingDateLocksCollection.doc(
           _lockId(booking.boatId, date),
         );
- 
+
         transaction.set(lockRef, {
           'booking_id': booking.id,
           'boat_id': booking.boatId,
@@ -180,6 +180,7 @@ class BookingRepository {
       }
     });
   }
+
   Future<void> cancelBooking(String bookingId, String currentUserId) async {
     final bookingRef = _bookingsCollection.doc(bookingId);
 

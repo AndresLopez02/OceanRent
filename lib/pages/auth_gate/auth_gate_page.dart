@@ -15,6 +15,7 @@ class AuthGatePage extends ConsumerStatefulWidget {
   ConsumerState<AuthGatePage> createState() => _AuthGatePageState();
 }
 
+// Esta página se encarga de decidir qué pantalla mostrar al usuario según su estado de autenticación y si ha completado el onboarding.
 class _AuthGatePageState extends ConsumerState<AuthGatePage> {
   bool _loading = true;
   bool _skipOnboarding = false;

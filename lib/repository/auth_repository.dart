@@ -12,7 +12,6 @@ class AuthRepository {
 
   Stream<User?> get authStateChanges => _firebaseAuthService.authStateChanges;
 
-  // Implementación de inicio de sesión con correo electrónico y contraseña, obteniendo el perfil completo
   Future<UserModel> signInWithEmailAndPassword({
     required String email,
     required String password,
@@ -21,10 +20,10 @@ class AuthRepository {
       email: email,
       password: password,
     );
-    return await _fetchUserModel(credential.user!.uid);
+
+    return _fetchUserModel(credential.user!.uid);
   }
 
-  // Implementación de registro de usuario con información adicional
   Future<UserModel> registerWithEmailAndPassword({
     required String email,
     required String password,
@@ -54,52 +53,75 @@ class AuthRepository {
     return user;
   }
 
-  // Implementación de inicio de sesión con Google, creando un perfil si es la primera vez
   Future<UserModel> signInWithGoogle() async {
     final credential = await _firebaseAuthService.signInWithGoogle();
     final uid = credential.user!.uid;
 
-    final doc = await _db.collection('users').doc(uid).get();
+    final existingUser = await _fetchExistingUserModel(uid);
 
-    if (!doc.exists) {
-      final user = UserModel(
-        uid: uid,
-        email: credential.user!.email ?? '',
-        name: credential.user!.displayName ?? '',
-        surname: '',
-        birthDate: null,
-        role: UserRole.customer,
-        nauticalLicense: const NauticalLicense(
-          type: 'none',
-          documentUrl: '',
-          status: 'verified',
-        ),
-      );
-      await _db.collection('users').doc(uid).set(user.toMap());
-      return user;
+    if (existingUser != null) {
+      return existingUser;
     }
 
-    return UserModel.fromMap(doc.data()!, uid);
+    final user = UserModel(
+      uid: uid,
+      email: credential.user!.email ?? '',
+      name: credential.user!.displayName ?? '',
+      surname: '',
+      birthDate: null,
+      role: UserRole.customer,
+      nauticalLicense: const NauticalLicense(
+        type: 'none',
+        documentUrl: '',
+        status: 'verified',
+      ),
+    );
+
+    await _db.collection('users').doc(uid).set(user.toMap());
+
+    return user;
   }
 
-  // Implementación de restablecimiento de contraseña
   Future<void> sendPasswordResetEmail({required String email}) {
     return _firebaseAuthService.sendPasswordResetEmail(email: email);
   }
 
-  // Implementación de obtención del usuario actual con perfil completo
   Future<UserModel?> getCurrentUser() async {
     final firebaseUser = _firebaseAuthService.currentUser;
     if (firebaseUser == null) return null;
-    return await _fetchUserModel(firebaseUser.uid);
+
+    return _fetchUserModel(firebaseUser.uid);
   }
 
-  // Implementación de cierre de sesión
   Future<void> signOut() => _firebaseAuthService.signOut();
 
   Future<UserModel> _fetchUserModel(String uid) async {
-    final doc = await _db.collection('users').doc(uid).get();
-    if (!doc.exists) throw Exception('Perfil no encontrado en Firestore.');
-    return UserModel.fromMap(doc.data()!, uid);
+    final user = await _fetchExistingUserModel(uid);
+
+    if (user == null) {
+      throw Exception('Perfil no encontrado en Firestore.');
+    }
+
+    return user;
+  }
+
+  Future<UserModel?> _fetchExistingUserModel(String uid) async {
+    final adminDoc = await _db.collection('admin').doc(uid).get();
+
+    if (adminDoc.exists && adminDoc.data() != null) {
+      final data = Map<String, dynamic>.from(adminDoc.data()!);
+      data['role'] = 'admin';
+      return UserModel.fromMap(data, uid);
+    }
+
+    final userDoc = await _db.collection('users').doc(uid).get();
+
+    if (userDoc.exists && userDoc.data() != null) {
+      final data = Map<String, dynamic>.from(userDoc.data()!);
+      data['role'] = data['role'] ?? 'customer';
+      return UserModel.fromMap(data, uid);
+    }
+
+    return null;
   }
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// Modelo de bloque de mantenimiento para un barco
 class MaintenanceBlockModel {
   final String id;
   final String boatId;
@@ -18,7 +19,7 @@ class MaintenanceBlockModel {
     required this.createdBy,
     this.createdAt,
   });
-
+  //
   factory MaintenanceBlockModel.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> doc,
   ) {
