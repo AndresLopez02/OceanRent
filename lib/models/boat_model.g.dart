@@ -5,7 +5,7 @@ part of 'boat_model.dart';
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
-
+// Este código es generado automáticamente por Hive. No lo modifiques manualmente.
 class BoatModelAdapter extends TypeAdapter<BoatModel> {
   @override
   final int typeId = 0;
