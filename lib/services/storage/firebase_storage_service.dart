@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 
 class FirebaseStorageService {
@@ -24,10 +25,27 @@ class FirebaseStorageService {
     required String uid,
     required XFile file,
   }) async {
-    final fileToUpload = File(file.path);
     final fileName = '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
     final ref = _firebaseStorage.ref().child('licenses/$uid/$fileName');
-    await ref.putFile(fileToUpload);
+    final metadata = SettableMetadata(contentType: _contentType(file.name));
+
+    if (kIsWeb) {
+      await ref.putData(await file.readAsBytes(), metadata);
+    } else {
+      await ref.putFile(File(file.path), metadata);
+    }
+
     return ref.getDownloadURL();
+  }
+
+  String? _contentType(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+
+    return switch (extension) {
+      'pdf' => 'application/pdf',
+      'jpg' || 'jpeg' => 'image/jpeg',
+      'png' => 'image/png',
+      _ => null,
+    };
   }
 }

@@ -7,6 +7,7 @@ import 'package:ocean_rent/pages/home/pages/customer/widgets/licence_comparer.da
 import 'package:ocean_rent/pages/home/pages/customer/widgets/license_detail_section.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/booking_providers.dart';
+import 'package:ocean_rent/providers/review_providers.dart';
 import 'package:ocean_rent/utils/boat_utils.dart';
 import 'package:ocean_rent/widgets/app_navigator.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -76,7 +77,7 @@ class _CustomerBoatDetailPageState
       startDate: startDate,
       endDate: endDate,
       crewCount: _crewCount,
-      depositAmount: widget.boat.depositAmount,
+      depositAmount: _depositAmount(),
     );
 
     if (!context.mounted) return;
@@ -138,6 +139,10 @@ class _CustomerBoatDetailPageState
 
   double _totalRentalAmount() {
     return _selectedDaysCount() * widget.boat.pricePerDay;
+  }
+
+  double _depositAmount() {
+    return _totalRentalAmount() * 0.10;
   }
 
   DateTime _startOfDay(DateTime date) {
@@ -491,7 +496,7 @@ class _CustomerBoatDetailPageState
                       endDate: _formatDate(_rangeEnd ?? _rangeStart!),
                       daysCount: _selectedDaysCount(),
                       rentalAmount: _totalRentalAmount(),
-                      depositAmount: boat.depositAmount,
+                      depositAmount: _depositAmount(),
                     ),
                   ],
 
@@ -669,17 +674,29 @@ class _SummaryRow extends StatelessWidget {
   }
 }
 
-class _BoatReviewsPreview extends StatelessWidget {
+class _BoatReviewsPreview extends ConsumerWidget {
   final BoatModel boat;
 
   const _BoatReviewsPreview({required this.boat});
 
   @override
-  Widget build(BuildContext context) {
-    final hasReviews = boat.ratingCount > 0;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reviewsAsync = ref.watch(reviewsByBoatProvider(boat.id));
+    final reviews = reviewsAsync.maybeWhen(
+      data: (value) => value,
+      orElse: () => null,
+    );
+    final reviewCount = reviews?.length ?? boat.ratingCount;
+    final ratingAvg = reviews == null
+        ? boat.ratingAvg
+        : reviews.isEmpty
+        ? 0.0
+        : reviews.fold<int>(0, (total, review) => total + review.rating) /
+              reviews.length;
+    final hasReviews = reviewCount > 0;
     final ratingText = hasReviews
-        ? '${boat.ratingAvg.toStringAsFixed(1)} · ${boat.ratingCount} reseña${boat.ratingCount == 1 ? '' : 's'}'
-        : 'Sin reseñas todavía';
+        ? '${ratingAvg.toStringAsFixed(1)} - $reviewCount resena${reviewCount == 1 ? '' : 's'}'
+        : 'Sin resenas todavia';
 
     return Container(
       padding: AppTheme.compactCardPadding,
@@ -688,7 +705,7 @@ class _BoatReviewsPreview extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Reseñas',
+            'Resenas',
             style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy),
           ),
           const SizedBox(height: AppTheme.spacing10),
@@ -709,7 +726,7 @@ class _BoatReviewsPreview extends StatelessWidget {
           Text(
             hasReviews
                 ? 'Consulta las valoraciones reales de otros clientes.'
-                : 'Este barco todavía no tiene valoraciones de clientes.',
+                : 'Este barco todavia no tiene valoraciones de clientes.',
             style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted),
           ),
           const SizedBox(height: AppTheme.spacing12),
@@ -725,7 +742,7 @@ class _BoatReviewsPreview extends StatelessWidget {
                 );
               },
               child: Text(
-                hasReviews ? 'Ver reseñas' : 'Ver sección de reseñas',
+                hasReviews ? 'Ver resenas' : 'Ver seccion de resenas',
               ),
             ),
           ),

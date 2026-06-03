@@ -2,51 +2,254 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
     function getUserRole() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
     }
 
     function isAdmin() {
-      return request.auth != null && getUserRole() == "admin";
+      return isSignedIn()
+        && (
+          exists(/databases/$(database)/documents/admin/$(request.auth.uid))
+          || getUserRole() == "admin"
+        );
     }
 
     function isCustomer() {
-      return request.auth != null && getUserRole() == "customer";
+      return isSignedIn() && getUserRole() == "customer";
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function validUserCreate(userId) {
+      return isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          "email",
+          "name",
+          "surname",
+          "birth_date",
+          "role",
+          "nautical_license",
+          "created_at"
+        ])
+        && request.resource.data.role == "customer"
+        && request.resource.data.email is string
+        && request.resource.data.name is string
+        && request.resource.data.surname is string
+        && request.resource.data.nautical_license.type == "none"
+        && request.resource.data.nautical_license.document_url == ""
+        && request.resource.data.nautical_license.status == "verified";
+    }
+
+    function validCustomerProfileUpdate(userId) {
+      return isOwner(userId)
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "name",
+          "surname",
+          "updated_at"
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.surname is string;
+    }
+
+    function validCustomerFcmTokenUpdate(userId) {
+      return isOwner(userId)
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "fcm_token",
+          "fcm_token_updated_at",
+          "fcm_token_platform"
+        ])
+        && request.resource.data.fcm_token is string
+        && request.resource.data.fcm_token_platform is string;
+    }
+
+    function validCustomerLicenseUpdate(userId) {
+      return isOwner(userId)
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "nautical_license",
+          "updated_at"
+        ])
+        && request.resource.data.nautical_license.type is string
+        && request.resource.data.nautical_license.type != "none"
+        && request.resource.data.nautical_license.document_url is string
+        && request.resource.data.nautical_license.document_url.size() > 0
+        && request.resource.data.nautical_license.status == "pending";
+    }
+
+    function validAdminSelfUpdate(adminId) {
+      return isOwner(adminId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "name",
+          "surname",
+          "updated_at",
+          "fcm_token",
+          "fcm_token_updated_at",
+          "fcm_token_platform"
+        ]);
+    }
+
+    function validBookingCreate() {
+      return request.resource.data.keys().hasOnly([
+          "id",
+          "boat_id",
+          "user_id",
+          "start_date",
+          "end_date",
+          "crew_count",
+          "status",
+          "deposit_amount",
+          "deposit_payment_intent_id",
+          "deposit_status",
+          "rental_payment_intent_id",
+          "created_at",
+          "updated_at"
+        ])
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.id == request.resource.id
+        && request.resource.data.boat_id is string
+        && exists(/databases/$(database)/documents/boats/$(request.resource.data.boat_id))
+        && request.resource.data.start_date is timestamp
+        && request.resource.data.end_date is timestamp
+        && request.resource.data.end_date >= request.resource.data.start_date
+        && request.resource.data.crew_count is int
+        && request.resource.data.crew_count > 0
+        && request.resource.data.deposit_amount is number
+        && request.resource.data.deposit_amount > 0
+        && request.resource.data.deposit_payment_intent_id == ""
+        && request.resource.data.rental_payment_intent_id == ""
+        && request.resource.data.status == "pendiente"
+        && request.resource.data.deposit_status == "held";
+    }
+
+    function validCustomerCancellation() {
+      return isCustomer()
+        && request.auth.uid == resource.data.user_id
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "status",
+          "deposit_status",
+          "updated_at"
+        ])
+        && request.resource.data.status == "cancelada"
+        && request.resource.data.deposit_status == "released"
+        && (
+          resource.data.status == "pendiente"
+          || resource.data.status == "confirmada"
+        );
+    }
+
+    function validBookingLockCreate(lockId) {
+      let booking = getAfter(/databases/$(database)/documents/bookings/$(request.resource.data.booking_id));
+      return isCustomer()
+        && request.resource.data.keys().hasOnly([
+          "booking_id",
+          "boat_id",
+          "date",
+          "date_key",
+          "status",
+          "created_at"
+        ])
+        && request.resource.data.boat_id is string
+        && request.resource.data.date is timestamp
+        && request.resource.data.date_key is string
+        && request.resource.data.status == "pendiente"
+        && lockId == request.resource.data.boat_id + "_" + request.resource.data.date_key
+        && booking.data.user_id == request.auth.uid
+        && booking.data.boat_id == request.resource.data.boat_id
+        && booking.data.status == "pendiente";
+    }
+
+    function validBookingLockDelete() {
+      let booking = getAfter(/databases/$(database)/documents/bookings/$(resource.data.booking_id));
+      return isCustomer()
+        && booking.data.user_id == request.auth.uid
+        && booking.data.boat_id == resource.data.boat_id
+        && booking.data.status == "cancelada";
+    }
+
+    function validReviewCreate(reviewId) {
+      let booking = get(/databases/$(database)/documents/bookings/$(request.resource.data.booking_id));
+      return isCustomer()
+        && request.resource.data.keys().hasOnly([
+          "id",
+          "boat_id",
+          "booking_id",
+          "user_id",
+          "rating",
+          "comment",
+          "admin_reply",
+          "created_at",
+          "updated_at"
+        ])
+        && reviewId == request.resource.data.booking_id
+        && request.resource.data.id == reviewId
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.boat_id is string
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.comment is string
+        && request.resource.data.comment.size() <= 1000
+        && request.resource.data.admin_reply == ""
+        && booking.data.user_id == request.auth.uid
+        && booking.data.boat_id == request.resource.data.boat_id
+        && booking.data.status == "confirmada";
     }
 
     match /boats/{boatId} {
-      allow read: if request.auth != null;
+      allow read: if isSignedIn();
       allow write, create, delete: if isAdmin();
     }
 
+    match /admin/{adminId} {
+      allow read: if isOwner(adminId) || isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || validAdminSelfUpdate(adminId);
+    }
+
     match /users/{userId} {
-      allow read, write: if request.auth.uid == userId || isAdmin();
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if validUserCreate(userId) || isAdmin();
+      allow update: if isAdmin()
+        || validCustomerProfileUpdate(userId)
+        || validCustomerFcmTokenUpdate(userId)
+        || validCustomerLicenseUpdate(userId);
+      allow delete: if isAdmin();
     }
 
     match /reviews/{reviewId} {
-      allow read: if request.auth != null;
-      allow create: if isCustomer() && request.auth.uid == request.resource.data.userId;
-      // hay que limitar la create de reviews por seguridad
+      allow read: if isSignedIn();
+      allow create: if validReviewCreate(reviewId);
       allow write: if isAdmin();
     }
 
     match /bookings/{bookingId} {
       allow read, write: if isAdmin();
-      allow read: if isCustomer() && request.auth.uid == resource.data.userId;
-      allow update: if isCustomer()
-        && request.auth.uid == resource.data.userId
-        && request.resource.data.status == 'cancelada'
-        && (resource.data.status == 'pendiente' || resource.data.status == 'confirmada');
+      allow create: if validBookingCreate();
+      allow read: if isCustomer() && request.auth.uid == resource.data.user_id;
+      allow update: if validCustomerCancellation();
     }
 
     match /booking_date_locks/{lockId} {
-      allow read, write: if isAdmin();
-      allow delete: if isCustomer()
-        && get(/databases/$(database)/documents/bookings/$(resource.data.booking_id)).data.user_id == request.auth.uid;
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+      allow create: if validBookingLockCreate(lockId);
+      allow delete: if validBookingLockDelete();
     }
 
     match /maintenance_blocks/{maintenanceId} {
-      allow read, write: if isAdmin();
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
     }
 
   }

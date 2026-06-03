@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/user_model.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
@@ -12,9 +13,9 @@ import 'package:ocean_rent/widgets/profile_widgets.dart';
 enum LicenseStatus { pending, verified, rejected, none }
 
 LicenseStatus _statusFromString(String s) => switch (s.toLowerCase()) {
-  'pending' => LicenseStatus.pending,
-  'verified' => LicenseStatus.verified,
-  'rejected' => LicenseStatus.rejected,
+  NauticalLicenseStatus.pending => LicenseStatus.pending,
+  NauticalLicenseStatus.verified => LicenseStatus.verified,
+  NauticalLicenseStatus.rejected => LicenseStatus.rejected,
   _ => LicenseStatus.none,
 };
 
@@ -63,6 +64,8 @@ class CustomerProfileScreen extends ConsumerStatefulWidget {
 
 class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
     with SingleTickerProviderStateMixin {
+  static const int _maxLicenseFileSizeBytes = 10 * 1024 * 1024;
+
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _surnameCtrl = TextEditingController();
@@ -156,6 +159,11 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
       return;
     }
 
+    if (pickedFile.size > _maxLicenseFileSizeBytes) {
+      _snack('El documento no puede superar los 10 MB', error: true);
+      return;
+    }
+
     setState(() {
       _pickedFileName = pickedFile.name;
       _isUploading = true;
@@ -165,23 +173,63 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
       final uid = ref.read(authNotifierProvider).currentUser!.uid;
       final repo = ref.read(userRepositoryProvider);
 
-      //  guardado solo el nombre del archivo y actualizo Firestore directamente
+      final documentUrl = await repo.uploadLicenseDocument(
+        uid: uid,
+        file: pickedFile.path != null
+            ? XFile(pickedFile.path!, name: pickedFile.name)
+            : XFile.fromData(
+                pickedFile.bytes!,
+                name: pickedFile.name,
+                mimeType: _mimeTypeForFileName(pickedFile.name),
+              ),
+      );
+
       await repo.updateNauticalLicense(
         uid: uid,
         type: _licenseType,
-        documentUrl: '',
-        status: 'pending',
+        documentUrl: documentUrl,
+        status: NauticalLicenseStatus.pending,
       );
+
+      if (!mounted) return;
 
       setState(() {
         _isUploading = false;
         _licenseStatus = LicenseStatus.pending;
+        _profile = UserModel(
+          uid: _profile!.uid,
+          email: _profile!.email,
+          name: _profile!.name,
+          surname: _profile!.surname,
+          birthDate: _profile!.birthDate,
+          role: _profile!.role,
+          nauticalLicense: NauticalLicense(
+            type: _licenseType,
+            documentUrl: documentUrl,
+            status: NauticalLicenseStatus.pending,
+          ),
+        );
       });
       _snack('Titulación enviada para verificación');
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isUploading = false);
-      _snack('Error al guardar la titulación: $e', error: true);
+      _snack(
+        _friendlyError(e, 'No se pudo guardar la titulación'),
+        error: true,
+      );
     }
+  }
+
+  String _mimeTypeForFileName(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+
+    return switch (extension) {
+      'pdf' => 'application/pdf',
+      'jpg' || 'jpeg' => 'image/jpeg',
+      'png' => 'image/png',
+      _ => 'application/octet-stream',
+    };
   }
 
   Future<void> _saveProfile() async {
@@ -198,10 +246,105 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
           );
       _snack('Perfil actualizado correctamente');
     } catch (e) {
-      _snack('Error al guardar el perfil: $e', error: true);
+      _snack(_friendlyError(e, 'No se pudo guardar el perfil'), error: true);
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  Future<void> _sendPasswordReset() async {
+    final profileEmail = _profile?.email.trim() ?? '';
+    final email = profileEmail.isNotEmpty
+        ? await _confirmPasswordResetEmail(profileEmail)
+        : await _askPasswordResetEmail();
+
+    if (!mounted || email == null) return;
+
+    final normalizedEmail = email.trim();
+    if (normalizedEmail.isEmpty || !normalizedEmail.contains('@')) {
+      _snack('Introduce un correo valido', error: true);
+      return;
+    }
+
+    final success = await ref
+        .read(authNotifierProvider)
+        .sendPasswordResetEmail(email: normalizedEmail);
+
+    if (!mounted) return;
+
+    if (success) {
+      _snack('Correo de restablecimiento enviado');
+      return;
+    }
+
+    _snack(
+      ref.read(authNotifierProvider).errorMessage ??
+          'No se pudo enviar el correo de restablecimiento',
+      error: true,
+    );
+  }
+
+  Future<String?> _confirmPasswordResetEmail(String email) {
+    return showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppTheme.surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppTheme.borderRadiusCard,
+        ),
+        title: Text('Restablecer contrasena', style: AppTheme.titleMedium),
+        content: Text(
+          'Enviar correo de recuperacion a $email?',
+          style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: AppTheme.accentButtonStyle,
+            onPressed: () => Navigator.of(dialogContext).pop(email),
+            child: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<String?> _askPasswordResetEmail() {
+    final controller = TextEditingController();
+
+    return showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppTheme.surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppTheme.borderRadiusCard,
+        ),
+        title: Text('Restablecer contrasena', style: AppTheme.titleMedium),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.emailAddress,
+          decoration: AppTheme.inputDecoration(
+            labelText: 'Correo electronico',
+            icon: Icons.mail_outline,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: AppTheme.accentButtonStyle,
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(controller.text.trim()),
+            child: const Text('Enviar'),
+          ),
+        ],
+      ),
+    ).whenComplete(controller.dispose);
   }
 
   void _snack(String msg, {bool error = false}) {
@@ -220,6 +363,18 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
         margin: AppTheme.listPadding,
       ),
     );
+  }
+
+  String _friendlyError(Object error, String fallback) {
+    final message = error.toString().replaceFirst('Exception: ', '').trim();
+
+    if (message.contains('permission-denied')) {
+      return 'No tienes permisos para realizar esta accion.';
+    }
+
+    if (message.isEmpty) return fallback;
+
+    return message;
   }
 
   // Build principal
@@ -271,6 +426,10 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
                 onTypeChanged: (v) => setState(() => _licenseType = v),
                 onPickDocument: _pickDocument,
               ),
+              const SizedBox(height: AppTheme.spacing28),
+              const ProfileSectionLabel('Seguridad'),
+              const SizedBox(height: AppTheme.spacing16),
+              _SecurityCard(onPasswordReset: _sendPasswordReset),
               const SizedBox(height: AppTheme.spacing36),
               ProfileSaveButton(isSaving: _isSaving, onPressed: _saveProfile),
               const SizedBox(height: AppTheme.spacing24),
@@ -406,6 +565,55 @@ class _PersonalDataCard extends StatelessWidget {
       ],
     ),
   );
+}
+
+class _SecurityCard extends StatelessWidget {
+  final VoidCallback onPasswordReset;
+
+  const _SecurityCard({required this.onPasswordReset});
+
+  @override
+  Widget build(BuildContext context) {
+    return ProfileCard(
+      child: Row(
+        children: [
+          Container(
+            width: AppTheme.summaryIconBoxSize,
+            height: AppTheme.summaryIconBoxSize,
+            decoration: AppTheme.adminIconBoxDecoration(AppTheme.oceanBlue),
+            child: const Icon(
+              Icons.lock_reset_outlined,
+              color: AppTheme.oceanBlue,
+              size: AppTheme.iconSize2xl,
+            ),
+          ),
+          const SizedBox(width: AppTheme.spacing12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Restablecer contrasena',
+                  style: AppTheme.titleSmall.copyWith(color: AppTheme.deepNavy),
+                ),
+                const SizedBox(height: AppTheme.spacing4),
+                Text(
+                  'Recibe un correo para cambiar la contrasena de tu cuenta.',
+                  style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppTheme.spacing8),
+          IconButton(
+            tooltip: 'Enviar correo de restablecimiento',
+            onPressed: onPasswordReset,
+            icon: const Icon(Icons.chevron_right_rounded),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // Titulación náutica

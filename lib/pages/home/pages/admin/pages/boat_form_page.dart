@@ -324,7 +324,7 @@ class _BoatFormPageState extends State<BoatFormPage> {
     } catch (e) {
       if (!mounted) return;
 
-      _showSnack('Error guardando barco: $e', error: true);
+      _showSnack(_friendlyErrorMessage(e), error: true);
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);
@@ -347,6 +347,15 @@ class _BoatFormPageState extends State<BoatFormPage> {
         margin: AppTheme.listPadding,
       ),
     );
+  }
+
+  String _friendlyErrorMessage(Object error) {
+    final raw = error.toString().replaceFirst('Exception: ', '').trim();
+    if (raw.isEmpty) {
+      return 'No se pudo guardar el barco.';
+    }
+
+    return raw.length > 140 ? '${raw.substring(0, 140)}...' : raw;
   }
 
   String? _validateRequired(String? value) {
@@ -699,12 +708,21 @@ class _BoatFormPageState extends State<BoatFormPage> {
                 child: ElevatedButton(
                   onPressed: _isSaving ? null : _save,
                   style: AppTheme.fullWidthPrimaryButtonStyle,
-                  child: Text(
-                    _isSaving ? 'Guardando...' : 'Guardar',
-                    style: AppTheme.buttonTextStyle.copyWith(
-                      color: AppTheme.pearlWhite,
-                    ),
-                  ),
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: AppTheme.loadingSize,
+                          height: AppTheme.loadingSize,
+                          child: CircularProgressIndicator(
+                            strokeWidth: AppTheme.progressStrokeWidth,
+                            color: AppTheme.pearlWhite,
+                          ),
+                        )
+                      : Text(
+                          'Guardar',
+                          style: AppTheme.buttonTextStyle.copyWith(
+                            color: AppTheme.pearlWhite,
+                          ),
+                        ),
                 ),
               ),
               if (!isEditing) ...[

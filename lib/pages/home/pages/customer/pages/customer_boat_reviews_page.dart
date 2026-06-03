@@ -4,6 +4,7 @@ import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/models/review_model.dart';
 import 'package:ocean_rent/providers/review_providers.dart';
+import 'package:ocean_rent/providers/user_providers.dart';
 
 class CustomerBoatReviewsPage extends ConsumerWidget {
   final BoatModel boat;
@@ -39,13 +40,18 @@ class CustomerBoatReviewsPage extends ConsumerWidget {
           ),
         ),
         data: (reviews) {
+          final realRatingCount = reviews.length;
+          final realRatingAvg = realRatingCount == 0
+              ? 0.0
+              : reviews.fold<int>(0, (total, review) => total + review.rating) /
+                    realRatingCount;
+
           return ListView(
             padding: AppTheme.cardPadding,
             children: [
               _ReviewSummaryCard(
-                ratingAvg: boat.ratingAvg,
-                ratingCount: boat.ratingCount,
-                realReviewsCount: reviews.length,
+                ratingAvg: realRatingAvg,
+                ratingCount: realRatingCount,
               ),
               const SizedBox(height: AppTheme.spacing20),
               Text(
@@ -72,18 +78,16 @@ class CustomerBoatReviewsPage extends ConsumerWidget {
 class _ReviewSummaryCard extends StatelessWidget {
   final double ratingAvg;
   final int ratingCount;
-  final int realReviewsCount;
 
   const _ReviewSummaryCard({
     required this.ratingAvg,
     required this.ratingCount,
-    required this.realReviewsCount,
   });
 
   @override
   Widget build(BuildContext context) {
-    final hasReviews = ratingCount > 0 || realReviewsCount > 0;
-    final count = ratingCount > 0 ? ratingCount : realReviewsCount;
+    final hasReviews = ratingCount > 0;
+    final count = ratingCount;
     final ratingText = hasReviews
         ? '${ratingAvg.toStringAsFixed(1)} · $count reseña${count == 1 ? '' : 's'}'
         : 'Sin reseñas todavía';
@@ -158,7 +162,7 @@ class _EmptyReviewsCard extends StatelessWidget {
   }
 }
 
-class _ReviewCard extends StatelessWidget {
+class _ReviewCard extends ConsumerWidget {
   final ReviewModel review;
 
   const _ReviewCard({required this.review});
@@ -173,8 +177,16 @@ class _ReviewCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final hasAdminReply = review.adminReply.trim().isNotEmpty;
+    final userAsync = ref.watch(userByIdProvider(review.userId));
+    final reviewerName = userAsync.maybeWhen(
+      data: (user) {
+        final fullName = '${user?.name ?? ''} ${user?.surname ?? ''}'.trim();
+        return fullName.isEmpty ? 'Cliente' : fullName;
+      },
+      orElse: () => 'Cliente',
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spacing12),
@@ -195,7 +207,7 @@ class _ReviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Cliente',
+                      reviewerName,
                       style: AppTheme.titleSmall.copyWith(
                         color: AppTheme.deepNavy,
                         fontWeight: FontWeight.w800,

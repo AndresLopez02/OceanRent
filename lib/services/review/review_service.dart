@@ -34,43 +34,35 @@ class ReviewService {
   }
 
   Future<void> createReview(ReviewModel review) async {
-    final existingReview = await _reviewsCollection
-        .where('booking_id', isEqualTo: review.bookingId)
-        .limit(1)
-        .get();
-
-    if (existingReview.docs.isNotEmpty) {
-      throw Exception('Ya existe una reseña para esta reserva.');
-    }
-
-    final reviewRef = _reviewsCollection.doc();
-    final boatRef = _firestore.collection('boats').doc(review.boatId);
+    final reviewRef = _reviewsCollection.doc(review.bookingId);
+    final bookingRef = _firestore.collection('bookings').doc(review.bookingId);
 
     await _firestore.runTransaction((transaction) async {
-      final boatSnapshot = await transaction.get(boatRef);
-      final boatData = boatSnapshot.data() ?? {};
+      final reviewSnapshot = await transaction.get(reviewRef);
 
-      final currentAvg = (boatData['rating_avg'] ?? 0).toDouble();
-      final currentCount = (boatData['rating_count'] ?? 0) as int;
+      if (reviewSnapshot.exists) {
+        throw Exception('Ya existe una resena para esta reserva.');
+      }
 
-      final newCount = currentCount + 1;
-      final newAvg = ((currentAvg * currentCount) + review.rating) / newCount;
+      final bookingSnapshot = await transaction.get(bookingRef);
+      final bookingData = bookingSnapshot.data();
+
+      if (bookingData == null ||
+          bookingData['user_id'] != review.userId ||
+          bookingData['boat_id'] != review.boatId ||
+          bookingData['status'] != 'confirmada') {
+        throw Exception('La reserva no permite crear una resena.');
+      }
 
       transaction.set(reviewRef, {
-        ...review.copyWith(id: reviewRef.id).toMap(),
+        ...review.copyWith(id: review.bookingId).toMap(),
         'id': reviewRef.id,
         'created_at': FieldValue.serverTimestamp(),
         'updated_at': FieldValue.serverTimestamp(),
       });
-
-      transaction.update(boatRef, {
-        'rating_avg': newAvg,
-        'rating_count': newCount,
-      });
     });
   }
 
-  // Permite escuchar en tiempo real la reseña asociada a una reserva específica.
   Stream<ReviewModel?> watchReviewByBooking(String bookingId) {
     return _reviewsCollection
         .where('booking_id', isEqualTo: bookingId)
@@ -85,7 +77,6 @@ class ReviewService {
         });
   }
 
-  // Permite escuchar en tiempo real todas las reseñas, ordenadas por fecha de creación (de más reciente a más antigua).
   Stream<List<ReviewModel>> watchAllReviews() {
     return _reviewsCollection.snapshots().map((snapshot) {
       final reviews = snapshot.docs
@@ -104,17 +95,16 @@ class ReviewService {
     });
   }
 
-  // Permite al administrador actualizar la respuesta a una reseña específica.
   Future<void> updateAdminReply({
     required String reviewId,
     required String adminReply,
   }) async {
     if (reviewId.trim().isEmpty) {
-      throw Exception('No se pudo identificar la reseña.');
+      throw Exception('No se pudo identificar la resena.');
     }
 
     if (adminReply.trim().isEmpty) {
-      throw Exception('La respuesta no puede estar vacía.');
+      throw Exception('La respuesta no puede estar vacia.');
     }
 
     await _reviewsCollection.doc(reviewId).update({

@@ -12,140 +12,166 @@ class CustomerBoatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: AppTheme.borderRadiusCard,
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => CustomerBoatDetailPage(boat: boat)),
-        );
-      },
-      child: Container(
-        margin: AppTheme.cardBottomMargin,
-        decoration: AppTheme.cardDecoration(
-          color: AppTheme.surface,
-          radius: AppTheme.radiusCard,
-          border: Border.all(
-            color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft),
+    void openDetail() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => CustomerBoatDetailPage(boat: boat)),
+      );
+    }
+
+    return Semantics(
+      button: true,
+      label: 'Ver detalles de ${boat.name}',
+      child: InkWell(
+        borderRadius: AppTheme.borderRadiusCard,
+        onTap: openDetail,
+        child: Container(
+          margin: AppTheme.cardBottomMargin,
+          decoration: AppTheme.cardDecoration(
+            color: AppTheme.surface,
+            radius: AppTheme.radiusCard,
+            border: Border.all(
+              color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft),
+            ),
+            boxShadow: AppTheme.softShadow(),
           ),
-          boxShadow: AppTheme.softShadow(),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: AppTheme.borderRadiusCardTop,
-                  child: boat.imageUrl.isNotEmpty
-                      ? Image.network(
-                          boat.imageUrl,
-                          height: AppTheme.customerBoatImageHeight,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => BoatImagePlaceholder(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: AppTheme.borderRadiusCardTop,
+                    child: boat.imageUrl.isNotEmpty
+                        ? Image.network(
+                            boat.imageUrl,
+                            height: AppTheme.customerBoatImageHeight,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => BoatImagePlaceholder(
+                              name: boat.name,
+                              height: AppTheme.customerBoatImageHeight,
+                              iconSize: AppTheme.emptyStateIconSize,
+                            ),
+                          )
+                        : BoatImagePlaceholder(
                             name: boat.name,
                             height: AppTheme.customerBoatImageHeight,
                             iconSize: AppTheme.emptyStateIconSize,
                           ),
-                        )
-                      : BoatImagePlaceholder(
-                          name: boat.name,
-                          height: AppTheme.customerBoatImageHeight,
-                          iconSize: AppTheme.emptyStateIconSize,
-                        ),
-                ),
-                Positioned(
-                  top: AppTheme.spacing10,
-                  right: AppTheme.spacing10,
-                  child: _AvailabilityBadge(isAvailable: boat.isAvailable),
-                ),
-                if (boat.ratingCount > 0)
+                  ),
                   Positioned(
-                    left: AppTheme.spacing10,
-                    bottom: AppTheme.spacing10,
-                    child: _RatingBadge(
-                      ratingAvg: boat.ratingAvg,
-                      ratingCount: boat.ratingCount,
-                    ),
+                    top: AppTheme.spacing10,
+                    right: AppTheme.spacing10,
+                    child: _AvailabilityBadge(isAvailable: boat.isAvailable),
                   ),
-              ],
-            ),
-            Padding(
-              padding: AppTheme.compactCardPadding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    boat.name.isEmpty
-                        ? 'BARCO SIN NOMBRE'
-                        : boat.name.toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTheme.titleLarge.copyWith(
-                      color: AppTheme.deepNavy,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: AppTheme.spacing10),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _BoatInfoItem(
-                              icon: Icons.directions_boat_outlined,
-                              label: formatBoatCategory(boat.category),
-                            ),
-                            const SizedBox(height: AppTheme.spacing6),
-                            _BoatInfoItem(
-                              icon: Icons.location_on_outlined,
-                              label: boat.portName.trim().isEmpty
-                                  ? 'Sin ubicación'
-                                  : boat.portName.trim(),
-                            ),
-                            const SizedBox(height: AppTheme.spacing6),
-                            _BoatInfoItem(
-                              icon: Icons.people_outline,
-                              label: boat.capacity <= 0
-                                  ? 'Sin capacidad'
-                                  : boat.capacity == 1
-                                  ? '1 persona'
-                                  : '${boat.capacity} personas',
-                            ),
-                          ],
-                        ),
+                  if (boat.ratingCount > 0)
+                    Positioned(
+                      left: AppTheme.spacing10,
+                      bottom: AppTheme.spacing10,
+                      child: _RatingBadge(
+                        ratingAvg: boat.ratingAvg,
+                        ratingCount: boat.ratingCount,
                       ),
-                      const SizedBox(width: AppTheme.spacing10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppTheme.spacing10,
-                          vertical: AppTheme.spacing6,
-                        ),
-                        decoration: AppTheme.badgeDecoration(
-                          color: AppTheme.sunsetGold,
-                          alpha: AppTheme.alphaLight,
-                        ),
-                        child: Text(
-                          '${boat.pricePerDay.toStringAsFixed(0)} €/día',
-                          style: AppTheme.labelMedium.copyWith(
-                            color: AppTheme.deepNavy,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (boat.requiredLicense.toLowerCase() != 'none') ...[
-                    const SizedBox(height: AppTheme.spacing8),
-                    _LicenseBadge(license: boat.requiredLicense),
-                  ],
+                    ),
                 ],
               ),
-            ),
-          ],
+              Padding(
+                padding: AppTheme.compactCardPadding,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      boat.name.isEmpty
+                          ? 'BARCO SIN NOMBRE'
+                          : boat.name.toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTheme.titleLarge.copyWith(
+                        color: AppTheme.deepNavy,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: AppTheme.spacing10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _BoatInfoItem(
+                                icon: Icons.directions_boat_outlined,
+                                label: formatBoatCategory(boat.category),
+                              ),
+                              const SizedBox(height: AppTheme.spacing6),
+                              _BoatInfoItem(
+                                icon: Icons.location_on_outlined,
+                                label: boat.portName.trim().isEmpty
+                                    ? 'Sin ubicacion'
+                                    : boat.portName.trim(),
+                              ),
+                              const SizedBox(height: AppTheme.spacing6),
+                              _BoatInfoItem(
+                                icon: Icons.people_outline,
+                                label: boat.capacity <= 0
+                                    ? 'Sin capacidad'
+                                    : boat.capacity == 1
+                                    ? '1 persona'
+                                    : '${boat.capacity} personas',
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: AppTheme.spacing10),
+                        Flexible(
+                          child: Transform.translate(
+                            offset: const Offset(AppTheme.spacing4, 0),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppTheme.spacing10,
+                                vertical: AppTheme.spacing6,
+                              ),
+                              decoration: AppTheme.badgeDecoration(
+                                color: AppTheme.sunsetGold,
+                                alpha: AppTheme.alphaLight,
+                              ),
+                              child: Text(
+                                '${boat.pricePerDay.toStringAsFixed(0)} EUR/dia',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTheme.labelMedium.copyWith(
+                                  color: AppTheme.deepNavy,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (boat.requiredLicense.toLowerCase() != 'none') ...[
+                      const SizedBox(height: AppTheme.spacing8),
+                      _LicenseBadge(license: boat.requiredLicense),
+                    ],
+                    const SizedBox(height: AppTheme.spacing12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: openDetail,
+                        style: AppTheme.compactTextButtonStyle,
+                        icon: const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: AppTheme.iconSizeLarge,
+                        ),
+                        label: const Text('Ver detalles'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -185,9 +211,9 @@ class _LicenseBadge extends StatelessWidget {
   String _licenseLabel(String license) {
     switch (license.toLowerCase()) {
       case 'pnb':
-        return 'Requiere licencia PNB';
+        return 'Requiere PNB';
       case 'per':
-        return 'Requiere licencia PER';
+        return 'Requiere PER';
       default:
         return 'Requiere licencia';
     }
@@ -216,11 +242,15 @@ class _LicenseBadge extends StatelessWidget {
             color: AppTheme.sunsetGold,
           ),
           const SizedBox(width: AppTheme.spacing4),
-          Text(
-            _licenseLabel(license),
-            style: AppTheme.bodySmall.copyWith(
-              color: AppTheme.sunsetGold,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              _licenseLabel(license),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTheme.bodySmall.copyWith(
+                color: AppTheme.sunsetGold,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

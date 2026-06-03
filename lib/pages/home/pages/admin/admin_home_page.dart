@@ -5,6 +5,8 @@ import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/models/booking_model.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_bookings_page.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_calendar_page.dart';
+import 'package:ocean_rent/pages/home/pages/admin/pages/admin_deposits_page.dart';
+import 'package:ocean_rent/pages/home/pages/admin/pages/admin_licenses_page.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_profile_screen.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_reviews_page.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/boat_form_page.dart';
@@ -196,7 +198,7 @@ class AdminHomePage extends ConsumerWidget {
   }
 }
 
-class _AdminDashboard extends StatelessWidget {
+class _AdminDashboard extends StatefulWidget {
   final List<BoatModel> boats;
   final List<BookingModel> bookings;
   final VoidCallback onCreateBoat;
@@ -212,7 +214,32 @@ class _AdminDashboard extends StatelessWidget {
   });
 
   @override
+  State<_AdminDashboard> createState() => _AdminDashboardState();
+}
+
+class _AdminDashboardState extends State<_AdminDashboard> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToFleetSection() {
+    if (!_scrollController.hasClients) return;
+
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: AppTheme.animationNormal,
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final boats = widget.boats;
+    final bookings = widget.bookings;
     final today = DateTime.now();
     final todayOnly = DateTime(today.year, today.month, today.day);
 
@@ -249,6 +276,7 @@ class _AdminDashboard extends StatelessWidget {
     final boatNames = {for (final boat in boats) boat.id: boat.name};
 
     return ListView(
+      controller: _scrollController,
       padding: AppTheme.adminDashboardPadding,
       children: [
         _AdminHeader(totalBoats: boats.length),
@@ -267,18 +295,28 @@ class _AdminDashboard extends StatelessWidget {
           childAspectRatio: AppTheme.adminSummaryAspectRatio,
           children: [
             AdminSummaryCard(
-              title: 'Reservas próximas',
+              title: 'Reservas proximas',
               value: '$upcomingBookings',
               subtitle: '$pendingBookings pendientes',
               icon: Icons.calendar_month_outlined,
               color: AppTheme.oceanBlue,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AdminBookingsPage()),
+                );
+              },
             ),
             AdminSummaryCard(
               title: 'Fianzas retenidas',
-              value: '${heldDepositsAmount.toStringAsFixed(0)} €',
+              value: '${heldDepositsAmount.toStringAsFixed(0)} EUR',
               subtitle: 'Estado held',
               icon: Icons.payments_outlined,
               color: AppTheme.sunsetGold,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AdminDepositsPage()),
+                );
+              },
             ),
             AdminSummaryCard(
               title: 'Barcos registrados',
@@ -286,13 +324,19 @@ class _AdminDashboard extends StatelessWidget {
               subtitle: 'Datos reales de boats',
               icon: Icons.directions_boat_filled_outlined,
               color: AppTheme.deepNavy,
+              onTap: _scrollToFleetSection,
             ),
-            const AdminSummaryCard(
+            AdminSummaryCard(
               title: 'Titulaciones',
               value: '0',
               subtitle: 'Pendiente de users',
               icon: Icons.verified_user_outlined,
               color: AppTheme.alertRed,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AdminLicensesPage()),
+                );
+              },
             ),
           ],
         ),
@@ -382,7 +426,7 @@ class _AdminDashboard extends StatelessWidget {
           title: 'Gestión de flota',
           subtitle: 'CRUD de barcos disponible desde el panel.',
           trailing: TextButton.icon(
-            onPressed: onCreateBoat,
+            onPressed: widget.onCreateBoat,
             style: AppTheme.compactTextButtonStyle,
             icon: const Icon(Icons.add, size: AppTheme.iconSizeLarge),
             label: Text(
@@ -402,7 +446,7 @@ class _AdminDashboard extends StatelessWidget {
             message:
                 'Crea el primer barco para empezar a completar el catálogo.',
             buttonText: 'Crear barco',
-            onPressed: onCreateBoat,
+            onPressed: widget.onCreateBoat,
           )
         else
           ...boats.map(
@@ -410,8 +454,8 @@ class _AdminDashboard extends StatelessWidget {
               padding: AppTheme.cardBottomMargin,
               child: _BoatAdminCard(
                 boat: boat,
-                onEdit: () => onEditBoat(boat),
-                onDelete: () => onDeleteBoat(boat),
+                onEdit: () => widget.onEditBoat(boat),
+                onDelete: () => widget.onDeleteBoat(boat),
               ),
             ),
           ),
@@ -680,6 +724,15 @@ class _BoatAdminCard extends StatelessWidget {
                   runSpacing: AppTheme.spacing8,
                   children: [
                     _InfoChip(
+                      icon: boat.isAvailable
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      label: boat.isAvailable ? 'Activo' : 'No disponible',
+                      color: boat.isAvailable
+                          ? AppTheme.oceanBlue
+                          : AppTheme.alertRed,
+                    ),
+                    _InfoChip(
                       icon: Icons.directions_boat_outlined,
                       label: formatBoatCategory(boat.category),
                     ),
@@ -763,21 +816,26 @@ class _BoatAdminCard extends StatelessWidget {
 class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String label;
+  final Color color;
 
-  const _InfoChip({required this.icon, required this.label});
+  const _InfoChip({
+    required this.icon,
+    required this.label,
+    this.color = AppTheme.oceanBlue,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: AppTheme.chipPadding,
       decoration: AppTheme.badgeDecoration(
-        color: AppTheme.oceanBlue,
+        color: color,
         alpha: AppTheme.alphaLight,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: AppTheme.iconSizeMedium, color: AppTheme.deepNavy),
+          Icon(icon, size: AppTheme.iconSizeMedium, color: color),
           const SizedBox(width: AppTheme.spacing6),
           Text(
             label,

@@ -11,6 +11,9 @@ class UserRepository {
 
   Future<UserModel> getUser(String uid) => _userService.getUser(uid);
 
+  Stream<List<UserModel>> watchCustomersWithLicenses() =>
+      _userService.watchCustomersWithLicenses();
+
   Future<void> updateProfile({
     required String uid,
     required String name,
@@ -32,5 +35,15 @@ class UserRepository {
     type: type,
     documentUrl: documentUrl,
     status: status,
+  );
+
+  Future<void> updateNauticalLicenseStatus({
+    required String uid,
+    required String status,
+    String? rejectionReason,
+  }) => _userService.updateNauticalLicenseStatus(
+    uid: uid,
+    status: status,
+    rejectionReason: rejectionReason,
   );
 }

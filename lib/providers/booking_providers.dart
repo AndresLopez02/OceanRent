@@ -180,6 +180,21 @@ class BookingNotifier extends ChangeNotifier {
     }
   }
 
+  Future<bool> releaseDeposit(String bookingId) async {
+    _setLoading(true);
+    _errorMessage = null;
+
+    try {
+      await _bookingRepository.releaseDeposit(bookingId);
+      return true;
+    } catch (e) {
+      _errorMessage = _cleanErrorMessage(e);
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<bool> createMaintenanceBlock({
     required String boatId,
     required String createdBy,

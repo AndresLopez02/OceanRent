@@ -39,15 +39,8 @@ class FilterDrawer extends StatelessWidget {
 
   String _formatCategory(String category) {
     if (category.isEmpty) return category;
-
-    if (category == 'todos') {
-      return 'Todos';
-    }
-
-    if (category == 'jetski') {
-      return 'Jet ski';
-    }
-
+    if (category == 'todos') return 'Todos';
+    if (category == 'jetski') return 'Jet ski';
     return category[0].toUpperCase() + category.substring(1);
   }
 
@@ -106,8 +99,7 @@ class FilterDrawer extends StatelessWidget {
               const SizedBox(height: AppTheme.spacing8),
               const Divider(),
               const SizedBox(height: AppTheme.spacing16),
-
-              Text('Categoría', style: _sectionTitleStyle(context)),
+              Text('Categoria', style: _sectionTitleStyle(context)),
               const SizedBox(height: AppTheme.spacing8),
               Wrap(
                 spacing: AppTheme.spacing8,
@@ -139,10 +131,8 @@ class FilterDrawer extends StatelessWidget {
                   );
                 }).toList(),
               ),
-
               _sectionSpacing(),
-
-              Text('Ubicación', style: _sectionTitleStyle(context)),
+              Text('Ubicacion', style: _sectionTitleStyle(context)),
               const SizedBox(height: AppTheme.spacing8),
               if (ports.isEmpty)
                 Text(
@@ -187,9 +177,7 @@ class FilterDrawer extends StatelessWidget {
                     );
                   }).toList(),
                 ),
-
               _sectionSpacing(),
-
               SwitchListTile.adaptive(
                 contentPadding: EdgeInsets.zero,
                 title: Text(
@@ -197,7 +185,7 @@ class FilterDrawer extends StatelessWidget {
                   style: _sectionTitleStyle(context),
                 ),
                 subtitle: Text(
-                  'Oculta barcos que no estén activos en el catálogo',
+                  'Oculta barcos que no esten activos en el catalogo',
                   style: AppTheme.bodySmall,
                 ),
                 value: onlyAvailable,
@@ -207,15 +195,13 @@ class FilterDrawer extends StatelessWidget {
                 ),
                 onChanged: onOnlyAvailableChanged,
               ),
-
               _sectionSpacing(),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Precio por día', style: _sectionTitleStyle(context)),
+                  Text('Precio por dia', style: _sectionTitleStyle(context)),
                   Text(
-                    '${rangedPrice.start.toInt()}€ - ${rangedPrice.end.toInt()}€',
+                    '${rangedPrice.start.toInt()} EUR - ${rangedPrice.end.toInt()} EUR',
                     style: _rangeValueStyle(context),
                   ),
                 ],
@@ -230,14 +216,12 @@ class FilterDrawer extends StatelessWidget {
                   alpha: AppTheme.alphaOverlayLight,
                 ),
                 labels: RangeLabels(
-                  '${rangedPrice.start.toInt()}€',
-                  '${rangedPrice.end.toInt()}€',
+                  '${rangedPrice.start.toInt()} EUR',
+                  '${rangedPrice.end.toInt()} EUR',
                 ),
                 onChanged: onPriceChanged,
               ),
-
               _sectionSpacing(),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -263,9 +247,7 @@ class FilterDrawer extends StatelessWidget {
                 ),
                 onChanged: onCapacityChanged,
               ),
-
               _sectionSpacing(),
-
               Text('Licencia requerida', style: _sectionTitleStyle(context)),
               const SizedBox(height: AppTheme.spacing8),
               DropdownButtonFormField<String?>(
@@ -291,11 +273,11 @@ class FilterDrawer extends StatelessWidget {
                   DropdownMenuItem(value: 'none', child: Text('Sin licencia')),
                   DropdownMenuItem(
                     value: 'pnb',
-                    child: Text('PNB — Patrón de Navegación Básica'),
+                    child: Text('PNB - Patron de Navegacion Basica'),
                   ),
                   DropdownMenuItem(
                     value: 'per',
-                    child: Text('PER — Patrón de Embarcaciones de Recreo'),
+                    child: Text('PER - Patron de Embarcaciones de Recreo'),
                   ),
                 ],
                 onChanged: onLicenseChanged,

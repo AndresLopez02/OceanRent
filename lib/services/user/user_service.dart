@@ -28,6 +28,37 @@ class UserService {
     return UserModel.fromMap(data, uid);
   }
 
+  Stream<List<UserModel>> watchCustomersWithLicenses() {
+    return _firestore.collection('users').snapshots().map((snapshot) {
+      final users = snapshot.docs
+          .map((doc) {
+            final data = Map<String, dynamic>.from(doc.data());
+            data['role'] = data['role'] ?? 'customer';
+            return UserModel.fromMap(data, doc.id);
+          })
+          .where((user) {
+            final license = user.nauticalLicense;
+            return license != null && license.type.toLowerCase() != 'none';
+          })
+          .toList();
+
+      users.sort((a, b) {
+        final statusCompare =
+            _licenseStatusPriority(
+              a.nauticalLicense?.status ?? 'none',
+            ).compareTo(
+              _licenseStatusPriority(b.nauticalLicense?.status ?? 'none'),
+            );
+
+        if (statusCompare != 0) return statusCompare;
+
+        return '${a.name} ${a.surname}'.compareTo('${b.name} ${b.surname}');
+      });
+
+      return users;
+    });
+  }
+
   Future<void> updateProfile({
     required String uid,
     required String name,
@@ -52,8 +83,23 @@ class UserService {
       'nautical_license.type': type,
       'nautical_license.document_url': documentUrl,
       'nautical_license.status': status,
+      'nautical_license.rejection_reason': FieldValue.delete(),
       'updated_at': FieldValue.serverTimestamp(),
     });
+  }
+
+  Future<void> updateNauticalLicenseStatus({
+    required String uid,
+    required String status,
+    String? rejectionReason,
+  }) {
+    final data = <String, dynamic>{
+      'nautical_license.status': status,
+      'nautical_license.rejection_reason': rejectionReason,
+      'updated_at': FieldValue.serverTimestamp(),
+    };
+
+    return _firestore.collection('users').doc(uid).update(data);
   }
 
   Future<DocumentReference<Map<String, dynamic>>> _profileDocumentRef(
@@ -67,5 +113,14 @@ class UserService {
     }
 
     return _firestore.collection('users').doc(uid);
+  }
+
+  int _licenseStatusPriority(String status) {
+    return switch (status) {
+      NauticalLicenseStatus.pending => 0,
+      NauticalLicenseStatus.rejected => 1,
+      NauticalLicenseStatus.verified => 2,
+      _ => 3,
+    };
   }
 }

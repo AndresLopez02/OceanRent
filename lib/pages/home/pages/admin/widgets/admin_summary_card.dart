@@ -7,6 +7,7 @@ class AdminSummaryCard extends StatelessWidget {
   final String subtitle;
   final IconData icon;
   final Color color;
+  final VoidCallback? onTap;
 
   const AdminSummaryCard({
     super.key,
@@ -15,11 +16,12 @@ class AdminSummaryCard extends StatelessWidget {
     required this.subtitle,
     required this.icon,
     required this.color,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final card = Container(
       padding: AppTheme.adminWidgetCardPadding,
       decoration: AppTheme.adminCardDecoration(),
       child: Row(
@@ -71,6 +73,14 @@ class AdminSummaryCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    if (onTap == null) return card;
+
+    return InkWell(
+      borderRadius: AppTheme.borderRadiusCard,
+      onTap: onTap,
+      child: card,
     );
   }
 }

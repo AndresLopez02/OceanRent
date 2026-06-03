@@ -10,3 +10,15 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
   final storageService = ref.watch(firebaseStorageServiceProvider);
   return UserRepository(userService, storageService);
 });
+
+final userByIdProvider = FutureProvider.autoDispose.family((
+  ref,
+  String uid,
+) async {
+  if (uid.trim().isEmpty) return null;
+  return ref.watch(userRepositoryProvider).getUser(uid);
+});
+
+final customersWithLicensesProvider = StreamProvider.autoDispose((ref) {
+  return ref.watch(userRepositoryProvider).watchCustomersWithLicenses();
+});

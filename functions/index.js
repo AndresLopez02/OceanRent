@@ -1,5 +1,8 @@
 const { setGlobalOptions } = require("firebase-functions");
-const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const {
+  onDocumentUpdated,
+  onDocumentWritten,
+} = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
@@ -128,6 +131,22 @@ exports.sendBookingReminderNotification = onSchedule(
   },
 );
 
+exports.syncBoatRatingOnReviewWrite = onDocumentWritten(
+  "reviews/{reviewId}",
+  async (event) => {
+    const beforeData = event.data.before.exists
+      ? event.data.before.data()
+      : null;
+    const afterData = event.data.after.exists ? event.data.after.data() : null;
+
+    const boatIds = new Set();
+    if (beforeData?.boat_id) boatIds.add(beforeData.boat_id);
+    if (afterData?.boat_id) boatIds.add(afterData.boat_id);
+
+    await Promise.all([...boatIds].map(syncBoatRating));
+  },
+);
+
 async function sendBookingNotification({
   bookingId,
   bookingData,
@@ -230,4 +249,50 @@ async function getBoatName(boatId) {
   const boatData = boatSnapshot.data();
 
   return boatData.name || "";
+}
+
+async function syncBoatRating(boatId) {
+  if (!boatId) {
+    return;
+  }
+
+  const boatRef = admin.firestore().collection("boats").doc(boatId);
+  const boatSnapshot = await boatRef.get();
+
+  if (!boatSnapshot.exists) {
+    logger.warn("No se puede sincronizar rating: el barco no existe.", {
+      boatId,
+    });
+    return;
+  }
+
+  const reviewsSnapshot = await admin
+    .firestore()
+    .collection("reviews")
+    .where("boat_id", "==", boatId)
+    .get();
+
+  let ratingCount = 0;
+  let ratingTotal = 0;
+
+  reviewsSnapshot.forEach((reviewDocument) => {
+    const rating = Number(reviewDocument.data().rating || 0);
+    if (Number.isFinite(rating) && rating >= 1 && rating <= 5) {
+      ratingCount += 1;
+      ratingTotal += rating;
+    }
+  });
+
+  const ratingAvg = ratingCount === 0 ? 0 : ratingTotal / ratingCount;
+
+  await boatRef.update({
+    rating_avg: ratingAvg,
+    rating_count: ratingCount,
+  });
+
+  logger.info("Rating de barco sincronizado.", {
+    boatId,
+    ratingAvg,
+    ratingCount,
+  });
 }
