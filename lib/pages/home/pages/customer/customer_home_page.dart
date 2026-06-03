@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/boat_list_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_bookings_page.dart';
+import 'package:ocean_rent/pages/home/pages/customer/pages/customer_chats_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_map_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_profile_screen.dart';
 import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
@@ -51,7 +52,7 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
     final pages = <Widget>[
       BoatListPage(categoriasIniciales: widget.initialCategories),
       const CustomerMapPage(),
-      const _ChatPlaceholder(),
+      const CustomerChatsPage(),
       const CustomerBookingsPage(),
       isAnonymous
           ? const Center(child: Text('Inicia sesion para ver tu perfil'))
@@ -113,49 +114,6 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
               label: 'Perfil',
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ChatPlaceholder extends StatelessWidget {
-  const _ChatPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: AppTheme.screenPadding,
-        child: Container(
-          padding: AppTheme.cardPadding,
-          decoration: AppTheme.cardDecoration(
-            border: Border.all(
-              color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft),
-            ),
-            boxShadow: AppTheme.softShadow(alpha: AppTheme.alphaUltraSoft),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.chat_outlined,
-                color: AppTheme.oceanBlue,
-                size: AppTheme.emptyStateIconSize,
-              ),
-              const SizedBox(height: AppTheme.spacing16),
-              Text(
-                'Chat',
-                style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy),
-              ),
-              const SizedBox(height: AppTheme.spacing8),
-              Text(
-                'Esta seccion se mantiene preparada para la mensajeria.',
-                textAlign: TextAlign.center,
-                style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted),
-              ),
-            ],
-          ),
         ),
       ),
     );

@@ -206,6 +206,40 @@ service cloud.firestore {
         && booking.data.status == "confirmada";
     }
 
+    function chatBookingData(bookingId) {
+      return get(/databases/$(database)/documents/bookings/$(bookingId)).data;
+    }
+
+    function isChatParticipant(bookingId) {
+      return isSignedIn()
+        && chatBookingData(bookingId).user_id == request.auth.uid;
+    }
+
+    function validChatMessageCreate(bookingId) {
+      let booking = chatBookingData(bookingId);
+      return isSignedIn()
+        && request.resource.data.keys().hasOnly([
+          "sender_id",
+          "sender_role",
+          "text",
+          "created_at"
+        ])
+        && request.resource.data.sender_id == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 1000
+        && request.resource.data.created_at == request.time
+        && booking.status != "cancelada"
+        && (
+          (isAdmin() && request.resource.data.sender_role == "admin")
+          || (
+            request.resource.data.sender_role == "customer"
+            && booking.user_id == request.auth.uid
+            && request.time < booking.end_date + duration.value(1, 'd')
+          )
+        );
+    }
+
     match /boats/{boatId} {
       allow read: if isSignedIn();
       allow write, create, delete: if isAdmin();
@@ -238,6 +272,14 @@ service cloud.firestore {
       allow create: if validBookingCreate();
       allow read: if isCustomer() && request.auth.uid == resource.data.user_id;
       allow update: if validCustomerCancellation();
+
+      // Chat en vivo de la reserva. Se activa al solicitarla y permanece
+      // abierto para el cliente antes y durante la fecha de la actividad.
+      match /messages/{messageId} {
+        allow read: if isAdmin() || isChatParticipant(bookingId);
+        allow create: if validChatMessageCreate(bookingId);
+        allow update, delete: if false;
+      }
     }
 
     match /booking_date_locks/{lockId} {

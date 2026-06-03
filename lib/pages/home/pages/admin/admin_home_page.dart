@@ -5,6 +5,7 @@ import 'package:ocean_rent/models/boat_model.dart';
 import 'package:ocean_rent/models/booking_model.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_bookings_page.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_calendar_page.dart';
+import 'package:ocean_rent/pages/home/pages/admin/pages/admin_chats_page.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_deposits_page.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_licenses_page.dart';
 import 'package:ocean_rent/pages/home/pages/admin/pages/admin_profile_screen.dart';
@@ -381,6 +382,18 @@ class _AdminDashboardState extends State<_AdminDashboard> {
             Navigator.of(
               context,
             ).push(MaterialPageRoute(builder: (_) => const AdminReviewsPage()));
+          },
+        ),
+        const SizedBox(height: AppTheme.spacing12),
+        AdminQuickActionCard(
+          title: 'Mensajes',
+          subtitle: 'Chatear con los clientes sobre sus reservas.',
+          icon: Icons.forum_outlined,
+          color: AppTheme.deepNavy,
+          onTap: () {
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const AdminChatsPage()));
           },
         ),
         const SizedBox(height: AppTheme.spacing12),
