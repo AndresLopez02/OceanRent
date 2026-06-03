@@ -214,7 +214,7 @@ class AppTheme {
   static const double radiusInput = 12;
   static const double radiusButton = 14;
   static const double radiusLg = 16;
-  static const double radiusCard = 18;
+  static const double radiusCard = 8;
   static const double radiusBadge = 20;
   static const double radiusHero = 22;
   static const double radiusPill = 999;

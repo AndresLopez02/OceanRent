@@ -27,6 +27,16 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
   String? selectedLicense;
   UserModel? currentUser;
 
+  final List<String> categories = [
+    'todos',
+    'lancha',
+    'semirigida',
+    'velero',
+    'yate',
+    'catamaran',
+    'jetski',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -45,16 +55,6 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
     if (!mounted) return;
     setState(() => currentUser = user);
   }
-
-  final List<String> categories = [
-    'todos',
-    'lancha',
-    'semirigida',
-    'velero',
-    'yate',
-    'catamaran',
-    'jetski',
-  ];
 
   List<BoatModel> filterBoats(List<BoatModel> boats) {
     return boats.where((boat) {
@@ -101,6 +101,100 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
       onlyAvailable = false;
       selectedLicense = null;
     });
+  }
+
+  List<Widget> _buildActiveFilterChips() {
+    final chips = <Widget>[];
+
+    for (final category in selectedCategories.where(
+      (item) => item != 'todos',
+    )) {
+      chips.add(
+        InputChip(
+          avatar: const Icon(
+            Icons.directions_boat_outlined,
+            size: AppTheme.iconSizeSmall,
+          ),
+          label: Text(category),
+          onDeleted: () => setState(() => selectedCategories.remove(category)),
+        ),
+      );
+    }
+
+    for (final port in selectedPorts) {
+      chips.add(
+        InputChip(
+          avatar: const Icon(
+            Icons.location_on_outlined,
+            size: AppTheme.iconSizeSmall,
+          ),
+          label: Text(port),
+          onDeleted: () => setState(() => selectedPorts.remove(port)),
+        ),
+      );
+    }
+
+    if (onlyAvailable) {
+      chips.add(
+        InputChip(
+          avatar: const Icon(
+            Icons.check_circle_outline,
+            size: AppTheme.iconSizeSmall,
+          ),
+          label: const Text('Disponibles'),
+          onDeleted: () => setState(() => onlyAvailable = false),
+        ),
+      );
+    }
+
+    if (selectedLicense != null) {
+      chips.add(
+        InputChip(
+          avatar: const Icon(
+            Icons.badge_outlined,
+            size: AppTheme.iconSizeSmall,
+          ),
+          label: Text(selectedLicense!.toUpperCase()),
+          onDeleted: () => setState(() => selectedLicense = null),
+        ),
+      );
+    }
+
+    if (rangedPrice.start != 0 || rangedPrice.end != 1000) {
+      chips.add(
+        InputChip(
+          avatar: const Icon(
+            Icons.payments_outlined,
+            size: AppTheme.iconSizeSmall,
+          ),
+          label: Text(
+            '${rangedPrice.start.toInt()} EUR - ${rangedPrice.end.toInt()} EUR',
+          ),
+          onDeleted: () => setState(() {
+            rangedPrice = const RangeValues(0, 1000);
+          }),
+        ),
+      );
+    }
+
+    if (rangedCapacity.start != 1 || rangedCapacity.end != 100) {
+      chips.add(
+        InputChip(
+          avatar: const Icon(
+            Icons.people_outline,
+            size: AppTheme.iconSizeSmall,
+          ),
+          label: Text(
+            '${rangedCapacity.start.toInt()} - ${rangedCapacity.end.toInt()} personas',
+          ),
+          onDeleted: () => setState(() {
+            rangedCapacity = const RangeValues(1, 100);
+          }),
+        ),
+      );
+    }
+
+    return chips;
   }
 
   Widget _buildEmptyState({
@@ -167,8 +261,8 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
       builder: (context, box, _) {
         final boats = box.values.toList();
         final filteredBoats = filterBoats(boats);
+        final activeFilterChips = _buildActiveFilterChips();
 
-        // Puertos derivados del caché de Hive: solo se recalculan cuando cambia la caja
         final ports =
             boats
                 .map((boat) => boat.portName.trim())
@@ -209,36 +303,61 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
           body: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Row(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Builder(
-                      builder: (context) => OutlinedButton.icon(
-                        onPressed: () => Scaffold.of(context).openDrawer(),
-                        icon: const Icon(Icons.tune),
-                        label: Text(
-                          activeFiltersCount == 0
-                              ? 'Filtros'
-                              : 'Filtros ($activeFiltersCount)',
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppTheme.deepNavy,
-                          side: BorderSide(color: AppTheme.deepNavy),
-                        ),
-                      ),
-                    ),
-                    if (activeFiltersCount > 0)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Chip(
-                          label: const Text('Filtros activos'),
-                          backgroundColor: AppTheme.oceanBlue.withValues(
-                            alpha: 0.15,
+                    Row(
+                      children: [
+                        Builder(
+                          builder: (context) => OutlinedButton.icon(
+                            onPressed: () => Scaffold.of(context).openDrawer(),
+                            icon: const Icon(Icons.tune),
+                            label: Text(
+                              activeFiltersCount == 0
+                                  ? 'Filtros'
+                                  : 'Filtros ($activeFiltersCount)',
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppTheme.deepNavy,
+                              side: const BorderSide(color: AppTheme.deepNavy),
+                            ),
                           ),
-                          deleteIcon: const Icon(Icons.close, size: 16),
-                          onDeleted: _resetFilters,
+                        ),
+                        const SizedBox(width: AppTheme.spacing10),
+                        Text(
+                          '${filteredBoats.length} de ${boats.length} barcos',
+                          style: AppTheme.bodySmall.copyWith(
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (activeFiltersCount > 0)
+                          IconButton(
+                            tooltip: 'Limpiar filtros',
+                            onPressed: _resetFilters,
+                            icon: const Icon(Icons.restart_alt_rounded),
+                          ),
+                      ],
+                    ),
+                    if (activeFilterChips.isNotEmpty) ...[
+                      const SizedBox(height: AppTheme.spacing10),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: activeFilterChips
+                              .map(
+                                (chip) => Padding(
+                                  padding: const EdgeInsets.only(
+                                    right: AppTheme.spacing8,
+                                  ),
+                                  child: chip,
+                                ),
+                              )
+                              .toList(),
                         ),
                       ),
+                    ],
                   ],
                 ),
               ),
@@ -248,14 +367,14 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
                         icon: Icons.directions_boat_filled_outlined,
                         title: 'No hay barcos disponibles',
                         message:
-                            'Todavía no se han cargado barcos en el catálogo de Ocean Rent.',
+                            'Todavia no se han cargado barcos en el catalogo de Ocean Rent.',
                       )
                     : filteredBoats.isEmpty
                     ? _buildEmptyState(
                         icon: Icons.filter_alt_off_rounded,
                         title: 'No hay barcos con esos filtros',
                         message:
-                            'Prueba a cambiar la categoría, el puerto, la licencia o el rango de precio.',
+                            'Prueba a cambiar la categoria, el puerto, la licencia o el rango de precio.',
                         onReset: _resetFilters,
                       )
                     : ListView.builder(

@@ -41,13 +41,15 @@ class BookingModel {
 
   factory BookingModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    final startDate = _dateFromTimestamp(data['start_date'], 'start_date');
+    final endDate = _dateFromTimestamp(data['end_date'], 'end_date');
 
     return BookingModel(
       id: doc.id,
       boatId: data['boat_id'] ?? '',
       userId: data['user_id'] ?? '',
-      startDate: _dateFromTimestamp(data['start_date']),
-      endDate: _dateFromTimestamp(data['end_date']),
+      startDate: startDate,
+      endDate: endDate,
       crewCount: data['crew_count'] ?? 1,
       status: data['status'] ?? statusPending,
       depositAmount: (data['deposit_amount'] ?? 0).toDouble(),
@@ -114,12 +116,12 @@ class BookingModel {
     );
   }
 
-  static DateTime _dateFromTimestamp(dynamic value) {
+  static DateTime _dateFromTimestamp(dynamic value, String fieldName) {
     if (value is Timestamp) {
       return value.toDate();
     }
 
-    return DateTime.now();
+    throw StateError('Reserva $fieldName invalida.');
   }
 
   static DateTime? _nullableDateFromTimestamp(dynamic value) {

@@ -2,6 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum UserRole { admin, customer }
 
+class NauticalLicenseStatus {
+  static const String none = 'none';
+  static const String pending = 'pending';
+  static const String verified = 'verified';
+  static const String rejected = 'rejected';
+
+  const NauticalLicenseStatus._();
+}
+
 class UserModel {
   final String uid;
   final String email;
@@ -64,7 +73,7 @@ class NauticalLicense {
     return NauticalLicense(
       type: map['type'] ?? 'none',
       documentUrl: map['document_url'] ?? '',
-      status: map['status'] ?? 'pending',
+      status: map['status'] ?? NauticalLicenseStatus.none,
       rejectionReason: map['rejection_reason'],
     );
   }

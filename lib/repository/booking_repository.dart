@@ -94,6 +94,11 @@ class BookingRepository {
 
     final bookingRef = _bookingsCollection.doc();
     final selectedDates = _datesInRange(normalizedStartDate, normalizedEndDate);
+    final calculatedDepositAmount = await _calculateDepositAmount(
+      boatId: boatId,
+      selectedDays: selectedDates.length,
+      fallbackDepositAmount: depositAmount,
+    );
 
     return _firestore.runTransaction<BookingModel>((transaction) async {
       final lockRefs = selectedDates
@@ -118,7 +123,7 @@ class BookingRepository {
         endDate: normalizedEndDate,
         crewCount: crewCount,
         status: BookingModel.statusPending,
-        depositAmount: depositAmount,
+        depositAmount: calculatedDepositAmount,
         depositPaymentIntentId: '',
         depositStatus: BookingModel.depositStatusHeld,
         rentalPaymentIntentId: '',
@@ -233,6 +238,17 @@ class BookingRepository {
       }
 
       await _performCancellation(transaction, bookingRef, booking);
+    });
+  }
+
+  Future<void> releaseDeposit(String bookingId) async {
+    if (bookingId.trim().isEmpty) {
+      throw Exception('No se pudo identificar la reserva.');
+    }
+
+    await _bookingsCollection.doc(bookingId).update({
+      'deposit_status': BookingModel.depositStatusReleased,
+      'updated_at': FieldValue.serverTimestamp(),
     });
   }
 
@@ -374,20 +390,23 @@ class BookingRepository {
   Future<Set<DateTime>> getUnavailableDates(String boatId) async {
     final unavailableDates = <DateTime>{};
 
-    final bookingSnapshot = await _bookingsCollection
+    final lockSnapshot = await _bookingDateLocksCollection
         .where('boat_id', isEqualTo: boatId)
         .get();
 
-    for (final doc in bookingSnapshot.docs) {
-      final booking = BookingModel.fromFirestore(doc);
+    for (final doc in lockSnapshot.docs) {
+      final data = doc.data();
+      final status = data['status'];
 
-      if (!_activeBookingStatuses.contains(booking.status)) {
+      if (!_activeBookingStatuses.contains(status)) {
         continue;
       }
 
-      unavailableDates.addAll(
-        _datesInRange(booking.startDate, booking.endDate),
-      );
+      final date = _dateFromTimestamp(data['date']);
+
+      if (date != null) {
+        unavailableDates.add(date);
+      }
     }
 
     final maintenanceSnapshot = await _maintenanceBlocksCollection
@@ -415,22 +434,29 @@ class BookingRepository {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    final snapshot = await _bookingsCollection
+    final snapshot = await _bookingDateLocksCollection
         .where('boat_id', isEqualTo: boatId)
         .get();
 
     for (final doc in snapshot.docs) {
-      final booking = BookingModel.fromFirestore(doc);
+      final data = doc.data();
+      final status = data['status'];
 
-      if (!_activeBookingStatuses.contains(booking.status)) {
+      if (!_activeBookingStatuses.contains(status)) {
+        continue;
+      }
+
+      final lockedDate = _dateFromTimestamp(data['date']);
+
+      if (lockedDate == null) {
         continue;
       }
 
       if (_rangesOverlap(
         startA: startDate,
         endA: endDate,
-        startB: booking.startDate,
-        endB: booking.endDate,
+        startB: lockedDate,
+        endB: lockedDate,
       )) {
         return true;
       }
@@ -500,6 +526,32 @@ class BookingRepository {
 
   DateTime _startOfDay(DateTime date) {
     return DateTime(date.year, date.month, date.day);
+  }
+
+  Future<double> _calculateDepositAmount({
+    required String boatId,
+    required int selectedDays,
+    required double fallbackDepositAmount,
+  }) async {
+    final boatSnapshot = await _firestore.collection('boats').doc(boatId).get();
+    final boatData = boatSnapshot.data();
+    final pricePerDay = (boatData?['price_per_day'] as num?)?.toDouble();
+
+    if (pricePerDay == null || pricePerDay <= 0 || selectedDays <= 0) {
+      if (fallbackDepositAmount > 0) {
+        return fallbackDepositAmount;
+      }
+
+      throw Exception('No se pudo calcular la fianza de la reserva.');
+    }
+
+    final depositAmount = pricePerDay * selectedDays * 0.10;
+
+    if (depositAmount <= 0) {
+      return fallbackDepositAmount;
+    }
+
+    return double.parse(depositAmount.toStringAsFixed(2));
   }
 
   DateTime? _dateFromTimestamp(dynamic value) {

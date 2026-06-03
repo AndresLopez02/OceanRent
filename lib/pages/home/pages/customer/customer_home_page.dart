@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/boat_list_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_bookings_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_map_page.dart';
@@ -15,12 +16,13 @@ class CustomerHomePage extends ConsumerStatefulWidget {
 
   const CustomerHomePage({super.key, this.initialCategories = const []});
 
-  // Esta página se ha creado para los usuarios regulares que tengan solo el rol de cliente u anónimos
   @override
   ConsumerState<CustomerHomePage> createState() => _CustomerHomePageState();
 }
 
 class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
+  int selectedIndex = 0;
+
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
     await ref.read(authNotifierProvider).signOut();
     ref.invalidate(bookingsStreamProvider);
@@ -42,35 +44,33 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
     setState(() => selectedIndex = index);
   }
 
-  int selectedIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authNotifierProvider).currentUser;
     final isAnonymous = user == null;
-    final List<Widget> pages = [
+    final pages = <Widget>[
       BoatListPage(categoriasIniciales: widget.initialCategories),
-      // Mapa implementado en el proyecto
       const CustomerMapPage(),
-      const Center(child: Text('Chat')),
-      // Posible implementación de un chat para hablar con el admin del barco
+      const _ChatPlaceholder(),
       const CustomerBookingsPage(),
       isAnonymous
-          ? const Center(child: Text('Inicia sesión para ver tu perfil'))
+          ? const Center(child: Text('Inicia sesion para ver tu perfil'))
           : const CustomerProfileScreen(),
     ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ocean Rent'),
         actions: [
           if (!isAnonymous)
             IconButton(
+              tooltip: 'Cerrar sesion',
               icon: const Icon(Icons.logout),
               onPressed: () {
                 mostrarDialogoConfirmacion(
                   context,
-                  titulo: 'Cerrar Sesión',
-                  mensaje: '¿Quieres cerrar sesión?',
+                  titulo: 'Cerrar sesion',
+                  mensaje: 'Quieres cerrar sesion?',
                   onAceptar: () {
                     _logout(context, ref);
                   },
@@ -81,17 +81,8 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
       ),
       body: pages[selectedIndex],
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.4),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+        decoration: AppTheme.bottomNavigationDecoration,
         child: NavigationBar(
-          shadowColor: Colors.black.withValues(alpha: 0.2),
           selectedIndex: selectedIndex,
           onDestinationSelected: (index) =>
               _onDestinationSelected(index, isAnonymous),
@@ -122,6 +113,49 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
               label: 'Perfil',
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatPlaceholder extends StatelessWidget {
+  const _ChatPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: AppTheme.screenPadding,
+        child: Container(
+          padding: AppTheme.cardPadding,
+          decoration: AppTheme.cardDecoration(
+            border: Border.all(
+              color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft),
+            ),
+            boxShadow: AppTheme.softShadow(alpha: AppTheme.alphaUltraSoft),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.chat_outlined,
+                color: AppTheme.oceanBlue,
+                size: AppTheme.emptyStateIconSize,
+              ),
+              const SizedBox(height: AppTheme.spacing16),
+              Text(
+                'Chat',
+                style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy),
+              ),
+              const SizedBox(height: AppTheme.spacing8),
+              Text(
+                'Esta seccion se mantiene preparada para la mensajeria.',
+                textAlign: TextAlign.center,
+                style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted),
+              ),
+            ],
+          ),
         ),
       ),
     );

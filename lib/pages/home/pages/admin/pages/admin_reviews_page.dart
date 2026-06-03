@@ -4,6 +4,7 @@ import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/review_model.dart';
 import 'package:ocean_rent/providers/boat_providers.dart';
 import 'package:ocean_rent/providers/review_providers.dart';
+import 'package:ocean_rent/providers/user_providers.dart';
 
 class AdminReviewsPage extends ConsumerWidget {
   const AdminReviewsPage({super.key});
@@ -176,6 +177,14 @@ class _AdminReviewCardState extends ConsumerState<_AdminReviewCard> {
   Widget build(BuildContext context) {
     final reviewNotifier = ref.watch(reviewNotifierProvider);
     final hasReply = widget.review.adminReply.trim().isNotEmpty;
+    final userAsync = ref.watch(userByIdProvider(widget.review.userId));
+    final reviewerName = userAsync.maybeWhen(
+      data: (user) {
+        final fullName = '${user?.name ?? ''} ${user?.surname ?? ''}'.trim();
+        return fullName.isEmpty ? 'Cliente' : fullName;
+      },
+      orElse: () => 'Cliente',
+    );
 
     return Container(
       padding: AppTheme.compactCardPadding,
@@ -207,6 +216,16 @@ class _AdminReviewCardState extends ConsumerState<_AdminReviewCard> {
                       style: AppTheme.titleMedium.copyWith(
                         color: AppTheme.deepNavy,
                         fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: AppTheme.spacing2),
+                    Text(
+                      reviewerName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTheme.bodySmall.copyWith(
+                        color: AppTheme.deepNavy,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: AppTheme.spacing2),

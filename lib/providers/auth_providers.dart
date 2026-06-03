@@ -59,7 +59,6 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
-  // Implementación de inicio de sesión con correo electrónico y contraseña
   Future<bool> signInWithEmailAndPassword({
     required String email,
     required String password,
@@ -77,14 +76,13 @@ class AuthNotifier extends ChangeNotifier {
       _errorMessage = _mapFirebaseError(e);
       return false;
     } catch (_) {
-      _errorMessage = 'Ha ocurrido un error inesperado al iniciar sesión.';
+      _errorMessage = 'Ha ocurrido un error inesperado al iniciar sesion.';
       return false;
     } finally {
       _setLoading(false);
     }
   }
 
-  // Implementación de registro de usuario con correo electrónico y contraseña
   Future<bool> registerWithEmailAndPassword({
     required String email,
     required String password,
@@ -115,7 +113,6 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
-  // Implementación de restablecimiento de contraseña
   Future<bool> sendPasswordResetEmail({required String email}) async {
     _setLoading(true);
     _errorMessage = null;
@@ -127,14 +124,13 @@ class AuthNotifier extends ChangeNotifier {
       _errorMessage = _mapFirebaseError(e);
       return false;
     } catch (_) {
-      _errorMessage = 'No se pudo enviar el correo de recuperación.';
+      _errorMessage = 'No se pudo enviar el correo de recuperacion.';
       return false;
     } finally {
       _setLoading(false);
     }
   }
 
-  // Implementación de inicio de sesión con Google, creando un perfil si es la primera vez
   Future<bool> signInWithGoogle() async {
     _setLoading(true);
     _errorMessage = null;
@@ -146,7 +142,7 @@ class AuthNotifier extends ChangeNotifier {
       _errorMessage = _mapFirebaseError(e);
       return false;
     } catch (_) {
-      _errorMessage = 'No se pudo iniciar sesión con Google.';
+      _errorMessage = 'No se pudo iniciar sesion con Google.';
       return false;
     } finally {
       _setLoading(false);
@@ -159,7 +155,7 @@ class AuthNotifier extends ChangeNotifier {
       await _authRepository.signOut();
       _currentUser = null;
     } catch (_) {
-      _errorMessage = 'No se pudo cerrar la sesión.';
+      _errorMessage = 'No se pudo cerrar la sesion.';
     } finally {
       _setLoading(false);
     }
@@ -172,16 +168,16 @@ class AuthNotifier extends ChangeNotifier {
 
   String _mapFirebaseError(FirebaseAuthException e) {
     return switch (e.code) {
-      'invalid-email' => 'El correo electrónico no es válido.',
-      'missing-email' => 'Introduce un correo electrónico.',
+      'invalid-email' => 'El correo electronico no es valido.',
+      'missing-email' => 'Introduce un correo electronico.',
       'user-not-found' ||
       'invalid-credential' ||
-      'wrong-password' => 'Correo o contraseña incorrectos.',
-      'email-already-in-use' => 'Ese correo ya está registrado.',
-      'weak-password' => 'La contraseña debe tener al menos 6 caracteres.',
-      'too-many-requests' => 'Demasiados intentos. Inténtalo más tarde.',
+      'wrong-password' => 'Correo o contrasena incorrectos.',
+      'email-already-in-use' => 'Ese correo ya esta registrado.',
+      'weak-password' => 'La contrasena debe tener al menos 6 caracteres.',
+      'too-many-requests' => 'Demasiados intentos. Intentalo mas tarde.',
       'account-exists-with-different-credential' =>
-        'Ya existe una cuenta con ese correo usando otro método.',
+        'Ya existe una cuenta con ese correo usando otro metodo.',
       _ => e.message ?? 'Error de Firebase Auth.',
     };
   }

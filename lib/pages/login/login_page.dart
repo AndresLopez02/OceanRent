@@ -36,8 +36,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (user == null) return;
 
     final destination = switch (user.role) {
-      UserRole.admin => AdminHomePage(),
-      UserRole.customer => CustomerHomePage(),
+      UserRole.admin => const AdminHomePage(),
+      UserRole.customer => const CustomerHomePage(),
     };
 
     Navigator.of(context).pushAndRemoveUntil(
@@ -56,14 +56,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     if (email.isEmpty || password.isEmpty) {
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Rellena correo y contraseña.')),
+        const SnackBar(content: Text('Rellena correo y contrasena.')),
       );
       return;
     }
 
     if (!email.contains('@')) {
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Introduce un correo válido.')),
+        const SnackBar(content: Text('Introduce un correo valido.')),
       );
       return;
     }
@@ -79,7 +79,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     } else {
       final error = ref.read(authNotifierProvider).errorMessage;
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text(error ?? 'No se pudo iniciar sesión.')),
+        SnackBar(content: Text(error ?? 'No se pudo iniciar sesion.')),
       );
     }
   }
@@ -89,7 +89,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     ref.read(authNotifierProvider).clearError();
 
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-
     final success = await ref.read(authNotifierProvider).signInWithGoogle();
 
     if (!mounted) return;
@@ -100,7 +99,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final error = ref.read(authNotifierProvider).errorMessage;
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text(error ?? 'No se pudo iniciar sesión con Google.'),
+          content: Text(error ?? 'No se pudo iniciar sesion con Google.'),
         ),
       );
     }
@@ -120,13 +119,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           shape: const RoundedRectangleBorder(
             borderRadius: AppTheme.borderRadiusCard,
           ),
-          title: Text('Recuperar contraseña', style: AppTheme.titleMedium),
+          title: Text('Recuperar contrasena', style: AppTheme.titleMedium),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Introduce tu correo electrónico y te enviaremos un enlace para restablecer la contraseña.',
+                  'Introduce tu correo y te enviaremos un enlace para restablecer la contrasena.',
                   style: AppTheme.bodySmall.copyWith(
                     color: AppTheme.textMuted,
                     height: AppTheme.lineHeightInfo,
@@ -138,7 +137,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   keyboardType: TextInputType.emailAddress,
                   style: AppTheme.fieldTextStyle,
                   decoration: AppTheme.inputDecoration(
-                    labelText: 'Correo electrónico',
+                    labelText: 'Correo electronico',
                   ).copyWith(hintText: 'ejemplo@correo.com'),
                 ),
               ],
@@ -177,14 +176,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     if (normalizedEmail.isEmpty) {
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Introduce un correo electrónico.')),
+        const SnackBar(content: Text('Introduce un correo electronico.')),
       );
       return;
     }
 
     if (!normalizedEmail.contains('@')) {
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Introduce un correo válido.')),
+        const SnackBar(content: Text('Introduce un correo valido.')),
       );
       return;
     }
@@ -199,12 +198,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     if (!mounted) return;
 
+    scaffoldMessenger.hideCurrentSnackBar();
     if (success) {
-      scaffoldMessenger.hideCurrentSnackBar();
       scaffoldMessenger.showSnackBar(
         const SnackBar(
           content: Text(
-            'Si el email es correcto, te llegará un correo para restablecer la contraseña.',
+            'Si el email es correcto, recibiras un correo para restablecer la contrasena.',
           ),
           behavior: SnackBarBehavior.floating,
           duration: Duration(seconds: 4),
@@ -212,11 +211,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       );
     } else {
       final error = ref.read(authNotifierProvider).errorMessage;
-      scaffoldMessenger.hideCurrentSnackBar();
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text(
-            error ?? 'No se pudo enviar el correo de recuperación.',
+            error ?? 'No se pudo enviar el correo de recuperacion.',
           ),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
@@ -239,12 +237,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final authState = ref.watch(authNotifierProvider);
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.white,
       appBar: AppBar(
         title: const Text('Ocean Rent'),
-        actions: [
-          const Icon(Icons.directions_boat_outlined),
-          const SizedBox(width: AppTheme.spacing20),
+        actions: const [
+          Icon(Icons.directions_boat_outlined),
+          SizedBox(width: AppTheme.spacing20),
         ],
       ),
       body: SafeArea(
@@ -259,38 +257,35 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Container(
-                    padding: AppTheme.authFormCardPadding,
-                    decoration: AppTheme.simpleCardDecoration(
-                      color: AppTheme.background,
-                      radius: AppTheme.radiusMd,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.spacing8,
+                      vertical: AppTheme.spacing20,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Iniciar sesión',
+                          'Iniciar sesion',
                           textAlign: TextAlign.center,
                           style: AppTheme.headlineMedium.copyWith(
-                            color: AppTheme.black,
+                            color: AppTheme.deepNavy,
                             fontSize: AppTheme.responsiveFontSize(
                               context,
                               AppTheme.fontSize20,
                             ),
                           ),
                         ),
-
                         const SizedBox(height: AppTheme.spacing28),
-                        buildLabelTextFields(context, 'Correo Electrónico'),
+                        buildLabelTextFields(context, 'Correo electronico'),
                         const SizedBox(height: AppTheme.spacing8),
                         CustomTextField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          hintText: '',
+                          hintText: 'usuario@correo.com',
                           obscureText: false,
                         ),
-
                         const SizedBox(height: AppTheme.spacing22),
-                        buildLabelTextFields(context, 'Contraseña'),
+                        buildLabelTextFields(context, 'Contrasena'),
                         const SizedBox(height: AppTheme.spacing8),
                         CustomTextField(
                           controller: _passwordController,
@@ -298,6 +293,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           hintText: '',
                           onSubmitted: (_) => _login(),
                           suffixIcon: IconButton(
+                            tooltip: _showPassword
+                                ? 'Ocultar contrasena'
+                                : 'Mostrar contrasena',
                             onPressed: () {
                               setState(() => _showPassword = !_showPassword);
                             },
@@ -309,9 +307,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: AppTheme.spacing18),
-
                         SizedBox(
                           height: AppTheme.authButtonHeight,
                           child: ElevatedButton(
@@ -334,9 +330,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   ),
                           ),
                         ),
-
                         const SizedBox(height: AppTheme.spacing10),
-
                         Align(
                           alignment: Alignment.centerLeft,
                           child: TextButton(
@@ -345,7 +339,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 : _showResetPasswordDialog,
                             style: AppTheme.compactTextButtonStyle,
                             child: Text(
-                              '¿Has olvidado tu contraseña?',
+                              'Has olvidado tu contrasena?',
                               style: AppTheme.bodySmall.copyWith(
                                 color: AppTheme.oceanBlue,
                                 fontSize: AppTheme.fontSize12,
@@ -354,7 +348,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: AppTheme.spacing14),
                         Row(
                           children: [
@@ -382,9 +375,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: AppTheme.spacing18),
-
                         SizedBox(
                           height: AppTheme.socialButtonHeight,
                           child: OutlinedButton(
@@ -397,21 +388,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               children: [
                                 _buildGoogleLogo(),
                                 const SizedBox(width: AppTheme.spacing10),
-                                Text(
-                                  'Continuar con Google',
-                                  style: AppTheme.bodyMedium.copyWith(
-                                    color: AppTheme.black87,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: AppTheme.fontSize14,
+                                Flexible(
+                                  child: Text(
+                                    'Continuar con Google',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTheme.bodyMedium.copyWith(
+                                      color: AppTheme.black87,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: AppTheme.fontSize14,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-
                         const SizedBox(height: AppTheme.spacing18),
-
                         TextButton(
                           onPressed: authState.isLoading
                               ? null
@@ -423,7 +416,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   );
                                 },
                           child: Text(
-                            '¿No tienes cuenta? Regístrate',
+                            'No tienes cuenta? Registrate',
                             style: AppTheme.bodyMedium.copyWith(
                               color: AppTheme.oceanBlue,
                               fontWeight: FontWeight.w600,
@@ -432,7 +425,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ),
                         ),
-
                         if (authState.errorMessage != null) ...[
                           const SizedBox(height: AppTheme.spacing12),
                           Text(
