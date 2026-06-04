@@ -25,4 +25,11 @@ class ChatRepository {
       text: text,
     );
   }
+
+  Future<void> closeChat({
+    required String bookingId,
+    required String closedBy,
+  }) {
+    return _chatService.closeChat(bookingId: bookingId, closedBy: closedBy);
+  }
 }

@@ -76,7 +76,7 @@ class AuthNotifier extends ChangeNotifier {
       _errorMessage = _mapFirebaseError(e);
       return false;
     } catch (_) {
-      _errorMessage = 'Ha ocurrido un error inesperado al iniciar sesion.';
+      _errorMessage = 'Ha ocurrido un error inesperado al iniciar sesión.';
       return false;
     } finally {
       _setLoading(false);
@@ -144,7 +144,7 @@ class AuthNotifier extends ChangeNotifier {
       _errorMessage = _mapFirebaseError(e);
       return false;
     } catch (_) {
-      _errorMessage = 'No se pudo iniciar sesion con Google.';
+      _errorMessage = 'No se pudo iniciar sesión con Google.';
       return false;
     } finally {
       _setLoading(false);
@@ -157,7 +157,7 @@ class AuthNotifier extends ChangeNotifier {
       await _authRepository.signOut();
       _currentUser = null;
     } catch (_) {
-      _errorMessage = 'No se pudo cerrar la sesion.';
+      _errorMessage = 'No se pudo cerrar la sesión.';
     } finally {
       _setLoading(false);
     }
@@ -170,13 +170,13 @@ class AuthNotifier extends ChangeNotifier {
 
   String _mapFirebaseError(FirebaseAuthException e) {
     return switch (e.code) {
-      'invalid-email' => 'El correo electronico no es valido.',
-      'missing-email' => 'Introduce un correo electronico.',
+      'invalid-email' => 'El correo electrónico no es válido.',
+      'missing-email' => 'Introduce un correo electrónico.',
       'user-not-found' ||
       'invalid-credential' ||
-      'wrong-password' => 'Correo o contrasena incorrectos.',
+      'wrong-password' => 'Correo o contraseña incorrectos.',
       'email-already-in-use' => 'Ese correo ya esta registrado.',
-      'weak-password' => 'La contrasena debe tener al menos 6 caracteres.',
+      'weak-password' => 'La contraseña debe tener al menos 6 caracteres.',
       'too-many-requests' => 'Demasiados intentos. Intentalo mas tarde.',
       'account-exists-with-different-credential' =>
         'Ya existe una cuenta con ese correo usando otro metodo.',

@@ -33,11 +33,11 @@ class AdminChatsPage extends ConsumerWidget {
               loading: () => const Center(
                 child: CircularProgressIndicator(color: AppTheme.oceanBlue),
               ),
-              error: (error, _) => Center(
+              error: (_, _) => Center(
                 child: Padding(
                   padding: AppTheme.screenPadding,
                   child: Text(
-                    'Error cargando los chats:\n$error',
+                    'No se pudieron cargar los chats.',
                     textAlign: TextAlign.center,
                     style: AppTheme.bodyLarge.copyWith(
                       color: AppTheme.alertRed,

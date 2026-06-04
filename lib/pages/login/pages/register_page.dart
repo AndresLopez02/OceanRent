@@ -287,13 +287,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                         const SizedBox(height: AppTheme.spacing22),
 
-                        buildLabelTextFields(context, 'Titulacion nautica'),
+                        buildLabelTextFields(context, 'Titulación náutica'),
                         const SizedBox(height: AppTheme.spacing8),
                         DropdownButtonFormField<String>(
                           initialValue: _selectedLicenseType,
                           isExpanded: true,
                           decoration: AppTheme.inputDecoration(
-                            labelText: 'Titulacion',
+                            labelText: 'Titulación',
                             icon: Icons.anchor_outlined,
                           ),
                           style: AppTheme.fieldTextStyle,

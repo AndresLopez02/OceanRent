@@ -347,7 +347,7 @@ class _EmptyCustomerBookingsState extends StatelessWidget {
               ),
               const SizedBox(height: AppTheme.spacing8),
               Text(
-                'Cuando reserves un barco podras consultar aqui el estado.',
+                'Cuando reserves un barco podrás consultar aquí el estado.',
                 textAlign: TextAlign.center,
                 style: AppTheme.bodySmall.copyWith(
                   color: AppTheme.textMuted,

@@ -7,7 +7,8 @@ class ChatAvailability {
   }
 
   static bool canSendMessages(BookingModel booking, {DateTime? now}) {
-    if (booking.status == BookingModel.statusCancelled) {
+    if (booking.status == BookingModel.statusCancelled ||
+        booking.isChatClosed) {
       return false;
     }
 

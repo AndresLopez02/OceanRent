@@ -695,8 +695,8 @@ class _BoatReviewsPreview extends ConsumerWidget {
               reviews.length;
     final hasReviews = reviewCount > 0;
     final ratingText = hasReviews
-        ? '${ratingAvg.toStringAsFixed(1)} - $reviewCount resena${reviewCount == 1 ? '' : 's'}'
-        : 'Sin resenas todavia';
+        ? '${ratingAvg.toStringAsFixed(1)} - $reviewCount reseña${reviewCount == 1 ? '' : 's'}'
+        : 'Sin reseñas todavía';
 
     return Container(
       padding: AppTheme.compactCardPadding,
@@ -726,7 +726,7 @@ class _BoatReviewsPreview extends ConsumerWidget {
           Text(
             hasReviews
                 ? 'Consulta las valoraciones reales de otros clientes.'
-                : 'Este barco todavia no tiene valoraciones de clientes.',
+                : 'Este barco todavía no tiene valoraciones de clientes.',
             style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted),
           ),
           const SizedBox(height: AppTheme.spacing12),
@@ -742,7 +742,7 @@ class _BoatReviewsPreview extends ConsumerWidget {
                 );
               },
               child: Text(
-                hasReviews ? 'Ver resenas' : 'Ver seccion de resenas',
+                hasReviews ? 'Ver reseñas' : 'Ver sección de reseñas',
               ),
             ),
           ),

@@ -29,7 +29,7 @@ final chatMessagesProvider = StreamProvider.autoDispose
           );
     });
 
-/// Último mensaje de una reserva, para mostrar la vista previa en la lista.
+/// Ultimo mensaje de una reserva, para mostrar la vista previa en la lista.
 final lastChatMessageProvider = StreamProvider.autoDispose
     .family<ChatMessageModel?, String>((ref, bookingId) {
       final authState = ref.watch(authStateChangesProvider);
@@ -60,9 +60,12 @@ class ChatNotifier extends ChangeNotifier {
   final ChatRepository _chatRepository;
 
   bool _isSending = false;
+  bool _isClosing = false;
   String? _errorMessage;
 
   bool get isSending => _isSending;
+
+  bool get isClosing => _isClosing;
 
   String? get errorMessage => _errorMessage;
 
@@ -79,6 +82,19 @@ class ChatNotifier extends ChangeNotifier {
   }) async {
     if (_isSending) return false;
 
+    final trimmedText = text.trim();
+    if (trimmedText.isEmpty) {
+      _errorMessage = 'El mensaje no puede estar vacío.';
+      notifyListeners();
+      return false;
+    }
+
+    if (trimmedText.length > 500) {
+      _errorMessage = 'El mensaje no puede superar los 500 caracteres.';
+      notifyListeners();
+      return false;
+    }
+
     _isSending = true;
     _errorMessage = null;
     notifyListeners();
@@ -88,15 +104,47 @@ class ChatNotifier extends ChangeNotifier {
         bookingId: bookingId,
         senderId: senderId,
         senderRole: senderRole,
-        text: text,
+        text: trimmedText,
       );
       return true;
     } catch (e) {
-      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      _errorMessage = _cleanErrorMessage(e);
       return false;
     } finally {
       _isSending = false;
       notifyListeners();
     }
+  }
+
+  Future<bool> closeChat({
+    required String bookingId,
+    required String closedBy,
+  }) async {
+    if (_isClosing) return false;
+
+    _isClosing = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _chatRepository.closeChat(bookingId: bookingId, closedBy: closedBy);
+      return true;
+    } catch (e) {
+      _errorMessage = _cleanErrorMessage(e);
+      return false;
+    } finally {
+      _isClosing = false;
+      notifyListeners();
+    }
+  }
+
+  String _cleanErrorMessage(Object error) {
+    final message = error.toString().replaceFirst('Exception: ', '').trim();
+
+    if (message.contains('permission-denied')) {
+      return 'No tienes permisos para realizar esta acción.';
+    }
+
+    return message.isEmpty ? 'No se pudo completar la operación.' : message;
   }
 }

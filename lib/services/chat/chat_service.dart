@@ -55,11 +55,35 @@ class ChatService {
       throw Exception('El mensaje no puede estar vacío.');
     }
 
+    if (trimmedText.length > 500) {
+      throw Exception('El mensaje no puede superar los 500 caracteres.');
+    }
+
     await _messagesCollection(bookingId).add({
       'sender_id': senderId,
       'sender_role': senderRole,
       'text': trimmedText,
       'created_at': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> closeChat({
+    required String bookingId,
+    required String closedBy,
+  }) async {
+    if (bookingId.trim().isEmpty) {
+      throw Exception('No se pudo identificar la conversación.');
+    }
+
+    if (closedBy.trim().isEmpty) {
+      throw Exception('No se pudo identificar al usuario.');
+    }
+
+    await _firestore.collection('bookings').doc(bookingId).update({
+      'chat_status': 'closed',
+      'chat_closed_at': FieldValue.serverTimestamp(),
+      'chat_closed_by': closedBy,
+      'updated_at': FieldValue.serverTimestamp(),
     });
   }
 }

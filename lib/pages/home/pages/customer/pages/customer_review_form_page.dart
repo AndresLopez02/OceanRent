@@ -62,7 +62,7 @@ class _CustomerReviewFormPageState
 
     _showSnackBar(
       ref.read(reviewNotifierProvider).errorMessage ??
-          'No se pudo publicar la resena.',
+          'No se pudo publicar la reseña.',
     );
   }
 
@@ -164,7 +164,7 @@ class _CustomerReviewFormPageState
                     )
                   : const Icon(Icons.publish_outlined),
               label: Text(
-                isSaving ? 'Publicando...' : 'Publicar resena',
+                isSaving ? 'Publicando...' : 'Publicar reseña',
                 style: AppTheme.buttonTextStyle.copyWith(
                   color: AppTheme.pearlWhite,
                 ),

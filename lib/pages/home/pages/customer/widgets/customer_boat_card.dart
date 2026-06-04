@@ -137,7 +137,7 @@ class CustomerBoatCard extends StatelessWidget {
                                 alpha: AppTheme.alphaLight,
                               ),
                               child: Text(
-                                '${boat.pricePerDay.toStringAsFixed(0)} EUR/dia',
+                                '${boat.pricePerDay.toStringAsFixed(0)} EUR/día',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTheme.labelMedium.copyWith(

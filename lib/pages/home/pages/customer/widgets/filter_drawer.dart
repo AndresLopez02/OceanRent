@@ -199,7 +199,7 @@ class FilterDrawer extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Precio por dia', style: _sectionTitleStyle(context)),
+                  Text('Precio por día', style: _sectionTitleStyle(context)),
                   Text(
                     '${rangedPrice.start.toInt()} EUR - ${rangedPrice.end.toInt()} EUR',
                     style: _rangeValueStyle(context),

@@ -64,7 +64,7 @@ class ReviewService {
       final reviewSnapshot = await transaction.get(reviewRef);
 
       if (reviewSnapshot.exists) {
-        throw Exception('Ya existe una resena para esta reserva.');
+        throw Exception('Ya existe una reseña para esta reserva.');
       }
 
       final bookingSnapshot = await transaction.get(bookingRef);
@@ -74,7 +74,7 @@ class ReviewService {
           bookingData['user_id'] != review.userId ||
           bookingData['boat_id'] != review.boatId ||
           bookingData['status'] != BookingModel.statusConfirmed) {
-        throw Exception('La reserva no permite crear una resena.');
+        throw Exception('La reserva no permite crear una reseña.');
       }
 
       final endDate = bookingData['end_date'];
@@ -126,13 +126,12 @@ class ReviewService {
     });
   }
 
-  // Prueba
   Future<void> updateAdminReply({
     required String reviewId,
     required String adminReply,
   }) async {
     if (reviewId.trim().isEmpty) {
-      throw Exception('No se pudo identificar la resena.');
+      throw Exception('No se pudo identificar la reseña.');
     }
 
     if (adminReply.trim().isEmpty) {
