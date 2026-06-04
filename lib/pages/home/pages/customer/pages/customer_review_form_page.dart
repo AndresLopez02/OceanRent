@@ -25,7 +25,6 @@ class _CustomerReviewFormPageState
   final TextEditingController _commentController = TextEditingController();
 
   int _selectedRating = 5;
-  bool _isSaving = false;
 
   @override
   void dispose() {
@@ -34,48 +33,50 @@ class _CustomerReviewFormPageState
   }
 
   Future<void> _publishReview() async {
-    if (_isSaving) return;
+    final comment = _commentController.text.trim();
 
-    setState(() {
-      _isSaving = true;
-    });
-
-    try {
-      await ref
-          .read(reviewRepositoryProvider)
-          .createReview(
-            ReviewModel(
-              id: '',
-              boatId: widget.booking.boatId,
-              bookingId: widget.booking.id,
-              userId: widget.userId,
-              rating: _selectedRating,
-              comment: _commentController.text.trim(),
-            ),
-          );
-
-      if (!mounted) return;
-
-      Navigator.pop(context, true);
-    } catch (e) {
-      if (!mounted) return;
-
-      final message = e.toString().replaceFirst('Exception: ', '');
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
+    if (comment.length > 300) {
+      _showSnackBar('El comentario no puede superar los 300 caracteres.');
+      return;
     }
+
+    final success = await ref
+        .read(reviewNotifierProvider)
+        .createReview(
+          ReviewModel(
+            id: '',
+            boatId: widget.booking.boatId,
+            bookingId: widget.booking.id,
+            userId: widget.userId,
+            rating: _selectedRating,
+            comment: comment,
+          ),
+        );
+
+    if (!mounted) return;
+
+    if (success) {
+      Navigator.pop(context, true);
+      return;
+    }
+
+    _showSnackBar(
+      ref.read(reviewNotifierProvider).errorMessage ??
+          'No se pudo publicar la resena.',
+    );
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
+    final reviewNotifier = ref.watch(reviewNotifierProvider);
+    final isSaving = reviewNotifier.isLoading;
+
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(title: const Text('Valorar experiencia')),
@@ -89,7 +90,7 @@ class _CustomerReviewFormPageState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Puntúa tu experiencia',
+                  'Puntua tu experiencia',
                   style: AppTheme.titleMedium.copyWith(
                     color: AppTheme.deepNavy,
                     fontWeight: FontWeight.w800,
@@ -97,7 +98,7 @@ class _CustomerReviewFormPageState
                 ),
                 const SizedBox(height: AppTheme.spacing8),
                 Text(
-                  'Tu valoración ayudará a otros clientes a conocer mejor este barco.',
+                  'Tu valoracion ayudara a otros clientes a conocer mejor este barco. El comentario es opcional.',
                   style: AppTheme.bodyMedium.copyWith(
                     color: AppTheme.textMuted,
                     height: AppTheme.lineHeightRegular,
@@ -110,7 +111,7 @@ class _CustomerReviewFormPageState
                     final starValue = index + 1;
 
                     return IconButton(
-                      onPressed: _isSaving
+                      onPressed: isSaving
                           ? null
                           : () {
                               setState(() {
@@ -130,7 +131,7 @@ class _CustomerReviewFormPageState
                 const SizedBox(height: AppTheme.spacing12),
                 TextField(
                   controller: _commentController,
-                  enabled: !_isSaving,
+                  enabled: !isSaving,
                   maxLength: 300,
                   maxLines: 5,
                   decoration:
@@ -138,7 +139,7 @@ class _CustomerReviewFormPageState
                         labelText: 'Comentario',
                         icon: Icons.rate_review_outlined,
                       ).copyWith(
-                        hintText: 'Cuenta cómo fue tu experiencia',
+                        hintText: 'Cuenta como fue tu experiencia',
                         alignLabelWithHint: true,
                       ),
                 ),
@@ -150,9 +151,9 @@ class _CustomerReviewFormPageState
             width: double.infinity,
             height: AppTheme.buttonHeight,
             child: ElevatedButton.icon(
-              onPressed: _isSaving ? null : _publishReview,
+              onPressed: isSaving ? null : _publishReview,
               style: AppTheme.fullWidthPrimaryButtonStyle,
-              icon: _isSaving
+              icon: isSaving
                   ? const SizedBox(
                       width: AppTheme.loadingSize,
                       height: AppTheme.loadingSize,
@@ -163,7 +164,7 @@ class _CustomerReviewFormPageState
                     )
                   : const Icon(Icons.publish_outlined),
               label: Text(
-                _isSaving ? 'Publicando...' : 'Publicar reseña',
+                isSaving ? 'Publicando...' : 'Publicar resena',
                 style: AppTheme.buttonTextStyle.copyWith(
                   color: AppTheme.pearlWhite,
                 ),

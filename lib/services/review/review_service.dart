@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ocean_rent/models/booking_model.dart';
 import 'package:ocean_rent/models/review_model.dart';
 
 class ReviewService {
@@ -34,6 +35,28 @@ class ReviewService {
   }
 
   Future<void> createReview(ReviewModel review) async {
+    final comment = review.comment.trim();
+
+    if (review.bookingId.trim().isEmpty) {
+      throw Exception('No se pudo identificar la reserva.');
+    }
+
+    if (review.boatId.trim().isEmpty) {
+      throw Exception('No se pudo identificar el barco.');
+    }
+
+    if (review.userId.trim().isEmpty) {
+      throw Exception('No se pudo identificar al cliente.');
+    }
+
+    if (review.rating < 1 || review.rating > 5) {
+      throw Exception('Selecciona una puntuacion entre 1 y 5 estrellas.');
+    }
+
+    if (comment.length > 300) {
+      throw Exception('El comentario no puede superar los 300 caracteres.');
+    }
+
     final reviewRef = _reviewsCollection.doc(review.bookingId);
     final bookingRef = _firestore.collection('bookings').doc(review.bookingId);
 
@@ -50,12 +73,20 @@ class ReviewService {
       if (bookingData == null ||
           bookingData['user_id'] != review.userId ||
           bookingData['boat_id'] != review.boatId ||
-          bookingData['status'] != 'confirmada') {
+          bookingData['status'] != BookingModel.statusConfirmed) {
         throw Exception('La reserva no permite crear una resena.');
       }
 
+      final endDate = bookingData['end_date'];
+
+      if (endDate is! Timestamp || endDate.toDate().isAfter(DateTime.now())) {
+        throw Exception(
+          'Solo puedes valorar una reserva cuando haya finalizado.',
+        );
+      }
+
       transaction.set(reviewRef, {
-        ...review.copyWith(id: review.bookingId).toMap(),
+        ...review.copyWith(id: review.bookingId, comment: comment).toMap(),
         'id': reviewRef.id,
         'created_at': FieldValue.serverTimestamp(),
         'updated_at': FieldValue.serverTimestamp(),
@@ -94,7 +125,8 @@ class ReviewService {
       return reviews;
     });
   }
-// Prueba
+
+  // Prueba
   Future<void> updateAdminReply({
     required String reviewId,
     required String adminReply,

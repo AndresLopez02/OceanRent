@@ -24,7 +24,7 @@ class _AdminBookingsPageState extends ConsumerState<AdminBookingsPage> {
   ) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: AppTheme.surface,
         shape: const RoundedRectangleBorder(
           borderRadius: AppTheme.borderRadiusCard,
@@ -36,18 +36,18 @@ class _AdminBookingsPageState extends ConsumerState<AdminBookingsPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text('Confirmar'),
           ),
         ],
       ),
     );
 
-    if (confirm != true) return;
+    if (confirm != true || !context.mounted) return;
 
     final success = await ref
         .read(bookingNotifierProvider)
@@ -72,7 +72,7 @@ class _AdminBookingsPageState extends ConsumerState<AdminBookingsPage> {
   ) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: AppTheme.surface,
         shape: const RoundedRectangleBorder(
           borderRadius: AppTheme.borderRadiusCard,
@@ -84,11 +84,11 @@ class _AdminBookingsPageState extends ConsumerState<AdminBookingsPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text('Volver'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(
               'Cancelar reserva',
               style: AppTheme.labelMedium.copyWith(
@@ -101,7 +101,7 @@ class _AdminBookingsPageState extends ConsumerState<AdminBookingsPage> {
       ),
     );
 
-    if (confirm != true) return;
+    if (confirm != true || !context.mounted) return;
 
     // El admin usa cancelBookingAsAdmin, sin límite de antelación.
     final success = await ref
@@ -169,16 +169,7 @@ class _AdminBookingsPageState extends ConsumerState<AdminBookingsPage> {
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppTheme.oceanBlue),
         ),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: AppTheme.screenPadding,
-            child: Text(
-              'Error cargando reservas:\n$error',
-              textAlign: TextAlign.center,
-              style: AppTheme.bodyLarge.copyWith(color: AppTheme.alertRed),
-            ),
-          ),
-        ),
+        error: (error, _) => const _BookingsErrorState(),
         data: (bookings) {
           final filteredBookings = _filterBookings(bookings);
 
@@ -215,19 +206,7 @@ class _AdminBookingsPageState extends ConsumerState<AdminBookingsPage> {
               ),
               Expanded(
                 child: filteredBookings.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: AppTheme.screenPadding,
-                          child: Text(
-                            _emptyMessageByFilter(),
-                            textAlign: TextAlign.center,
-                            style: AppTheme.bodyLarge.copyWith(
-                              color: AppTheme.deepNavy,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      )
+                    ? _EmptyBookingsState(message: _emptyMessageByFilter())
                     : ListView.separated(
                         padding: AppTheme.listPadding,
                         itemCount: filteredBookings.length,
@@ -256,6 +235,92 @@ class _AdminBookingsPageState extends ConsumerState<AdminBookingsPage> {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _BookingsErrorState extends StatelessWidget {
+  const _BookingsErrorState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: AppTheme.screenPadding,
+        child: Container(
+          padding: AppTheme.cardPadding,
+          decoration: AppTheme.adminCardDecoration(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.cloud_off_outlined,
+                color: AppTheme.alertRed,
+                size: AppTheme.emptyStateIconSize,
+              ),
+              const SizedBox(height: AppTheme.spacing16),
+              Text(
+                'No se pudieron cargar las reservas',
+                textAlign: TextAlign.center,
+                style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy),
+              ),
+              const SizedBox(height: AppTheme.spacing8),
+              Text(
+                'Revisa tu conexion o intenta de nuevo en unos minutos.',
+                textAlign: TextAlign.center,
+                style: AppTheme.bodySmall.copyWith(
+                  color: AppTheme.textMuted,
+                  height: AppTheme.lineHeightRegular,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyBookingsState extends StatelessWidget {
+  final String message;
+
+  const _EmptyBookingsState({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: AppTheme.screenPadding,
+        child: Container(
+          padding: AppTheme.cardPadding,
+          decoration: AppTheme.adminCardDecoration(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.event_busy_outlined,
+                color: AppTheme.oceanBlue,
+                size: AppTheme.emptyStateIconSize,
+              ),
+              const SizedBox(height: AppTheme.spacing16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: AppTheme.titleMedium.copyWith(color: AppTheme.deepNavy),
+              ),
+              const SizedBox(height: AppTheme.spacing8),
+              Text(
+                'Cuando entren nuevas solicitudes apareceran aqui.',
+                textAlign: TextAlign.center,
+                style: AppTheme.bodySmall.copyWith(
+                  color: AppTheme.textMuted,
+                  height: AppTheme.lineHeightRegular,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

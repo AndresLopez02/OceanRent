@@ -41,9 +41,18 @@ service cloud.firestore {
         && request.resource.data.email is string
         && request.resource.data.name is string
         && request.resource.data.surname is string
-        && request.resource.data.nautical_license.type == "none"
         && request.resource.data.nautical_license.document_url == ""
-        && request.resource.data.nautical_license.status == "verified";
+        && request.resource.data.nautical_license.rejection_reason == ""
+        && (
+          (
+            request.resource.data.nautical_license.type == "none"
+            && request.resource.data.nautical_license.status == "verified"
+          )
+          || (
+            request.resource.data.nautical_license.type in ["pnb", "per"]
+            && request.resource.data.nautical_license.status == "pending"
+          )
+        );
     }
 
     function validCustomerProfileUpdate(userId) {
@@ -199,11 +208,12 @@ service cloud.firestore {
         && request.resource.data.rating >= 1
         && request.resource.data.rating <= 5
         && request.resource.data.comment is string
-        && request.resource.data.comment.size() <= 1000
+        && request.resource.data.comment.size() <= 300
         && request.resource.data.admin_reply == ""
         && booking.data.user_id == request.auth.uid
         && booking.data.boat_id == request.resource.data.boat_id
-        && booking.data.status == "confirmada";
+        && booking.data.status == "confirmada"
+        && request.time >= booking.data.end_date;
     }
 
     function chatBookingData(bookingId) {

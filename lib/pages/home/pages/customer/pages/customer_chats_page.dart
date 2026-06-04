@@ -92,10 +92,7 @@ class CustomerChatsPage extends ConsumerWidget {
               ),
             ),
             if (conversations.isEmpty)
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: _EmptyChats(),
-              )
+              SliverFillRemaining(hasScrollBody: false, child: _EmptyChats())
             else
               SliverPadding(
                 padding: AppTheme.listPadding,
@@ -105,7 +102,8 @@ class CustomerChatsPage extends ConsumerWidget {
                       return const SizedBox(height: AppTheme.spacing12);
                     }
                     final booking = conversations[index ~/ 2];
-                    final boatName = boatNames[booking.boatId] ?? booking.boatId;
+                    final boatName =
+                        boatNames[booking.boatId] ?? booking.boatId;
                     return _ChatConversationCard(
                       booking: booking,
                       boatName: boatName,

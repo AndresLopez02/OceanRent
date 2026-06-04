@@ -39,7 +39,9 @@ class AdminChatsPage extends ConsumerWidget {
                   child: Text(
                     'Error cargando los chats:\n$error',
                     textAlign: TextAlign.center,
-                    style: AppTheme.bodyLarge.copyWith(color: AppTheme.alertRed),
+                    style: AppTheme.bodyLarge.copyWith(
+                      color: AppTheme.alertRed,
+                    ),
                   ),
                 ),
               ),
@@ -120,9 +122,8 @@ class _AdminChatCard extends ConsumerWidget {
     final canSend = ChatAvailability.canSendMessages(booking);
 
     final customerName = userAsync.maybeWhen(
-      data: (user) => user == null
-          ? 'Cliente'
-          : '${user.name} ${user.surname}'.trim(),
+      data: (user) =>
+          user == null ? 'Cliente' : '${user.name} ${user.surname}'.trim(),
       orElse: () => 'Cliente',
     );
 

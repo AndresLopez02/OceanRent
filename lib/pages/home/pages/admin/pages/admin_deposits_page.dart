@@ -4,10 +4,12 @@ import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/booking_model.dart';
 import 'package:ocean_rent/providers/boat_providers.dart';
 import 'package:ocean_rent/providers/booking_providers.dart';
+import 'package:ocean_rent/providers/user_providers.dart';
 
 class AdminDepositsPage extends ConsumerWidget {
   const AdminDepositsPage({super.key});
-///Prueba de commit
+
+  ///Prueba de commit
   ///Prueba de commit 2
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -81,6 +83,8 @@ class AdminDepositsPage extends ConsumerWidget {
                                 boatNames[booking.boatId] ?? booking.boatId,
                             onRelease: () =>
                                 _releaseDeposit(context, ref, booking),
+                            onCapture: () =>
+                                _captureDeposit(context, ref, booking),
                           );
                         },
                       ),
@@ -144,6 +148,59 @@ class AdminDepositsPage extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _captureDeposit(
+    BuildContext context,
+    WidgetRef ref,
+    BookingModel booking,
+  ) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppTheme.surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppTheme.borderRadiusCard,
+        ),
+        title: Text('Cobrar fianza', style: AppTheme.titleMedium),
+        content: Text(
+          'Marcar esta fianza como cobrada? Esta accion solo actualiza el estado en Ocean Rent.',
+          style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: AppTheme.destructiveButtonStyle,
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Cobrar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !context.mounted) return;
+
+    final success = await ref
+        .read(bookingNotifierProvider)
+        .captureDeposit(booking.id);
+
+    if (!context.mounted) return;
+
+    final message = success
+        ? 'Fianza marcada como cobrada.'
+        : ref.read(bookingNotifierProvider).errorMessage ??
+              'No se pudo actualizar la fianza.';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: success ? AppTheme.oceanBlue : AppTheme.alertRed,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 }
 
 class _DepositsHeader extends StatelessWidget {
@@ -195,19 +252,35 @@ class _DepositsHeader extends StatelessWidget {
   }
 }
 
-class _DepositBookingCard extends StatelessWidget {
+class _DepositBookingCard extends ConsumerWidget {
   final BookingModel booking;
   final String boatName;
   final VoidCallback onRelease;
+  final VoidCallback onCapture;
 
   const _DepositBookingCard({
     required this.booking,
     required this.boatName,
     required this.onRelease,
+    required this.onCapture,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(userByIdProvider(booking.userId));
+    final customerName = userAsync.maybeWhen(
+      data: (user) {
+        final fullName = '${user?.name ?? ''} ${user?.surname ?? ''}'.trim();
+        return fullName.isEmpty ? 'Cliente' : fullName;
+      },
+      loading: () => 'Cargando cliente...',
+      orElse: () => 'Cliente',
+    );
+    final customerEmail = userAsync.maybeWhen(
+      data: (user) => user?.email ?? '',
+      orElse: () => '',
+    );
+
     return Container(
       padding: AppTheme.compactCardPadding,
       decoration: AppTheme.cardDecoration(
@@ -254,8 +327,10 @@ class _DepositBookingCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppTheme.spacing14),
+          _DepositInfoRow(label: 'Cliente', value: customerName),
+          if (customerEmail.isNotEmpty)
+            _DepositInfoRow(label: 'Email', value: customerEmail),
           _DepositInfoRow(label: 'Reserva', value: booking.id),
-          _DepositInfoRow(label: 'Cliente', value: booking.userId),
           _DepositInfoRow(
             label: 'Inicio',
             value: _formatDate(booking.startDate),
@@ -270,15 +345,26 @@ class _DepositBookingCard extends StatelessWidget {
             value: _formatBookingStatus(booking.status),
           ),
           const SizedBox(height: AppTheme.spacing12),
-          SizedBox(
-            width: double.infinity,
-            height: AppTheme.compactButtonHeight,
-            child: ElevatedButton.icon(
-              onPressed: onRelease,
-              style: AppTheme.accentButtonStyle,
-              icon: const Icon(Icons.lock_open_outlined),
-              label: const Text('Marcar como devuelta'),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: onRelease,
+                  style: AppTheme.accentButtonStyle,
+                  icon: const Icon(Icons.lock_open_outlined),
+                  label: const Text('Devolver'),
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacing10),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: onCapture,
+                  style: AppTheme.destructiveButtonStyle,
+                  icon: const Icon(Icons.payments_outlined),
+                  label: const Text('Cobrar'),
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -28,6 +28,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   bool _showPassword = false;
   bool _showConfirmPassword = false;
   DateTime? _selectedBirthDate;
+  String _selectedLicenseType = NauticalLicenseStatus.none;
 
   @override
   void dispose() {
@@ -149,6 +150,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           name: name,
           surname: surname,
           birthDate: _selectedBirthDate!,
+          nauticalLicenseType: _selectedLicenseType,
         );
 
     if (!mounted) return;
@@ -285,6 +287,65 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                         const SizedBox(height: AppTheme.spacing22),
 
+                        buildLabelTextFields(context, 'Titulacion nautica'),
+                        const SizedBox(height: AppTheme.spacing8),
+                        DropdownButtonFormField<String>(
+                          initialValue: _selectedLicenseType,
+                          isExpanded: true,
+                          decoration: AppTheme.inputDecoration(
+                            labelText: 'Titulacion',
+                            icon: Icons.anchor_outlined,
+                          ),
+                          style: AppTheme.fieldTextStyle,
+                          dropdownColor: AppTheme.white,
+                          borderRadius: AppTheme.borderRadiusInput,
+                          items: const [
+                            DropdownMenuItem(
+                              value: NauticalLicenseStatus.none,
+                              child: Text('Sin titulacion'),
+                            ),
+                            DropdownMenuItem(value: 'pnb', child: Text('PNB')),
+                            DropdownMenuItem(value: 'per', child: Text('PER')),
+                          ],
+                          onChanged: authState.isLoading
+                              ? null
+                              : (value) {
+                                  if (value == null) return;
+                                  setState(() {
+                                    _selectedLicenseType = value;
+                                  });
+                                },
+                        ),
+                        if (_selectedLicenseType !=
+                            NauticalLicenseStatus.none) ...[
+                          const SizedBox(height: AppTheme.spacing10),
+                          Container(
+                            padding: AppTheme.infoBannerPadding,
+                            decoration: AppTheme.infoBannerDecoration(
+                              AppTheme.sunsetGold,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.info_outline,
+                                  color: AppTheme.sunsetGold,
+                                  size: AppTheme.iconSizeMedium,
+                                ),
+                                const SizedBox(width: AppTheme.spacing8),
+                                Expanded(
+                                  child: Text(
+                                    'Tras registrarte, sube el documento desde tu perfil para que el admin pueda validarlo.',
+                                    style: AppTheme.infoBannerTextStyle(
+                                      AppTheme.sunsetGold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: AppTheme.spacing22),
                         buildLabelTextFields(context, 'Correo electrónico'),
                         const SizedBox(height: AppTheme.spacing8),
                         CustomTextField(
