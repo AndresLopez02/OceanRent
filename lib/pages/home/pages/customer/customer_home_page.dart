@@ -55,7 +55,7 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
       const CustomerChatsPage(),
       const CustomerBookingsPage(),
       isAnonymous
-          ? const Center(child: Text('Inicia sesion para ver tu perfil'))
+          ? const Center(child: Text('Inicia sesión para ver tu perfil'))
           : const CustomerProfileScreen(),
     ];
 
@@ -65,13 +65,13 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
         actions: [
           if (!isAnonymous)
             IconButton(
-              tooltip: 'Cerrar sesion',
+              tooltip: 'Cerrar sesión',
               icon: const Icon(Icons.logout),
               onPressed: () {
                 mostrarDialogoConfirmacion(
                   context,
-                  titulo: 'Cerrar sesion',
-                  mensaje: 'Quieres cerrar sesion?',
+                  titulo: 'Cerrar sesión',
+                  mensaje: '¿Quieres cerrar sesión?',
                   onAceptar: () {
                     _logout(context, ref);
                   },

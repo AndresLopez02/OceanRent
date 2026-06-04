@@ -118,9 +118,9 @@ class ReviewNotifier extends ChangeNotifier {
     final message = error.toString().replaceFirst('Exception: ', '').trim();
 
     if (message.contains('permission-denied')) {
-      return 'No tienes permisos para realizar esta accion.';
+      return 'No tienes permisos para realizar esta acción.';
     }
 
-    return message.isEmpty ? 'No se pudo completar la operacion.' : message;
+    return message.isEmpty ? 'No se pudo completar la operación.' : message;
   }
 }

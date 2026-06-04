@@ -11,8 +11,6 @@ class AdminLicensesPage extends ConsumerStatefulWidget {
   ConsumerState<AdminLicensesPage> createState() => _AdminLicensesPageState();
 }
 
-//Prueba de commit
-// Prueba de commit 2
 class _AdminLicensesPageState extends ConsumerState<AdminLicensesPage> {
   final Set<String> _updatingUsers = {};
 
@@ -370,7 +368,7 @@ class _EmptyLicensesState extends StatelessWidget {
               ),
               const SizedBox(height: AppTheme.spacing8),
               Text(
-                'Cuando un cliente suba su licencia nautica aparecera aqui.',
+                'Cuando un cliente suba su licencia náutica aparecerá aquí.',
                 textAlign: TextAlign.center,
                 style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted),
               ),

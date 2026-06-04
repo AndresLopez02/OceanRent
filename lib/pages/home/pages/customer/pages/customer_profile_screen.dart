@@ -262,7 +262,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
 
     final normalizedEmail = email.trim();
     if (normalizedEmail.isEmpty || !normalizedEmail.contains('@')) {
-      _snack('Introduce un correo valido', error: true);
+      _snack('Introduce un correo válido', error: true);
       return;
     }
 
@@ -292,7 +292,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
         shape: const RoundedRectangleBorder(
           borderRadius: AppTheme.borderRadiusCard,
         ),
-        title: Text('Restablecer contrasena', style: AppTheme.titleMedium),
+        title: Text('Restablecer contraseña', style: AppTheme.titleMedium),
         content: Text(
           'Enviar correo de recuperacion a $email?',
           style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted),
@@ -322,12 +322,12 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
         shape: const RoundedRectangleBorder(
           borderRadius: AppTheme.borderRadiusCard,
         ),
-        title: Text('Restablecer contrasena', style: AppTheme.titleMedium),
+        title: Text('Restablecer contraseña', style: AppTheme.titleMedium),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.emailAddress,
           decoration: AppTheme.inputDecoration(
-            labelText: 'Correo electronico',
+            labelText: 'Correo electrónico',
             icon: Icons.mail_outline,
           ),
         ),
@@ -369,7 +369,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen>
     final message = error.toString().replaceFirst('Exception: ', '').trim();
 
     if (message.contains('permission-denied')) {
-      return 'No tienes permisos para realizar esta accion.';
+      return 'No tienes permisos para realizar esta acción.';
     }
 
     if (message.isEmpty) return fallback;
@@ -593,12 +593,12 @@ class _SecurityCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Restablecer contrasena',
+                  'Restablecer contraseña',
                   style: AppTheme.titleSmall.copyWith(color: AppTheme.deepNavy),
                 ),
                 const SizedBox(height: AppTheme.spacing4),
                 Text(
-                  'Recibe un correo para cambiar la contrasena de tu cuenta.',
+                  'Recibe un correo para cambiar la contraseña de tu cuenta.',
                   style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted),
                 ),
               ],

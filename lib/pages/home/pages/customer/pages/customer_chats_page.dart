@@ -45,11 +45,11 @@ class CustomerChatsPage extends ConsumerWidget {
       loading: () => const Center(
         child: CircularProgressIndicator(color: AppTheme.oceanBlue),
       ),
-      error: (error, _) => Center(
+      error: (_, _) => Center(
         child: Padding(
           padding: AppTheme.screenPadding,
           child: Text(
-            'Error cargando tus chats:\n$error',
+            'No se pudieron cargar tus chats.',
             textAlign: TextAlign.center,
             style: AppTheme.bodyLarge.copyWith(color: AppTheme.alertRed),
           ),
@@ -106,7 +106,6 @@ class CustomerChatsPage extends ConsumerWidget {
                         boatNames[booking.boatId] ?? booking.boatId;
                     return _ChatConversationCard(
                       booking: booking,
-                      boatName: boatName,
                       currentUserId: user.uid,
                       isAdmin: false,
                       title: boatName,
@@ -155,10 +154,8 @@ class _EmptyChats extends StatelessWidget {
   }
 }
 
-/// Tarjeta de conversación reutilizable para clientes y administradores.
 class _ChatConversationCard extends ConsumerWidget {
   final BookingModel booking;
-  final String boatName;
   final String currentUserId;
   final bool isAdmin;
   final String title;
@@ -166,7 +163,6 @@ class _ChatConversationCard extends ConsumerWidget {
 
   const _ChatConversationCard({
     required this.booking,
-    required this.boatName,
     required this.currentUserId,
     required this.isAdmin,
     required this.title,

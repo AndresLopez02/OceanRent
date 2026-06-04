@@ -9,6 +9,9 @@ class BookingModel {
   static const String depositStatusReleased = 'released';
   static const String depositStatusCaptured = 'captured';
 
+  static const String chatStatusOpen = 'open';
+  static const String chatStatusClosed = 'closed';
+
   final String id;
   final String boatId;
   final String userId;
@@ -22,6 +25,9 @@ class BookingModel {
   final String rentalPaymentIntentId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String chatStatus;
+  final DateTime? chatClosedAt;
+  final String chatClosedBy;
 
   const BookingModel({
     required this.id,
@@ -37,6 +43,9 @@ class BookingModel {
     required this.rentalPaymentIntentId,
     this.createdAt,
     this.updatedAt,
+    this.chatStatus = chatStatusOpen,
+    this.chatClosedAt,
+    this.chatClosedBy = '',
   });
 
   factory BookingModel.fromFirestore(DocumentSnapshot doc) {
@@ -58,6 +67,9 @@ class BookingModel {
       rentalPaymentIntentId: data['rental_payment_intent_id'] ?? '',
       createdAt: _nullableDateFromTimestamp(data['created_at']),
       updatedAt: _nullableDateFromTimestamp(data['updated_at']),
+      chatStatus: data['chat_status'] ?? chatStatusOpen,
+      chatClosedAt: _nullableDateFromTimestamp(data['chat_closed_at']),
+      chatClosedBy: data['chat_closed_by'] ?? '',
     );
   }
 
@@ -79,8 +91,14 @@ class BookingModel {
       'updated_at': updatedAt != null
           ? Timestamp.fromDate(updatedAt!)
           : FieldValue.serverTimestamp(),
+      if (chatStatus != chatStatusOpen) 'chat_status': chatStatus,
+      if (chatClosedAt != null)
+        'chat_closed_at': Timestamp.fromDate(chatClosedAt!),
+      if (chatClosedBy.isNotEmpty) 'chat_closed_by': chatClosedBy,
     };
   }
+
+  bool get isChatClosed => chatStatus == chatStatusClosed;
 
   BookingModel copyWith({
     String? id,
@@ -96,6 +114,9 @@ class BookingModel {
     String? rentalPaymentIntentId,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? chatStatus,
+    DateTime? chatClosedAt,
+    String? chatClosedBy,
   }) {
     return BookingModel(
       id: id ?? this.id,
@@ -113,6 +134,9 @@ class BookingModel {
           rentalPaymentIntentId ?? this.rentalPaymentIntentId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      chatStatus: chatStatus ?? this.chatStatus,
+      chatClosedAt: chatClosedAt ?? this.chatClosedAt,
+      chatClosedBy: chatClosedBy ?? this.chatClosedBy,
     );
   }
 

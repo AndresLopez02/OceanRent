@@ -311,7 +311,7 @@ class _EmptyBookingsState extends StatelessWidget {
               ),
               const SizedBox(height: AppTheme.spacing8),
               Text(
-                'Cuando entren nuevas solicitudes apareceran aqui.',
+                'Cuando entren nuevas solicitudes aparecerán aquí.',
                 textAlign: TextAlign.center,
                 style: AppTheme.bodySmall.copyWith(
                   color: AppTheme.textMuted,

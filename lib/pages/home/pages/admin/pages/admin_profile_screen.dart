@@ -234,7 +234,7 @@ class _AdminManagementCard extends StatelessWidget {
           _AdminManagementTile(
             icon: Icons.verified_user_outlined,
             title: 'Titulaciones',
-            subtitle: 'Validar o rechazar licencias nauticas.',
+            subtitle: 'Validar o rechazar licencias náuticas.',
             onTap: () => _open(context, const AdminLicensesPage()),
           ),
           const Divider(height: AppTheme.spacing24),

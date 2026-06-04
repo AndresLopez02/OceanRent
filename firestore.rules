@@ -157,6 +157,21 @@ service cloud.firestore {
         );
     }
 
+    function validCustomerChatClose() {
+      return isCustomer()
+        && request.auth.uid == resource.data.user_id
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "chat_status",
+          "chat_closed_at",
+          "chat_closed_by",
+          "updated_at"
+        ])
+        && resource.data.chat_status != "closed"
+        && request.resource.data.chat_status == "closed"
+        && request.resource.data.chat_closed_at == request.time
+        && request.resource.data.chat_closed_by == request.auth.uid;
+    }
+
     function validBookingLockCreate(lockId) {
       let booking = getAfter(/databases/$(database)/documents/bookings/$(request.resource.data.booking_id));
       return isCustomer()
@@ -237,9 +252,10 @@ service cloud.firestore {
         && request.resource.data.sender_id == request.auth.uid
         && request.resource.data.text is string
         && request.resource.data.text.size() > 0
-        && request.resource.data.text.size() <= 1000
+        && request.resource.data.text.size() <= 500
         && request.resource.data.created_at == request.time
         && booking.status != "cancelada"
+        && booking.chat_status != "closed"
         && (
           (isAdmin() && request.resource.data.sender_role == "admin")
           || (
@@ -281,7 +297,7 @@ service cloud.firestore {
       allow read, write: if isAdmin();
       allow create: if validBookingCreate();
       allow read: if isCustomer() && request.auth.uid == resource.data.user_id;
-      allow update: if validCustomerCancellation();
+      allow update: if validCustomerCancellation() || validCustomerChatClose();
 
       // Chat en vivo de la reserva. Se activa al solicitarla y permanece
       // abierto para el cliente antes y durante la fecha de la actividad.

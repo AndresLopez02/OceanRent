@@ -9,8 +9,6 @@ import 'package:ocean_rent/providers/user_providers.dart';
 class AdminDepositsPage extends ConsumerWidget {
   const AdminDepositsPage({super.key});
 
-  ///Prueba de commit
-  ///Prueba de commit 2
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookingsAsync = ref.watch(bookingsStreamProvider);
@@ -163,7 +161,7 @@ class AdminDepositsPage extends ConsumerWidget {
         ),
         title: Text('Cobrar fianza', style: AppTheme.titleMedium),
         content: Text(
-          'Marcar esta fianza como cobrada? Esta accion solo actualiza el estado en Ocean Rent.',
+          '¿Marcar esta fianza como cobrada? Esta acción solo actualiza el estado en Ocean Rent.',
           style: AppTheme.bodyMedium.copyWith(color: AppTheme.textMuted),
         ),
         actions: [
@@ -434,7 +432,7 @@ class _EmptyDepositsState extends StatelessWidget {
               ),
               const SizedBox(height: AppTheme.spacing8),
               Text(
-                'Las reservas con deposit_status held apareceran aqui.',
+                'Las reservas con deposit_status held aparecerán aquí.',
                 textAlign: TextAlign.center,
                 style: AppTheme.bodySmall.copyWith(color: AppTheme.textMuted),
               ),

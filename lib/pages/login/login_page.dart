@@ -56,14 +56,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     if (email.isEmpty || password.isEmpty) {
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Rellena correo y contrasena.')),
+        const SnackBar(content: Text('Rellena correo y contraseña.')),
       );
       return;
     }
 
     if (!email.contains('@')) {
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Introduce un correo valido.')),
+        const SnackBar(content: Text('Introduce un correo válido.')),
       );
       return;
     }
@@ -79,7 +79,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     } else {
       final error = ref.read(authNotifierProvider).errorMessage;
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text(error ?? 'No se pudo iniciar sesion.')),
+        SnackBar(content: Text(error ?? 'No se pudo iniciar sesión.')),
       );
     }
   }
@@ -99,7 +99,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final error = ref.read(authNotifierProvider).errorMessage;
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text(error ?? 'No se pudo iniciar sesion con Google.'),
+          content: Text(error ?? 'No se pudo iniciar sesión con Google.'),
         ),
       );
     }
@@ -119,13 +119,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           shape: const RoundedRectangleBorder(
             borderRadius: AppTheme.borderRadiusCard,
           ),
-          title: Text('Recuperar contrasena', style: AppTheme.titleMedium),
+          title: Text('Recuperar contraseña', style: AppTheme.titleMedium),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Introduce tu correo y te enviaremos un enlace para restablecer la contrasena.',
+                  'Introduce tu correo y te enviaremos un enlace para restablecer la contraseña.',
                   style: AppTheme.bodySmall.copyWith(
                     color: AppTheme.textMuted,
                     height: AppTheme.lineHeightInfo,
@@ -137,7 +137,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   keyboardType: TextInputType.emailAddress,
                   style: AppTheme.fieldTextStyle,
                   decoration: AppTheme.inputDecoration(
-                    labelText: 'Correo electronico',
+                    labelText: 'Correo electrónico',
                   ).copyWith(hintText: 'ejemplo@correo.com'),
                 ),
               ],
@@ -176,14 +176,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     if (normalizedEmail.isEmpty) {
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Introduce un correo electronico.')),
+        const SnackBar(content: Text('Introduce un correo electrónico.')),
       );
       return;
     }
 
     if (!normalizedEmail.contains('@')) {
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Introduce un correo valido.')),
+        const SnackBar(content: Text('Introduce un correo válido.')),
       );
       return;
     }
@@ -203,7 +203,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       scaffoldMessenger.showSnackBar(
         const SnackBar(
           content: Text(
-            'Si el email es correcto, recibiras un correo para restablecer la contrasena.',
+            'Si el email es correcto, recibirás un correo para restablecer la contraseña.',
           ),
           behavior: SnackBarBehavior.floating,
           duration: Duration(seconds: 4),
@@ -265,7 +265,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Iniciar sesion',
+                          'Iniciar sesión',
                           textAlign: TextAlign.center,
                           style: AppTheme.headlineMedium.copyWith(
                             color: AppTheme.deepNavy,
@@ -276,7 +276,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                         ),
                         const SizedBox(height: AppTheme.spacing28),
-                        buildLabelTextFields(context, 'Correo electronico'),
+                        buildLabelTextFields(context, 'Correo electrónico'),
                         const SizedBox(height: AppTheme.spacing8),
                         CustomTextField(
                           controller: _emailController,
@@ -294,8 +294,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           onSubmitted: (_) => _login(),
                           suffixIcon: IconButton(
                             tooltip: _showPassword
-                                ? 'Ocultar contrasena'
-                                : 'Mostrar contrasena',
+                                ? 'Ocultar contraseña'
+                                : 'Mostrar contraseña',
                             onPressed: () {
                               setState(() => _showPassword = !_showPassword);
                             },
@@ -339,7 +339,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 : _showResetPasswordDialog,
                             style: AppTheme.compactTextButtonStyle,
                             child: Text(
-                              'Has olvidado tu contrasena?',
+                              '¿Has olvidado tu contraseña?',
                               style: AppTheme.bodySmall.copyWith(
                                 color: AppTheme.oceanBlue,
                                 fontSize: AppTheme.fontSize12,
