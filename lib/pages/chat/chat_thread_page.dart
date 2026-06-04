@@ -105,7 +105,9 @@ class _ChatThreadPageState extends ConsumerState<ChatThreadPage> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTheme.labelSmall.copyWith(
-                  color: AppTheme.white.withValues(alpha: AppTheme.alphaTextOnDark),
+                  color: AppTheme.white.withValues(
+                    alpha: AppTheme.alphaTextOnDark,
+                  ),
                 ),
               ),
           ],
@@ -124,7 +126,9 @@ class _ChatThreadPageState extends ConsumerState<ChatThreadPage> {
                   child: Text(
                     'No se pudo cargar la conversación.',
                     textAlign: TextAlign.center,
-                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.alertRed),
+                    style: AppTheme.bodyMedium.copyWith(
+                      color: AppTheme.alertRed,
+                    ),
                   ),
                 ),
               ),
@@ -162,6 +166,7 @@ class _ChatThreadPageState extends ConsumerState<ChatThreadPage> {
     );
   }
 }
+
 class _EmptyConversation extends StatelessWidget {
   final bool isAdmin;
 
@@ -214,8 +219,12 @@ class _MessageBubble extends StatelessWidget {
     final radius = BorderRadius.only(
       topLeft: const Radius.circular(AppTheme.radiusLg),
       topRight: const Radius.circular(AppTheme.radiusLg),
-      bottomLeft: Radius.circular(isMine ? AppTheme.radiusLg : AppTheme.radiusXs),
-      bottomRight: Radius.circular(isMine ? AppTheme.radiusXs : AppTheme.radiusLg),
+      bottomLeft: Radius.circular(
+        isMine ? AppTheme.radiusLg : AppTheme.radiusXs,
+      ),
+      bottomRight: Radius.circular(
+        isMine ? AppTheme.radiusXs : AppTheme.radiusLg,
+      ),
     );
 
     return Align(
@@ -235,7 +244,9 @@ class _MessageBubble extends StatelessWidget {
           border: isMine
               ? null
               : Border.all(
-                  color: AppTheme.deepNavy.withValues(alpha: AppTheme.alphaSoft),
+                  color: AppTheme.deepNavy.withValues(
+                    alpha: AppTheme.alphaSoft,
+                  ),
                 ),
           boxShadow: AppTheme.softShadow(alpha: AppTheme.alphaUltraSoft),
         ),

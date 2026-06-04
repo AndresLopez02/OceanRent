@@ -30,9 +30,14 @@ class AuthRepository {
     required String name,
     required String surname,
     required DateTime birthDate,
+    required String nauticalLicenseType,
   }) async {
     final credential = await _firebaseAuthService
         .createUserWithEmailAndPassword(email: email, password: password);
+    final normalizedLicenseType = _normalizeLicenseType(nauticalLicenseType);
+    final licenseStatus = normalizedLicenseType == NauticalLicenseStatus.none
+        ? NauticalLicenseStatus.verified
+        : NauticalLicenseStatus.pending;
 
     final user = UserModel(
       uid: credential.user!.uid,
@@ -41,10 +46,11 @@ class AuthRepository {
       surname: surname,
       birthDate: birthDate,
       role: UserRole.customer,
-      nauticalLicense: const NauticalLicense(
-        type: 'none',
+      nauticalLicense: NauticalLicense(
+        type: normalizedLicenseType,
         documentUrl: '',
-        status: 'verified',
+        status: licenseStatus,
+        rejectionReason: '',
       ),
     );
 
@@ -74,6 +80,7 @@ class AuthRepository {
         type: 'none',
         documentUrl: '',
         status: 'verified',
+        rejectionReason: '',
       ),
     );
 
@@ -123,5 +130,15 @@ class AuthRepository {
     }
 
     return null;
+  }
+
+  String _normalizeLicenseType(String value) {
+    final normalizedValue = value.trim().toLowerCase();
+
+    return switch (normalizedValue) {
+      'pnb' => 'pnb',
+      'per' => 'per',
+      _ => NauticalLicenseStatus.none,
+    };
   }
 }

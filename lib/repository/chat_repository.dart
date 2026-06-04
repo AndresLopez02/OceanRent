@@ -7,9 +7,11 @@ class ChatRepository {
   Stream<List<ChatMessageModel>> watchMessages(String bookingId) {
     return _chatService.watchMessages(bookingId);
   }
+
   Stream<ChatMessageModel?> watchLastMessage(String bookingId) {
     return _chatService.watchLastMessage(bookingId);
   }
+
   Future<void> sendMessage({
     required String bookingId,
     required String senderId,

@@ -18,6 +18,7 @@ import 'package:ocean_rent/pages/onboarding/onboarding_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/boat_providers.dart';
 import 'package:ocean_rent/providers/booking_providers.dart';
+import 'package:ocean_rent/providers/user_providers.dart';
 import 'package:ocean_rent/utils/boat_utils.dart';
 import 'package:ocean_rent/widgets/boat_image_placeholder.dart';
 
@@ -94,6 +95,7 @@ class AdminHomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final boatsAsync = ref.watch(boatsStreamProvider);
     final bookingsAsync = ref.watch(bookingsStreamProvider);
+    final licensesAsync = ref.watch(customersWithLicensesProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -176,9 +178,17 @@ class AdminHomePage extends ConsumerWidget {
               ),
             ),
             data: (bookings) {
+              final pendingLicensesCount = licensesAsync.maybeWhen(
+                data: (users) => users
+                    .where((user) => user.nauticalLicense?.status == 'pending')
+                    .length,
+                orElse: () => 0,
+              );
+
               return _AdminDashboard(
                 boats: boats,
                 bookings: bookings,
+                pendingLicensesCount: pendingLicensesCount,
                 onCreateBoat: () async {
                   await Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const BoatFormPage()),
@@ -202,6 +212,7 @@ class AdminHomePage extends ConsumerWidget {
 class _AdminDashboard extends StatefulWidget {
   final List<BoatModel> boats;
   final List<BookingModel> bookings;
+  final int pendingLicensesCount;
   final VoidCallback onCreateBoat;
   final ValueChanged<BoatModel> onEditBoat;
   final ValueChanged<BoatModel> onDeleteBoat;
@@ -209,6 +220,7 @@ class _AdminDashboard extends StatefulWidget {
   const _AdminDashboard({
     required this.boats,
     required this.bookings,
+    required this.pendingLicensesCount,
     required this.onCreateBoat,
     required this.onEditBoat,
     required this.onDeleteBoat,
@@ -329,8 +341,8 @@ class _AdminDashboardState extends State<_AdminDashboard> {
             ),
             AdminSummaryCard(
               title: 'Titulaciones',
-              value: '0',
-              subtitle: 'Pendiente de users',
+              value: '${widget.pendingLicensesCount}',
+              subtitle: 'Pendientes de validar',
               icon: Icons.verified_user_outlined,
               color: AppTheme.alertRed,
               onTap: () {

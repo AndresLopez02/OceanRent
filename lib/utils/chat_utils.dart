@@ -5,6 +5,7 @@ class ChatAvailability {
   static bool isConversationEnabled(BookingModel booking) {
     return booking.status != BookingModel.statusCancelled;
   }
+
   static bool canSendMessages(BookingModel booking, {DateTime? now}) {
     if (booking.status == BookingModel.statusCancelled) {
       return false;

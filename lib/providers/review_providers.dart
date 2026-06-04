@@ -67,6 +67,21 @@ class ReviewNotifier extends ChangeNotifier {
 
   String? get errorMessage => _errorMessage;
 
+  Future<bool> createReview(ReviewModel review) async {
+    _setLoading(true);
+    _errorMessage = null;
+
+    try {
+      await _reviewRepository.createReview(review);
+      return true;
+    } catch (e) {
+      _errorMessage = _cleanErrorMessage(e);
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<bool> updateAdminReply({
     required String reviewId,
     required String adminReply,
@@ -82,7 +97,7 @@ class ReviewNotifier extends ChangeNotifier {
 
       return true;
     } catch (e) {
-      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      _errorMessage = _cleanErrorMessage(e);
       return false;
     } finally {
       _setLoading(false);
@@ -97,5 +112,15 @@ class ReviewNotifier extends ChangeNotifier {
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
+  }
+
+  String _cleanErrorMessage(Object error) {
+    final message = error.toString().replaceFirst('Exception: ', '').trim();
+
+    if (message.contains('permission-denied')) {
+      return 'No tienes permisos para realizar esta accion.';
+    }
+
+    return message.isEmpty ? 'No se pudo completar la operacion.' : message;
   }
 }

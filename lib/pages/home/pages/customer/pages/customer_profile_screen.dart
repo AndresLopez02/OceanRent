@@ -863,7 +863,7 @@ class _DocumentUpload extends StatelessWidget {
           _InfoBanner(
             color: AppTheme.alertRed,
             icon: Icons.info_outline_rounded,
-            text: 'Tu documento fue rechazado. Por favor, sube uno nuevo.',
+            text: _rejectionMessage(profile.nauticalLicense?.rejectionReason),
           ),
         ],
         if (licenseStatus == LicenseStatus.pending) ...[
@@ -884,6 +884,16 @@ class _DocumentUpload extends StatelessWidget {
         ],
       ],
     );
+  }
+
+  String _rejectionMessage(String? reason) {
+    final cleanReason = reason?.trim() ?? '';
+
+    if (cleanReason.isEmpty) {
+      return 'Tu documento fue rechazado. Por favor, sube uno nuevo.';
+    }
+
+    return 'Tu documento fue rechazado: $cleanReason. Puedes subir uno nuevo.';
   }
 }
 

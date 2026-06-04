@@ -89,6 +89,7 @@ class AuthNotifier extends ChangeNotifier {
     required String name,
     required String surname,
     required DateTime birthDate,
+    required String nauticalLicenseType,
   }) async {
     _setLoading(true);
     _errorMessage = null;
@@ -100,6 +101,7 @@ class AuthNotifier extends ChangeNotifier {
         name: name,
         surname: surname,
         birthDate: birthDate,
+        nauticalLicenseType: nauticalLicenseType,
       );
       return true;
     } on FirebaseAuthException catch (e) {

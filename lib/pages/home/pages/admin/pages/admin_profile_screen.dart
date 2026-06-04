@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/user_model.dart';
+import 'package:ocean_rent/pages/home/pages/admin/pages/admin_bookings_page.dart';
+import 'package:ocean_rent/pages/home/pages/admin/pages/admin_calendar_page.dart';
+import 'package:ocean_rent/pages/home/pages/admin/pages/admin_deposits_page.dart';
+import 'package:ocean_rent/pages/home/pages/admin/pages/admin_licenses_page.dart';
 import 'package:ocean_rent/providers/auth_providers.dart';
 import 'package:ocean_rent/providers/user_providers.dart';
 import 'package:ocean_rent/widgets/profile_widgets.dart';
@@ -194,12 +198,133 @@ class _AdminProfileScreenState extends ConsumerState<AdminProfileScreen>
                   surnameCtrl: _surnameCtrl,
                   emailCtrl: _emailCtrl,
                 ),
+                const SizedBox(height: AppTheme.spacing28),
+                ProfileSectionLabel(
+                  'Gestion',
+                  color: AppTheme.deepNavy.withValues(
+                    alpha: AppTheme.alphaDisabled,
+                  ),
+                ),
+                const SizedBox(height: AppTheme.spacing16),
+                const _AdminManagementCard(),
                 const SizedBox(height: AppTheme.spacing36),
                 ProfileSaveButton(isSaving: _isSaving, onPressed: _saveProfile),
                 const SizedBox(height: AppTheme.spacing24),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AdminManagementCard extends StatelessWidget {
+  const _AdminManagementCard();
+
+  void _open(BuildContext context, Widget page) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ProfileCard(
+      child: Column(
+        children: [
+          _AdminManagementTile(
+            icon: Icons.verified_user_outlined,
+            title: 'Titulaciones',
+            subtitle: 'Validar o rechazar licencias nauticas.',
+            onTap: () => _open(context, const AdminLicensesPage()),
+          ),
+          const Divider(height: AppTheme.spacing24),
+          _AdminManagementTile(
+            icon: Icons.assignment_outlined,
+            title: 'Reservas',
+            subtitle: 'Consultar, confirmar o cancelar reservas.',
+            onTap: () => _open(context, const AdminBookingsPage()),
+          ),
+          const Divider(height: AppTheme.spacing24),
+          _AdminManagementTile(
+            icon: Icons.payments_outlined,
+            title: 'Fianzas',
+            subtitle: 'Liberar o marcar como cobradas las fianzas.',
+            onTap: () => _open(context, const AdminDepositsPage()),
+          ),
+          const Divider(height: AppTheme.spacing24),
+          _AdminManagementTile(
+            icon: Icons.calendar_month_outlined,
+            title: 'Mantenimiento',
+            subtitle: 'Bloquear fechas y revisar disponibilidad.',
+            onTap: () =>
+                _open(context, const AdminCalendarPage(initialTabIndex: 1)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AdminManagementTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _AdminManagementTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: AppTheme.borderRadiusMd,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppTheme.spacing4),
+        child: Row(
+          children: [
+            Container(
+              width: AppTheme.quickActionIconBoxSize,
+              height: AppTheme.quickActionIconBoxSize,
+              decoration: AppTheme.adminIconBoxDecoration(AppTheme.oceanBlue),
+              child: Icon(
+                icon,
+                color: AppTheme.oceanBlue,
+                size: AppTheme.iconSizeXl,
+              ),
+            ),
+            const SizedBox(width: AppTheme.spacing12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTheme.titleSmall.copyWith(
+                      color: AppTheme.deepNavy,
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacing4),
+                  Text(
+                    subtitle,
+                    style: AppTheme.bodySmall.copyWith(
+                      color: AppTheme.textMuted,
+                      height: AppTheme.lineHeightRegular,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppTheme.spacing8),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppTheme.textSecondary,
+            ),
+          ],
         ),
       ),
     );

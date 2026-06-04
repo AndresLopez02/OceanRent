@@ -14,16 +14,17 @@ class ChatService {
         .doc(bookingId)
         .collection('messages');
   }
+
   Stream<List<ChatMessageModel>> watchMessages(String bookingId) {
-    return _messagesCollection(bookingId)
-        .orderBy('created_at')
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => ChatMessageModel.fromFirestore(doc))
-              .toList();
-        });
+    return _messagesCollection(bookingId).orderBy('created_at').snapshots().map(
+      (snapshot) {
+        return snapshot.docs
+            .map((doc) => ChatMessageModel.fromFirestore(doc))
+            .toList();
+      },
+    );
   }
+
   Stream<ChatMessageModel?> watchLastMessage(String bookingId) {
     return _messagesCollection(bookingId)
         .orderBy('created_at', descending: true)
@@ -37,6 +38,7 @@ class ChatService {
           return ChatMessageModel.fromFirestore(snapshot.docs.first);
         });
   }
+
   Future<void> sendMessage({
     required String bookingId,
     required String senderId,

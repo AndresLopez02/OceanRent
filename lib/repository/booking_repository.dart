@@ -246,9 +246,72 @@ class BookingRepository {
       throw Exception('No se pudo identificar la reserva.');
     }
 
-    await _bookingsCollection.doc(bookingId).update({
-      'deposit_status': BookingModel.depositStatusReleased,
-      'updated_at': FieldValue.serverTimestamp(),
+    final bookingRef = _bookingsCollection.doc(bookingId);
+
+    await _firestore.runTransaction((transaction) async {
+      final bookingSnapshot = await transaction.get(bookingRef);
+
+      if (!bookingSnapshot.exists) {
+        throw Exception('La reserva no existe.');
+      }
+
+      final booking = BookingModel.fromFirestore(bookingSnapshot);
+
+      if (booking.status == BookingModel.statusCancelled) {
+        throw Exception(
+          'No se puede devolver la fianza de una reserva cancelada.',
+        );
+      }
+
+      if (booking.depositStatus == BookingModel.depositStatusReleased) {
+        return;
+      }
+
+      if (booking.depositStatus != BookingModel.depositStatusHeld) {
+        throw Exception('Esta fianza no esta retenida actualmente.');
+      }
+
+      transaction.update(bookingRef, {
+        'deposit_status': BookingModel.depositStatusReleased,
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
+  Future<void> captureDeposit(String bookingId) async {
+    if (bookingId.trim().isEmpty) {
+      throw Exception('No se pudo identificar la reserva.');
+    }
+
+    final bookingRef = _bookingsCollection.doc(bookingId);
+
+    await _firestore.runTransaction((transaction) async {
+      final bookingSnapshot = await transaction.get(bookingRef);
+
+      if (!bookingSnapshot.exists) {
+        throw Exception('La reserva no existe.');
+      }
+
+      final booking = BookingModel.fromFirestore(bookingSnapshot);
+
+      if (booking.status == BookingModel.statusCancelled) {
+        throw Exception(
+          'No se puede cobrar la fianza de una reserva cancelada.',
+        );
+      }
+
+      if (booking.depositStatus == BookingModel.depositStatusCaptured) {
+        return;
+      }
+
+      if (booking.depositStatus != BookingModel.depositStatusHeld) {
+        throw Exception('Esta fianza no esta retenida actualmente.');
+      }
+
+      transaction.update(bookingRef, {
+        'deposit_status': BookingModel.depositStatusCaptured,
+        'updated_at': FieldValue.serverTimestamp(),
+      });
     });
   }
 

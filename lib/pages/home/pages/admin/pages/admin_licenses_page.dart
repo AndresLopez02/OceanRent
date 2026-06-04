@@ -10,6 +10,7 @@ class AdminLicensesPage extends ConsumerStatefulWidget {
   @override
   ConsumerState<AdminLicensesPage> createState() => _AdminLicensesPageState();
 }
+
 //Prueba de commit
 // Prueba de commit 2
 class _AdminLicensesPageState extends ConsumerState<AdminLicensesPage> {
@@ -24,6 +25,13 @@ class _AdminLicensesPageState extends ConsumerState<AdminLicensesPage> {
 
     if (!mounted) return;
     if (status == NauticalLicenseStatus.rejected && reason == null) return;
+    if (status == NauticalLicenseStatus.rejected &&
+        (reason?.trim().isEmpty ?? true)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Indica un motivo para rechazar.')),
+      );
+      return;
+    }
 
     setState(() => _updatingUsers.add(user.uid));
 
