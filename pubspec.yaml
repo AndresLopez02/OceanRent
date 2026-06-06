@@ -60,6 +60,7 @@ dependencies:
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
   firebase_messaging: ^16.2.2
+  flutter_stripe: ^11.4.0
 
 dev_dependencies:
   flutter_test:

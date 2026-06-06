@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocean_rent/core/theme/app_theme.dart';
 import 'package:ocean_rent/models/boat_model.dart';
+import 'package:ocean_rent/pages/checkout/checkout_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer/pages/customer_boat_reviews_page.dart';
 import 'package:ocean_rent/pages/home/pages/customer/widgets/licence_comparer.dart';
 import 'package:ocean_rent/pages/home/pages/customer/widgets/license_detail_section.dart';
@@ -71,30 +72,21 @@ class _CustomerBoatDetailPageState
       return;
     }
 
-    final success = await bookingNotifier.createBooking(
-      boatId: widget.boat.id,
-      userId: user.uid,
-      startDate: startDate,
-      endDate: endDate,
-      crewCount: _crewCount,
-      depositAmount: _depositAmount(),
-    );
-
     if (!context.mounted) return;
 
-    if (success) {
-      setState(() {
-        _rangeStart = null;
-        _rangeEnd = null;
-        _crewCount = 1;
-      });
-
-      _showSnackBar('Reserva creada correctamente. Estado: pendiente.');
-      return;
-    }
-
-    _showSnackBar(
-      bookingNotifier.errorMessage ?? 'No se pudo crear la reserva.',
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CheckoutPage(
+          boat: widget.boat,
+          startDate: startDate,
+          endDate: endDate,
+          crewCount: _crewCount,
+          totalAmount: _totalRentalAmount(),
+          depositAmount: _depositAmount(),
+          userId: user.uid,
+        ),
+      ),
     );
   }
 
@@ -186,7 +178,7 @@ class _CustomerBoatDetailPageState
         ? 'Licencia insuficiente'
         : _rangeStart == null
         ? 'Selecciona fechas'
-        : 'Reservar ahora';
+        : 'Ir al pago';
 
     return Scaffold(
       appBar: AppBar(
