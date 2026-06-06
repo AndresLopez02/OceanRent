@@ -11,10 +11,12 @@ import 'package:ocean_rent/pages/auth_gate/auth_gate_page.dart';
 import 'package:ocean_rent/services/boat/boat_cache_service.dart';
 import 'package:ocean_rent/services/firebase_options.dart';
 import 'package:ocean_rent/services/notification/notification_service.dart';
+import 'package:ocean_rent/services/stripe/stripe_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es_ES', null);
+  await StripeService.initialize();
 
   await Hive.initFlutter();
   Hive.registerAdapter(BoatModelAdapter());
