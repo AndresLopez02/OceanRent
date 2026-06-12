@@ -11,22 +11,22 @@ prácticas de DAM en Zaitec.
 ### Panel de Administración
 | Panel Admin | Resumen de actividad | Gestión de reservas |
 |---|---|---|
-| ![Panel Admin](https://github.com/user-attachments/assets/55fb3f3a-9148-43a7-b933-38f546702f72) | ![Resumen](https://github.com/user-attachments/assets/4a5e0847-2c07-4503-b152-08f7f64d65f7) | ![Reservas](https://github.com/user-attachments/assets/4fee654b-40a4-4ab5-9590-ddfa2b2f2727) |
+| ![Panel Admin](https://github.com/user-attachments/assets/13391c46-7ec8-4511-9f6a-8fceee3bd72d) | ![Resumen](https://github.com/user-attachments/assets/0868267e-9961-4f7e-86c8-4f5f2f4bb328) | ![Reservas](https://github.com/user-attachments/assets/643acfe7-c72d-4a0d-b99d-df4bd49147bb) |
 
 ### Gestión Admin
 | Fianzas retenidas | Titulaciones | Calendario de flota |
 |---|---|---|
-| ![Fianzas](https://github.com/user-attachments/assets/293ba9fd-387f-4a81-ad59-037adf5e4990) | ![Titulaciones](https://github.com/user-attachments/assets/d7135469-d50e-4ce1-84cd-6c3a1af7d088) | ![Calendario](https://github.com/user-attachments/assets/9c9926dd-8be9-4c63-9b55-109db4899aee) |
+| ![Fianzas](https://github.com/user-attachments/assets/a1b505d5-7347-4309-aa29-6aceb9605745) | ![Titulaciones](https://github.com/user-attachments/assets/37378dbd-f6d9-4496-be8d-c0c0fd5deb6e) | ![Calendario](https://github.com/user-attachments/assets/a68aada5-1a34-44ac-969c-c577176d36f5) |
 
 ### Vista Cliente
 | Detalle barco | Selección de fechas | Mapa | Perfil cliente |
 |---|---|---|---|
-| ![Detalle](https://github.com/user-attachments/assets/4e363684-acf4-4666-a77c-7317455d9042) | ![Fechas](https://github.com/user-attachments/assets/0671223c-2629-410e-a29b-f8b13c087f95) | ![Mapa](https://github.com/user-attachments/assets/22951546-f41b-4638-adac-9af987aa51a4) | ![Perfil](https://github.com/user-attachments/assets/e9d3530d-ddd0-4cc7-963a-fbd1ff9c1062) |
+| ![Detalle](https://github.com/user-attachments/assets/f796148e-699f-4aa8-b14f-bfac09466922) | ![Fechas](https://github.com/user-attachments/assets/d47d4513-a074-4800-8cd0-d23b894a42d1) | ![Mapa](https://github.com/user-attachments/assets/5ead2725-ba82-41dd-b146-868c0d98b513) | ![Perfil](https://github.com/user-attachments/assets/25de5297-3d5f-4ea3-adbd-a477a4372edc) |
 
 ### Formularios Admin
 | Crear barco | Editar barco | Perfil Admin |
 |---|---|---|
-| ![Crear](https://github.com/user-attachments/assets/210da1d9-a11c-4895-a739-1fc995963246) | ![Editar](https://github.com/user-attachments/assets/99c8deee-f0f8-4a1b-bbfc-15b39ae6d33d) | ![Perfil Admin](https://github.com/user-attachments/assets/99c8deee-f0f8-4a1b-bbfc-15b39ae6d33d) |
+| ![Crear](https://github.com/user-attachments/assets/be8f4d4a-e4eb-45e5-acbc-6ba77397dcf8) | ![Editar](https://github.com/user-attachments/assets/2a2e9139-8a22-4e39-87e9-801061f2dcb9) | ![Perfil Admin](https://github.com/user-attachments/assets/680fc03f-7f99-46c0-93e2-7b8a6bbcd48d) |
 
 ---
 
