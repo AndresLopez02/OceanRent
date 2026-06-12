@@ -1,3 +1,4 @@
+<img width="2400" height="1080" alt="1000115225" src="https://github.com/user-attachments/assets/188b2e0f-e325-4906-abaa-dcd0a4e70a2e" />
 # 🚢 OceanRent
 
 Aplicación móvil multiplataforma para la gestión de alquiler de
@@ -11,7 +12,7 @@ prácticas de DAM en Zaitec.
 ### Panel de Administración
 | Panel Admin | Resumen de actividad | Gestión de reservas |
 |---|---|---|
-| ![Panel Admin](screenshots/panel_admin_1.jpg) | ![Resumen](screenshots/panel_admin_2.jpg) | ![Reservas](screenshots/reservas.jpg) |
+| ![Panel Admin](<img width="2400" height="1080" alt="1000115225" src="https://github.com/user-attachments/assets/c58a9fc5-668e-42af-9d40-bb52f8cdddf4" />/panel_admin_1.jpg) | ![Resumen](screenshots/panel_admin_2.jpg) | ![Reservas](screenshots/reservas.jpg) |
 
 ### Gestión Admin
 | Fianzas retenidas | Titulaciones | Calendario de flota |
