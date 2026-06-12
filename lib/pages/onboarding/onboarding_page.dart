@@ -14,6 +14,7 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage> {
   List<String> _selectedCategories = [];
   final pageController = PageController();
+
   @override
   void dispose() {
     pageController.dispose();
@@ -29,6 +30,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         children: [
           PageView(
             controller: pageController,
+            onPageChanged: (index) => setState(() => currentPage = index),
             children: [
               OnboardingPrimaryPage(
                 onNext: () => pageController.nextPage(
@@ -50,11 +52,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   AppNavigator.goToExploreBoats(
                     context,
                     categories: _selectedCategories,
+                    places: places,
                   );
                 },
               ),
             ],
-            onPageChanged: (index) => setState(() => currentPage = index),
           ),
           Positioned(
             top: 60,

@@ -12,11 +12,15 @@ class AppNavigator {
   static void goToExploreBoats(
     BuildContext context, {
     List<String> categories = const [],
+    List<String> places = const [],
   }) {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => CustomerHomePage(initialCategories: categories),
+        builder: (_) => CustomerHomePage(
+          initialCategories: categories,
+          initialPlaces: places,
+        ),
       ),
     );
   }

@@ -19,19 +19,19 @@ class OnboardingCategoryPageState extends State<OnboardingCategoryPage> {
     return Scaffold(
       backgroundColor: AppTheme.pearlWhite,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              const SizedBox(height: 50),
+              const SizedBox(height: AppTheme.spacing40),
               Text(
                 '¿Qué barco estás \n buscando?',
                 textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(color: Colors.black),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Colors.black,
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppTheme.spacing12),
               Text(
                 'Selecciona el que más te interese',
                 textAlign: TextAlign.center,
@@ -39,6 +39,7 @@ class OnboardingCategoryPageState extends State<OnboardingCategoryPage> {
                   color: AppTheme.pearlWhite.withValues(alpha: 0.6),
                 ),
               ),
+              const SizedBox(height: AppTheme.spacing16),
               CustomCard(
                 title: 'Velero',
                 description: 'Experiencia de navegación relajada',
@@ -50,7 +51,7 @@ class OnboardingCategoryPageState extends State<OnboardingCategoryPage> {
                       : selected.add('velero');
                 }),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppTheme.spacing8),
               CustomCard(
                 title: 'Lancha',
                 description: 'Rápido, para excursiones cortas',
@@ -62,7 +63,7 @@ class OnboardingCategoryPageState extends State<OnboardingCategoryPage> {
                       : selected.add('lancha');
                 }),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppTheme.spacing8),
               CustomCard(
                 title: 'Catamarán',
                 description: 'Ideal para grupos',
@@ -74,8 +75,7 @@ class OnboardingCategoryPageState extends State<OnboardingCategoryPage> {
                       : selected.add('catamaran');
                 }),
               ),
-
-              const SizedBox(height: 8),
+              const SizedBox(height: AppTheme.spacing8),
               CustomCard(
                 title: 'Yate a motor',
                 description: 'Rápido y cómodo',
@@ -87,7 +87,7 @@ class OnboardingCategoryPageState extends State<OnboardingCategoryPage> {
                       : selected.add('yate');
                 }),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppTheme.spacing8),
               CustomCard(
                 title: 'Jet Ski',
                 description: 'Ágil y emocionante',
@@ -99,19 +99,15 @@ class OnboardingCategoryPageState extends State<OnboardingCategoryPage> {
                       : selected.add('jetski');
                 }),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: AppTheme.spacing24),
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: AppTheme.buttonHeight,
                 child: ElevatedButton(
                   onPressed: () => widget.onNext(selected),
-                  style: ElevatedButton.styleFrom(
+                  style: AppTheme.onboardingButtonStyle(
                     backgroundColor: AppTheme.oceanBlue,
                     foregroundColor: AppTheme.pearlWhite,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
                   ),
                   child: Text(
                     'Siguiente',
@@ -121,22 +117,20 @@ class OnboardingCategoryPageState extends State<OnboardingCategoryPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              Container(
+              const SizedBox(height: AppTheme.spacing20),
+              SizedBox(
                 width: double.infinity,
-                height: 52,
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppTheme.deepNavy, width: 1.5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: ElevatedButton(
+                height: AppTheme.buttonHeight,
+                child: OutlinedButton(
                   onPressed: () => AppNavigator.goToExploreBoats(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.pearlWhite,
+                  style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.deepNavy,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                    side: const BorderSide(
+                      color: AppTheme.deepNavy,
+                      width: AppTheme.borderWidthMedium,
+                    ),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: AppTheme.borderRadiusMd,
                     ),
                   ),
                   child: Text(
@@ -147,6 +141,7 @@ class OnboardingCategoryPageState extends State<OnboardingCategoryPage> {
                   ),
                 ),
               ),
+              const SizedBox(height: AppTheme.spacing20),
             ],
           ),
         ),

@@ -14,8 +14,13 @@ import 'package:ocean_rent/widgets/dialog_confirmacion.dart';
 
 class CustomerHomePage extends ConsumerStatefulWidget {
   final List<String> initialCategories;
+  final List<String> initialPlaces;
 
-  const CustomerHomePage({super.key, this.initialCategories = const []});
+  const CustomerHomePage({
+    super.key,
+    this.initialCategories = const [],
+    this.initialPlaces = const [],
+  });
 
   @override
   ConsumerState<CustomerHomePage> createState() => _CustomerHomePageState();
@@ -50,7 +55,10 @@ class _CustomerHomePageState extends ConsumerState<CustomerHomePage> {
     final user = ref.watch(authNotifierProvider).currentUser;
     final isAnonymous = user == null;
     final pages = <Widget>[
-      BoatListPage(categoriasIniciales: widget.initialCategories),
+      BoatListPage(
+        categoriasIniciales: widget.initialCategories,
+        lugaresIniciales: widget.initialPlaces,
+      ),
       const CustomerMapPage(),
       const CustomerChatsPage(),
       const CustomerBookingsPage(),

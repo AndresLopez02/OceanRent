@@ -20,75 +20,71 @@ class _OnboardingPlacePageState extends State<OnboardingPlacePage> {
     return Scaffold(
       backgroundColor: AppTheme.pearlWhite,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              const SizedBox(height: 50),
+              const SizedBox(height: AppTheme.spacing40),
               Text(
                 '¿Dónde quieres navegar?',
                 textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(color: Colors.black),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Colors.black,
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppTheme.spacing12),
               Text(
                 'Selecciona tu zona preferida',
                 textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey.shade600,
+                ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppTheme.spacing24),
               CustomCard(
                 title: 'Marbella',
                 description: 'Costa del Sol, Málaga',
-                isSelected: selected.contains('marbella'),
+                isSelected: selected.contains('Marbella'),
                 onTap: () => setState(() {
-                  selected.contains('marbella')
-                      ? selected.remove('marbella')
-                      : selected.add('marbella');
+                  selected.contains('Marbella')
+                      ? selected.remove('Marbella')
+                      : selected.add('Marbella');
                 }),
                 imagePath: 'assets/icons/playa.svg',
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppTheme.spacing8),
               CustomCard(
                 title: 'Málaga',
                 description: 'Capital de la Costa del Sol',
-                isSelected: selected.contains('malaga'),
+                isSelected: selected.contains('Málaga'),
                 onTap: () => setState(() {
-                  selected.contains('malaga')
-                      ? selected.remove('malaga')
-                      : selected.add('malaga');
+                  selected.contains('Málaga')
+                      ? selected.remove('Málaga')
+                      : selected.add('Málaga');
                 }),
                 imagePath: 'assets/icons/playa.svg',
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppTheme.spacing8),
               CustomCard(
                 title: 'Cabo Cañaveral',
                 description: 'Aguas tranquilas del Mediterráneo',
-                isSelected: selected.contains('cabo_canaveral'),
+                isSelected: selected.contains('Cabo Cañaveral'),
                 onTap: () => setState(() {
-                  selected.contains('cabo_canaveral')
-                      ? selected.remove('cabo_canaveral')
-                      : selected.add('cabo_canaveral');
+                  selected.contains('Cabo Cañaveral')
+                      ? selected.remove('Cabo Cañaveral')
+                      : selected.add('Cabo Cañaveral');
                 }),
                 imagePath: 'assets/icons/playa.svg',
               ),
-              const SizedBox(height: 224),
+              const SizedBox(height: AppTheme.spacing24),
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: AppTheme.buttonHeight,
                 child: ElevatedButton(
                   onPressed: () => widget.onFinish(selected),
-                  style: ElevatedButton.styleFrom(
+                  style: AppTheme.onboardingButtonStyle(
                     backgroundColor: AppTheme.oceanBlue,
                     foregroundColor: AppTheme.pearlWhite,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
                   ),
                   child: Text(
                     'Explorar Barcos',
@@ -98,22 +94,20 @@ class _OnboardingPlacePageState extends State<OnboardingPlacePage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              Container(
+              const SizedBox(height: AppTheme.spacing20),
+              SizedBox(
                 width: double.infinity,
-                height: 52,
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppTheme.deepNavy, width: 1.5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: ElevatedButton(
+                height: AppTheme.buttonHeight,
+                child: OutlinedButton(
                   onPressed: () => AppNavigator.goToExploreBoats(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.pearlWhite,
+                  style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.deepNavy,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                    side: const BorderSide(
+                      color: AppTheme.deepNavy,
+                      width: AppTheme.borderWidthMedium,
+                    ),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: AppTheme.borderRadiusMd,
                     ),
                   ),
                   child: Text(
@@ -124,6 +118,7 @@ class _OnboardingPlacePageState extends State<OnboardingPlacePage> {
                   ),
                 ),
               ),
+              const SizedBox(height: AppTheme.spacing20),
             ],
           ),
         ),

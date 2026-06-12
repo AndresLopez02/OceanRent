@@ -39,22 +39,22 @@ class _OnboardingPrimaryPageState extends State<OnboardingPrimaryPage> {
       child: Scaffold(
         backgroundColor: AppTheme.deepNavy,
         body: SafeArea(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               children: [
-                const SizedBox(height: 40),
-                const SizedBox(height: 34),
+                const SizedBox(height: AppTheme.spacing40),
+                const SizedBox(height: AppTheme.spacing34),
                 const _BoatIllustration(),
-                const SizedBox(height: 40),
+                const SizedBox(height: AppTheme.spacing40),
                 Text(
                   'El mar te espera',
                   textAlign: TextAlign.center,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(color: AppTheme.pearlWhite),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppTheme.pearlWhite,
+                  ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppTheme.spacing12),
                 Text(
                   'Alquila tu barco perfecto \n ahora mismo',
                   textAlign: TextAlign.center,
@@ -62,7 +62,7 @@ class _OnboardingPrimaryPageState extends State<OnboardingPrimaryPage> {
                     color: AppTheme.pearlWhite.withValues(alpha: 0.6),
                   ),
                 ),
-                const SizedBox(height: 180),
+                const SizedBox(height: AppTheme.spacing40),
                 GestureDetector(
                   onTap: () =>
                       setState(() => _doNotShowAgain = !_doNotShowAgain),
@@ -70,14 +70,15 @@ class _OnboardingPrimaryPageState extends State<OnboardingPrimaryPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
+                        duration: AppTheme.animationFast,
                         width: 22,
                         height: 22,
                         decoration: BoxDecoration(
                           color: _doNotShowAgain
                               ? AppTheme.oceanBlue
                               : Colors.transparent,
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius:
+                              BorderRadius.circular(AppTheme.radiusSm),
                           border: Border.all(
                             color: _doNotShowAgain
                                 ? AppTheme.oceanBlue
@@ -93,30 +94,26 @@ class _OnboardingPrimaryPageState extends State<OnboardingPrimaryPage> {
                               )
                             : null,
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: AppTheme.spacing10),
                       Text(
                         'No mostrar esta pantalla de nuevo',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppTheme.pearlWhite.withValues(alpha: 0.75),
-                          fontSize: 13,
+                          fontSize: AppTheme.fontSize13,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppTheme.spacing20),
                 SizedBox(
                   width: double.infinity,
-                  height: 72,
+                  height: AppTheme.onboardingButtonHeight,
                   child: ElevatedButton(
                     onPressed: _handleNext,
-                    style: ElevatedButton.styleFrom(
+                    style: AppTheme.onboardingButtonStyle(
                       backgroundColor: AppTheme.oceanBlue,
                       foregroundColor: AppTheme.pearlWhite,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
                     ),
                     child: Text(
                       'Explorar Barcos',
@@ -126,19 +123,15 @@ class _OnboardingPrimaryPageState extends State<OnboardingPrimaryPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppTheme.spacing20),
                 SizedBox(
                   width: double.infinity,
-                  height: 72,
+                  height: AppTheme.onboardingButtonHeight,
                   child: ElevatedButton(
                     onPressed: () => AppNavigator.goToLogin(context),
-                    style: ElevatedButton.styleFrom(
+                    style: AppTheme.onboardingButtonStyle(
                       backgroundColor: AppTheme.pearlWhite,
                       foregroundColor: AppTheme.deepNavy,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
                     ),
                     child: Text(
                       'Ya tengo una cuenta',
@@ -148,7 +141,7 @@ class _OnboardingPrimaryPageState extends State<OnboardingPrimaryPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppTheme.spacing12),
                 TextButton(
                   onPressed: _handleExplore,
                   child: Text(
@@ -158,7 +151,7 @@ class _OnboardingPrimaryPageState extends State<OnboardingPrimaryPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppTheme.spacing16),
               ],
             ),
           ),
@@ -174,8 +167,8 @@ class _BoatIllustration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 260,
-      height: 140,
+      width: AppTheme.onboardingIllustrationWidth,
+      height: AppTheme.onboardingIllustrationHeight,
       child: CustomPaint(painter: _BoatIllustrationPainter()),
     );
   }
@@ -185,6 +178,7 @@ class _BoatIllustrationPainter extends CustomPainter {
   static const Color _boatPurple = Color(0xFF514964);
   static const Color _boatDark = Color(0xFF28334F);
   static const Color _windowBlue = Color(0xFF1D6F9F);
+
   @override
   void paint(Canvas canvas, Size size) {
     final Paint pearlPaint = Paint()

@@ -11,8 +11,13 @@ import 'package:ocean_rent/providers/user_providers.dart';
 
 class BoatListPage extends ConsumerStatefulWidget {
   final List<String> categoriasIniciales;
+  final List<String> lugaresIniciales;
 
-  const BoatListPage({super.key, this.categoriasIniciales = const []});
+  const BoatListPage({
+    super.key,
+    this.categoriasIniciales = const [],
+    this.lugaresIniciales = const [],
+  });
 
   @override
   ConsumerState<BoatListPage> createState() => _BoatListPageState();
@@ -37,11 +42,27 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
     'jetski',
   ];
 
+  // Normaliza texto eliminando acentos y pasando a minúsculas
+  String _normalize(String text) {
+    const accents = 'áéíóúàèìòùäëïöüâêîôûñÁÉÍÓÚÀÈÌÒÙÄËÏÖÜÂÊÎÔÛÑ';
+    const normal  = 'aeiouaeiouaeiouaeiounAEIOUAEIOUAEIOUAEIOUN';
+    return text.trim().toLowerCase().splitMapJoin(
+      '',
+      onNonMatch: (char) {
+        final i = accents.indexOf(char);
+        return i >= 0 ? normal[i] : char;
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     if (widget.categoriasIniciales.isNotEmpty) {
       selectedCategories = List.from(widget.categoriasIniciales);
+    }
+    if (widget.lugaresIniciales.isNotEmpty) {
+      selectedPorts = List.from(widget.lugaresIniciales);
     }
     loadCurrentUser();
   }
@@ -69,7 +90,8 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
       }
 
       if (selectedPorts.isNotEmpty &&
-          !selectedPorts.contains(boat.portName.trim())) {
+          !selectedPorts.any((port) =>
+              _normalize(port) == _normalize(boat.portName))) {
         return false;
       }
 
@@ -263,13 +285,12 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
         final filteredBoats = filterBoats(boats);
         final activeFilterChips = _buildActiveFilterChips();
 
-        final ports =
-            boats
-                .map((boat) => boat.portName.trim())
-                .where((port) => port.isNotEmpty)
-                .toSet()
-                .toList()
-              ..sort();
+        final ports = boats
+            .map((boat) => boat.portName.trim())
+            .where((port) => port.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
 
         return Scaffold(
           drawer: FilterDrawer(
@@ -287,9 +308,16 @@ class _BoatListPageState extends ConsumerState<BoatListPage> {
                   : selectedCategories.add(value);
             }),
             onPortChanged: (value) => setState(() {
-              selectedPorts.contains(value)
-                  ? selectedPorts.remove(value)
-                  : selectedPorts.add(value);
+              final exists = selectedPorts.any(
+                (p) => _normalize(p) == _normalize(value),
+              );
+              if (exists) {
+                selectedPorts.removeWhere(
+                  (p) => _normalize(p) == _normalize(value),
+                );
+              } else {
+                selectedPorts.add(value);
+              }
             }),
             onPriceChanged: (values) => setState(() => rangedPrice = values),
             onCapacityChanged: (values) =>
