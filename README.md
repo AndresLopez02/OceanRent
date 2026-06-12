@@ -72,10 +72,12 @@ prácticas de DAM en Zaitec.
 | Flutter / Dart | Desarrollo de la app multiplataforma |
 | Firebase Authentication | Registro e inicio de sesión de usuarios |
 | Cloud Firestore | Base de datos en tiempo real |
-| Firebase Storage | Almacenamiento de imágenes y documentos |
 | flutter_map | Integración de mapas interactivos |
 | Figma | Diseño UI/UX del prototipo completo |
 | Git + GitHub Projects | Control de versiones y gestión ágil |
+
+> ⚠️ Firebase Storage fue descartado durante el desarrollo
+> por costes. Las imágenes se gestionan mediante URLs externas.
 
 ---
 
