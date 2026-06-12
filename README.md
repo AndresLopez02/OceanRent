@@ -1,5 +1,3 @@
-
-
 # 🚢 OceanRent
 
 Aplicación móvil multiplataforma para la gestión de alquiler de
@@ -13,22 +11,22 @@ prácticas de DAM en Zaitec.
 ### Panel de Administración
 | Panel Admin | Resumen de actividad | Gestión de reservas |
 |---|---|---|
-| ![Panel Admin](<img width="2400" height="1080" alt="1000115225" src="https://github.com/user-attachments/assets/c58a9fc5-668e-42af-9d40-bb52f8cdddf4" />/panel_admin_1.jpg) | ![Resumen]([screenshots/panel_admin_2.jpg](https://github.com/user-attachments/assets/4a5e0847-2c07-4503-b152-08f7f64d65f7)) | ![Reservas]([screenshots/reservas.jpg](https://github.com/user-attachments/assets/4fee654b-40a4-4ab5-9590-ddfa2b2f2727)) |
+| ![Panel Admin](https://github.com/user-attachments/assets/55fb3f3a-9148-43a7-b933-38f546702f72) | ![Resumen](https://github.com/user-attachments/assets/4a5e0847-2c07-4503-b152-08f7f64d65f7) | ![Reservas](https://github.com/user-attachments/assets/4fee654b-40a4-4ab5-9590-ddfa2b2f2727) |
 
 ### Gestión Admin
 | Fianzas retenidas | Titulaciones | Calendario de flota |
 |---|---|---|
-| ![Fianzas](screenshots/fianzas.jpg) | ![Titulaciones](screenshots/titulaciones.jpg) | ![Calendario](screenshots/calendario.jpg) |
+| ![Fianzas](https://github.com/user-attachments/assets/293ba9fd-387f-4a81-ad59-037adf5e4990) | ![Titulaciones](https://github.com/user-attachments/assets/d7135469-d50e-4ce1-84cd-6c3a1af7d088) | ![Calendario](https://github.com/user-attachments/assets/9c9926dd-8be9-4c63-9b55-109db4899aee) |
 
 ### Vista Cliente
 | Detalle barco | Selección de fechas | Mapa | Perfil cliente |
 |---|---|---|---|
-| ![Detalle](screenshots/detalle_barco.jpg) | ![Fechas](screenshots/fechas.jpg) | ![Mapa](screenshots/mapa.jpg) | ![Perfil](screenshots/perfil_cliente.jpg) |
+| ![Detalle](https://github.com/user-attachments/assets/4e363684-acf4-4666-a77c-7317455d9042) | ![Fechas](https://github.com/user-attachments/assets/0671223c-2629-410e-a29b-f8b13c087f95) | ![Mapa](https://github.com/user-attachments/assets/22951546-f41b-4638-adac-9af987aa51a4) | ![Perfil](https://github.com/user-attachments/assets/e9d3530d-ddd0-4cc7-963a-fbd1ff9c1062) |
 
 ### Formularios Admin
 | Crear barco | Editar barco | Perfil Admin |
 |---|---|---|
-| ![Crear](screenshots/crear_barco.jpg) | ![Editar](screenshots/editar_barco.jpg) | ![Perfil Admin](screenshots/perfil_admin.jpg) |
+| ![Crear](https://github.com/user-attachments/assets/210da1d9-a11c-4895-a739-1fc995963246) | ![Editar](https://github.com/user-attachments/assets/99c8deee-f0f8-4a1b-bbfc-15b39ae6d33d) | ![Perfil Admin](https://github.com/user-attachments/assets/99c8deee-f0f8-4a1b-bbfc-15b39ae6d33d) |
 
 ---
 
