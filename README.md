@@ -1,3 +1,4 @@
+<img width="1080" height="2400" alt="1000115235" src="https://github.com/user-attachments/assets/d148cdaa-1bda-4325-ab10-9452a533b34b" />
 # 🚢 OceanRent
 
 Aplicación móvil multiplataforma para la gestión de alquiler de
@@ -16,7 +17,7 @@ prácticas de DAM en Zaitec.
 ### Gestión Admin
 | Fianzas retenidas | Titulaciones | Calendario de flota |
 |---|---|---|
-| ![Fianzas](https://github.com/user-attachments/assets/643acfe7-c72d-4a0d-b99d-df4bd49147bb) | ![Titulaciones](https://github.com/user-attachments/assets/a1b505d5-7347-4309-aa29-6aceb9605745) | ![Calendario](https://github.com/user-attachments/assets/a68aada5-1a34-44ac-969c-c577176d36f5) |
+| ![Fianzas](https://github.com/user-attachments/assets/643acfe7-c72d-4a0d-b99d-df4bd49147bb) | ![Titulaciones](https://github.com/user-attachments/assets/a1b505d5-7347-4309-aa29-6aceb9605745) | ![Calendario](https://github.com/user-attachments/assets/d148cdaa-1bda-4325-ab10-9452a533b34b) |
 
 ### Vista Cliente
 | Detalle barco | Selección de fechas | Mapa | Perfil cliente |
