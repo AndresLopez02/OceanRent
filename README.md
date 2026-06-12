@@ -1,4 +1,3 @@
-<img width="1080" height="2400" alt="1000115235" src="https://github.com/user-attachments/assets/d148cdaa-1bda-4325-ab10-9452a533b34b" />
 # 🚢 OceanRent
 
 Aplicación móvil multiplataforma para la gestión de alquiler de
